@@ -1,13 +1,14 @@
 spring:
   application:
     name: jainam-billing-system
-
   datasource:
-    url: jdbc:mysql://localhost:3306/jainam_billing?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: piyush
+    url: jdbc:mysql://pyho-0.h.filess.io:61001/jainam_billing_placemanat?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: jainam_billing_placemanat
+    password: f6eaec84942d07d9d9f45c9613a89fb48a7f62d5
     driver-class-name: com.mysql.cj.jdbc.Driver
-
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 1
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,19 +17,15 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
-    # Ensure data.sql runs AFTER Hibernate creates/updates the schema
     defer-datasource-initialization: true
-
   sql:
     init:
-      mode: always
-
+      mode: never
   mail:
     host: smtp.gmail.com
     port: 587
     username: piyushiaf5445@gmail.com
     password: btmx ccio ktrv pvde
-
     properties:
       mail:
         smtp:
@@ -36,7 +33,6 @@ spring:
           starttls:
             enable: true
             required: true
-
 server:
   port: 8080
   servlet:
@@ -44,7 +40,6 @@ server:
   error:
     include-message: always
     include-binding-errors: always
-
 logging:
   level:
     root: INFO
