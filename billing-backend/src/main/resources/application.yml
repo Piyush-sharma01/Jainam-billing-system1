@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: jainam-billing-system
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/jainam_billing?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: piyush
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+    # Ensure data.sql runs AFTER Hibernate creates/updates the schema
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: piyushiaf5445@gmail.com
+    password: btmx ccio ktrv pvde
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  error:
+    include-message: always
+    include-binding-errors: always
+
+logging:
+  level:
+    root: INFO
+    com.jainam: DEBUG
