@@ -16,7 +16,7 @@ export default function Billing() {
   const [clients, setClients] = useState([])
   const [products, setProducts] = useState([])
   const [selectedClient, setSelectedClient] = useState(null)
-  const [cart, setCart] = useState([]) // { productId, name, category, price, gst, stock, quantity }
+  const [cart, setCart] = useState([])
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -29,7 +29,6 @@ export default function Billing() {
     loadData()
   }, [])
 
-  // Close the suggestions dropdown when clicking anywhere outside the search box
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchBoxRef.current && !searchBoxRef.current.contains(e.target)) {
@@ -53,10 +52,6 @@ export default function Billing() {
     }
   }
 
-  // Suggestions: match on the product name starting with the typed text first
-  // (so typing "Co" surfaces "Copper Pipe" above a product that merely
-  // contains "co" somewhere in the middle), falling back to "contains" and
-  // category matches.
   const suggestions = (() => {
     const term = productSearch.trim().toLowerCase()
     if (!term) return []
@@ -137,8 +132,6 @@ export default function Billing() {
     cart.forEach((item) => {
       const lineBase = item.price * item.quantity
       subtotal += lineBase
-      // Each line uses its own product's GST rate (matches how the backend
-      // calculates tax) instead of a flat rate.
       tax += lineBase * (item.gst / 100)
     })
     return { subtotal, tax, total: subtotal + tax }
@@ -187,14 +180,13 @@ export default function Billing() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-800">Create Invoice</h1>
-        <p className="text-gray-500">Search products, build the order, and generate a bill</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Create Invoice</h1>
+        <p className="text-gray-500 text-sm sm:text-base">Search products, build the order, and generate a bill</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Client selection */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
               Client
             </h2>
@@ -222,8 +214,7 @@ export default function Billing() {
             )}
           </div>
 
-          {/* Product search + add */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
               Add Products
             </h2>
@@ -319,9 +310,8 @@ export default function Billing() {
             </div>
           </div>
 
-          {/* Cart */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <ShoppingCart size={18} className="text-gray-500" />
                 <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
@@ -349,7 +339,7 @@ export default function Billing() {
                   return (
                     <div
                       key={item.productId}
-                      className="flex items-center gap-4 px-6 py-4"
+                      className="flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4"
                     >
                       <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
                         {item.imageUrl ? (
@@ -364,7 +354,7 @@ export default function Billing() {
                         )}
                       </div>
 
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-[140px]">
                         <p className="text-sm font-medium text-gray-800 truncate">
                           {item.name}
                         </p>
@@ -379,50 +369,53 @@ export default function Billing() {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-1 border border-gray-200 rounded-lg shrink-0">
+                      {/* Quantity, price, delete — wraps to its own row on narrow phones */}
+                      <div className="flex items-center gap-3 sm:gap-4 ml-auto sm:ml-0 shrink-0 w-full sm:w-auto justify-end sm:justify-start pl-12 sm:pl-0">
+                        <div className="flex items-center gap-1 border border-gray-200 rounded-lg shrink-0">
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.productId, Math.max(1, item.quantity - 1))
+                            }
+                            className="p-2 text-gray-500 hover:text-gray-800"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value)
+                              updateQuantity(item.productId, isNaN(val) ? 1 : Math.max(1, val))
+                            }}
+                            className="w-12 text-center text-sm border-0 focus:outline-none focus:ring-0"
+                          />
+                          <button
+                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                            className="p-2 text-gray-500 hover:text-gray-800"
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+
+                        <p className="w-20 sm:w-24 text-right text-sm font-semibold text-gray-800 shrink-0">
+                          ₹{lineTotal.toFixed(2)}
+                        </p>
+
                         <button
-                          onClick={() =>
-                            updateQuantity(item.productId, Math.max(1, item.quantity - 1))
-                          }
-                          className="p-2 text-gray-500 hover:text-gray-800"
+                          onClick={() => removeFromCart(item.productId)}
+                          className="text-gray-400 hover:text-red-600 shrink-0"
                         >
-                          <Minus size={14} />
-                        </button>
-                        <input
-                          type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value)
-                            updateQuantity(item.productId, isNaN(val) ? 1 : Math.max(1, val))
-                          }}
-                          className="w-12 text-center text-sm border-0 focus:outline-none focus:ring-0"
-                        />
-                        <button
-                          onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                          className="p-2 text-gray-500 hover:text-gray-800"
-                        >
-                          <Plus size={14} />
+                          <Trash2 size={18} />
                         </button>
                       </div>
-
-                      <p className="w-24 text-right text-sm font-semibold text-gray-800 shrink-0">
-                        ₹{lineTotal.toFixed(2)}
-                      </p>
-
-                      <button
-                        onClick={() => removeFromCart(item.productId)}
-                        className="text-gray-400 hover:text-red-600 shrink-0"
-                      >
-                        <Trash2 size={18} />
-                      </button>
                     </div>
                   )
                 })}
               </div>
             )}
 
-            <div className="px-6 py-4 border-t border-gray-100">
+            <div className="px-4 sm:px-6 py-4 border-t border-gray-100">
               <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
                 Notes
               </label>
@@ -437,8 +430,7 @@ export default function Billing() {
           </div>
         </div>
 
-        {/* Summary */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-fit lg:sticky lg:top-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 h-fit lg:sticky lg:top-6">
           <div className="flex items-center gap-2 mb-4">
             <FileText size={18} className="text-gray-500" />
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
