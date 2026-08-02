@@ -115,8 +115,6 @@ export default function InvoiceHistory() {
     printWindow.document.write(html)
     printWindow.document.close()
     printWindow.focus()
-    // Give the new tab a moment to finish rendering before invoking print,
-    // so the layout above is actually there when the dialog opens.
     printWindow.onload = () => printWindow.print()
   }
 
@@ -133,20 +131,20 @@ export default function InvoiceHistory() {
   }
 
   const StatCard = ({ label, value, color }) => (
-    <div className="bg-white rounded-lg shadow p-4">
-      <p className="text-gray-500 text-sm">{label}</p>
-      <p className={`text-2xl font-bold ${color}`}>{value}</p>
+    <div className="bg-white rounded-lg shadow p-3 sm:p-4">
+      <p className="text-gray-500 text-xs sm:text-sm">{label}</p>
+      <p className={`text-xl sm:text-2xl font-bold ${color}`}>{value}</p>
     </div>
   )
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-800">Invoice History</h1>
-        <p className="text-gray-500">View all invoices and their status</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Invoice History</h1>
+        <p className="text-gray-500 text-sm sm:text-base">View all invoices and their status</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <StatCard label="Total Invoices" value={stats.total} color="text-blue-600" />
         <StatCard label="Paid" value={stats.paid} color="text-green-600" />
         <StatCard label="Pending" value={stats.pending} color="text-yellow-600" />
@@ -159,73 +157,75 @@ export default function InvoiceHistory() {
         ) : invoices.length === 0 ? (
           <div className="p-6 text-center text-gray-500">No invoices found</div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Invoice No.</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Client</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Date</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Status</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((invoice) => (
-                <tr key={invoice.id} className="border-b hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-800">{invoice.invoiceNumber}</td>
-                  <td className="px-6 py-4 text-sm text-gray-800">{invoice.client?.company || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-800">
-                    {new Date(invoice.invoiceDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-800">
-                    ₹{invoice.grandTotal?.toFixed(2) || '0.00'}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      invoice.status === 'PAID' ? 'bg-green-100 text-green-800' :
-                      invoice.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                      invoice.status === 'OVERDUE' ? 'bg-red-100 text-red-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {invoice.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm flex gap-2">
-                    <button
-                      onClick={() => handleViewInvoice(invoice)}
-                      className="text-blue-600 hover:text-blue-800"
-                      title="View"
-                    >
-                      <Eye size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleDownloadInvoice(invoice)}
-                      className="text-green-600 hover:text-green-800"
-                      title="Download PDF"
-                    >
-                      <Download size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleSendEmail(invoice.id)}
-                      className="text-orange-600 hover:text-orange-800"
-                      title="Send Email"
-                    >
-                      <Mail size={18} />
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px]">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 text-left text-sm font-medium text-gray-700">Invoice No.</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-sm font-medium text-gray-700">Client</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-sm font-medium text-gray-700">Date</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {invoices.map((invoice) => (
+                  <tr key={invoice.id} className="border-b hover:bg-gray-50">
+                    <td className="px-4 sm:px-6 py-4 text-sm font-medium text-gray-800">{invoice.invoiceNumber}</td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-gray-800">{invoice.client?.company || 'N/A'}</td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-gray-800">
+                      {new Date(invoice.invoiceDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 text-sm font-medium text-gray-800">
+                      ₹{invoice.grandTotal?.toFixed(2) || '0.00'}
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 text-sm">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        invoice.status === 'PAID' ? 'bg-green-100 text-green-800' :
+                        invoice.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                        invoice.status === 'OVERDUE' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {invoice.status}
+                      </span>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 text-sm flex gap-2">
+                      <button
+                        onClick={() => handleViewInvoice(invoice)}
+                        className="text-blue-600 hover:text-blue-800"
+                        title="View"
+                      >
+                        <Eye size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDownloadInvoice(invoice)}
+                        className="text-green-600 hover:text-green-800"
+                        title="Download PDF"
+                      >
+                        <Download size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleSendEmail(invoice.id)}
+                        className="text-orange-600 hover:text-orange-800"
+                        title="Send Email"
+                      >
+                        <Mail size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       {selectedInvoice && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">{selectedInvoice.invoiceNumber}</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800">{selectedInvoice.invoiceNumber}</h2>
               <button
                 onClick={() => setSelectedInvoice(null)}
                 className="text-gray-500 hover:text-gray-700"
@@ -241,9 +241,9 @@ export default function InvoiceHistory() {
             </p>
             <div className="space-y-2 mb-4">
               {(selectedInvoice.lineItems || []).map((item, idx) => (
-                <div key={idx} className="flex justify-between text-sm text-gray-700 border-b pb-2">
-                  <span>{item.productName} x {item.quantity}</span>
-                  <span>₹{item.total?.toFixed(2) || '0.00'}</span>
+                <div key={idx} className="flex justify-between gap-2 text-sm text-gray-700 border-b pb-2">
+                  <span className="truncate">{item.productName} x {item.quantity}</span>
+                  <span className="shrink-0">₹{item.total?.toFixed(2) || '0.00'}</span>
                 </div>
               ))}
             </div>
