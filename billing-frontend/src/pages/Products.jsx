@@ -50,8 +50,6 @@ export default function Products() {
     )
   }
 
-  // Unique brand list (in the order first seen), used for both the filter
-  // tabs and the autocomplete suggestions in the Add/Edit modal.
   const existingBrands = Array.from(
     new Set(products.map((p) => p.brand).filter(Boolean))
   ).sort()
@@ -91,14 +89,14 @@ export default function Products() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Products</h1>
-          <p className="text-gray-500">Manage your product catalog</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Products</h1>
+          <p className="text-gray-500 text-sm sm:text-base">Manage your product catalog</p>
         </div>
         <button
           onClick={() => { setEditingProduct(null); setShowModal(true) }}
-          className="btn-primary flex items-center gap-2"
+          className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
         >
           <Plus size={20} />
           Add Product
