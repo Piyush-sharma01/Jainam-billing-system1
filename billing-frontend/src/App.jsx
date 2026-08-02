@@ -11,6 +11,7 @@ import Navbar from './components/Navbar'
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('authToken'))
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem('user')
     if (!stored) return null
@@ -38,11 +39,15 @@ export default function App() {
 
   const ProtectedRoute = ({ children }) => {
     return isLoggedIn ? (
-      <div className="flex h-screen bg-gray-100">
-        <Sidebar onLogout={handleLogout} />
-        <div className="flex-1 flex flex-col">
-          <Navbar user={user} onLogout={handleLogout} />
-          <main className="flex-1 overflow-auto p-6">
+      <div className="flex h-screen bg-gray-100 overflow-hidden">
+        <Sidebar
+          onLogout={handleLogout}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Navbar user={user} onLogout={handleLogout} onMenuClick={() => setSidebarOpen(true)} />
+          <main className="flex-1 overflow-auto p-4 sm:p-6">
             {children}
           </main>
         </div>
