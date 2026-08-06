@@ -43,6 +43,10 @@ public class Product {
     @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean active = true;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -53,6 +57,9 @@ public class Product {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (active == null) {
+            active = true;
+        }
     }
 
     @PreUpdate
