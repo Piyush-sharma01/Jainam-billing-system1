@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { invoiceAPI } from '../services/api'
-import { Eye, Download, Mail } from 'lucide-react'
+import { Eye, Download, Mail, Trash2 } from 'lucide-react'
 
 export default function InvoiceHistory() {
   const [invoices, setInvoices] = useState([])
@@ -130,6 +130,16 @@ export default function InvoiceHistory() {
     }
   }
 
+  const handleDeleteInvoice = async (id) => {
+    if (!window.confirm('Delete this invoice? This cannot be undone.')) return
+    try {
+      await invoiceAPI.delete(id)
+      loadInvoices()
+    } catch (err) {
+      alert('Failed to delete invoice: ' + (err.response?.data?.message || err.message))
+    }
+  }
+
   const StatCard = ({ label, value, color }) => (
     <div className="bg-white rounded-lg shadow p-3 sm:p-4">
       <p className="text-gray-500 text-xs sm:text-sm">{label}</p>
@@ -158,7 +168,7 @@ export default function InvoiceHistory() {
           <div className="p-6 text-center text-gray-500">No invoices found</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px]">
+            <table className="w-full min-w-[800px]">
               <thead className="bg-gray-50 border-b">
                 <tr>
                   <th className="px-4 sm:px-6 py-3 text-left text-sm font-medium text-gray-700">Invoice No.</th>
@@ -211,6 +221,13 @@ export default function InvoiceHistory() {
                         title="Send Email"
                       >
                         <Mail size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteInvoice(invoice.id)}
+                        className="text-red-600 hover:text-red-800"
+                        title="Delete"
+                      >
+                        <Trash2 size={18} />
                       </button>
                     </td>
                   </tr>
