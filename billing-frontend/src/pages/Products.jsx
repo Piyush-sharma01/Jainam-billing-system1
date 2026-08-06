@@ -168,7 +168,7 @@ export default function Products() {
                   <img
                     src={product.imageUrl}
                     alt={product.name}
-                    className="w-full h-auto max-h-[350px] object-contain"
+                    className="w-full h-auto max-h-[150px] object-contain"
                     onError={(e) => {
                       e.target.style.display = 'none'
                       e.target.nextSibling.style.display = 'flex'
