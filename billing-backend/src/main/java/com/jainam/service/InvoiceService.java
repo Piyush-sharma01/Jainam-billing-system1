@@ -13,12 +13,16 @@ import com.jainam.repository.InvoiceRepository;
 import com.jainam.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,11 +37,18 @@ public class InvoiceService {
     private ProductRepository productRepository;
 
     @Autowired
-    private JavaMailSender mailSender;
+    private RestTemplate restTemplate;
 
-    // Inject the configured mail username so setFrom() gets the real address
-    @Value("${spring.mail.username}")
-    private String mailUsername;
+    @Value("${brevo.api-key}")
+    private String brevoApiKey;
+
+    @Value("${brevo.sender-email}")
+    private String brevoSenderEmail;
+
+    @Value("${brevo.sender-name}")
+    private String brevoSenderName;
+
+    private static final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
     public List<InvoiceDTO> getAllInvoices() {
         return invoiceRepository.findAllByOrderByInvoiceDateDesc().stream()
@@ -122,19 +133,37 @@ public class InvoiceService {
             .orElseThrow(() -> new RuntimeException("Invoice not found"));
 
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            // Use injected @Value field instead of literal "${GMAIL_USER}"
-            message.setFrom(mailUsername);
-            message.setTo(recipientEmail);
-            message.setSubject("Invoice " + invoice.getInvoiceNumber());
-            message.setText("Dear " + invoice.getClient().getContactPerson() + ",\n\n" +
-                "Please find attached your invoice " + invoice.getInvoiceNumber() + ".\n\n" +
-                "Amount Due: ₹" + invoice.getGrandTotal() + "\n" +
+            String textBody = "Dear " + invoice.getClient().getContactPerson() + ",\n\n" +
+                "Please find below your invoice " + invoice.getInvoiceNumber() + ".\n\n" +
+                "Amount Due: Rs " + invoice.getGrandTotal() + "\n" +
                 "Due Date: " + invoice.getDueDate() + "\n\n" +
                 "Thank you for your business!\n\n" +
-                "Jainam Billing System");
+                "Jainam Billing System";
 
-            mailSender.send(message);
+            String htmlBody = textBody.replace("\n", "<br/>");
+
+            Map<String, Object> sender = new HashMap<>();
+            sender.put("name", brevoSenderName);
+            sender.put("email", brevoSenderEmail);
+
+            Map<String, Object> recipient = new HashMap<>();
+            recipient.put("email", recipientEmail);
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("sender", sender);
+            body.put("to", List.of(recipient));
+            body.put("subject", "Invoice " + invoice.getInvoiceNumber());
+            body.put("htmlContent", htmlBody);
+            body.put("textContent", textBody);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("api-key", brevoApiKey);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("accept", "application/json");
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+            restTemplate.postForEntity(BREVO_API_URL, request, String.class);
         } catch (Exception e) {
             throw new RuntimeException("Failed to send email: " + e.getMessage());
         }
