@@ -15,6 +15,7 @@ public class ProductService {
 
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll().stream()
+            .filter(p -> Boolean.TRUE.equals(p.getActive()))
             .map(this::convertToDTO)
             .collect(Collectors.toList());
     }
@@ -27,6 +28,7 @@ public class ProductService {
 
     public List<ProductDTO> searchProducts(String keyword) {
         return productRepository.searchProducts(keyword).stream()
+            .filter(p -> Boolean.TRUE.equals(p.getActive()))
             .map(this::convertToDTO)
             .collect(Collectors.toList());
     }
@@ -40,7 +42,7 @@ public class ProductService {
     public ProductDTO updateProduct(Long id, ProductDTO productDTO) {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Product not found"));
-        
+
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
         product.setCategory(productDTO.getCategory());
@@ -49,13 +51,16 @@ public class ProductService {
         product.setGst(productDTO.getGst());
         product.setStock(productDTO.getStock());
         product.setImageUrl(productDTO.getImageUrl());
-        
+
         Product updatedProduct = productRepository.save(product);
         return convertToDTO(updatedProduct);
     }
 
     public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
+        Product product = productRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setActive(false);
+        productRepository.save(product);
     }
 
     private ProductDTO convertToDTO(Product product) {
@@ -68,7 +73,8 @@ public class ProductService {
             product.getPrice(),
             product.getGst(),
             product.getStock(),
-            product.getImageUrl()
+            product.getImageUrl(),
+            product.getActive()
         );
     }
 
@@ -82,6 +88,7 @@ public class ProductService {
             .gst(productDTO.getGst())
             .stock(productDTO.getStock())
             .imageUrl(productDTO.getImageUrl())
+            .active(true)
             .build();
     }
 }
