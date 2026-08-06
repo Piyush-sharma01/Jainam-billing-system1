@@ -18,4 +18,5 @@ public class ProductDTO {
     private BigDecimal gst;
     private Integer stock;
     private String imageUrl;
+    private Boolean active;
 }
