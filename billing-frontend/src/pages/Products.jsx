@@ -163,12 +163,12 @@ export default function Products() {
               key={product.id}
               className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
             >
-              <div className="h-40 bg-gray-50 flex items-center justify-center overflow-hidden">
+    <div className="w-full bg-gray-50 flex items-center justify-center overflow-hidden">
                 {product.imageUrl ? (
                   <img
                     src={product.imageUrl}
                     alt={product.name}
-                   className="w-full h-full object-contain p-2"
+                    className="w-full h-auto max-h-[350px] object-contain"
                     onError={(e) => {
                       e.target.style.display = 'none'
                       e.target.nextSibling.style.display = 'flex'
@@ -176,7 +176,7 @@ export default function Products() {
                   />
                 ) : null}
                 <div
-                  className="w-full h-full flex-col items-center justify-center text-gray-300"
+                  className="w-full h-40 flex-col items-center justify-center text-gray-300"
                   style={{ display: product.imageUrl ? 'none' : 'flex' }}
                 >
                   <Package size={36} />
