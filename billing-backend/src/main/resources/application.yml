@@ -21,18 +21,12 @@ spring:
   sql:
     init:
       mode: never
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: piyushiaf5445@gmail.com
-    password: btmx ccio ktrv pvde
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
+
+brevo:
+  api-key: ${BREVO_API_KEY}
+  sender-email: ${BREVO_SENDER_EMAIL}
+  sender-name: Jainam Billing System
+
 server:
   port: ${PORT:8080}
   servlet:
