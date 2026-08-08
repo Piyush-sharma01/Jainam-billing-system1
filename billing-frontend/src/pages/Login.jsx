@@ -19,7 +19,7 @@ export default function Login({ onLogin }) {
     }
 
     // Demo login - accept admin/password
-    if (username === 'admin' && password === 'password') {
+    if (username === 'Sanjay' && password === 'Jainam123') {
       onLogin({ name: 'Admin User', username })
       navigate('/dashboard')
     } else {
