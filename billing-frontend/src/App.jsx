@@ -8,6 +8,8 @@ import Billing from './pages/Billing'
 import InvoiceHistory from './pages/InvoiceHistory'
 import Sidebar from './components/Sidebar'
 import Navbar from './components/Navbar'
+import Catalogue from './pages/Catalogue'
+
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('authToken'))
@@ -64,6 +66,7 @@ export default function App() {
           isLoggedIn ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />
         } />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/catalogue" element={<ProtectedRoute><Catalogue /></ProtectedRoute>} />
         <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
         <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
         <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
