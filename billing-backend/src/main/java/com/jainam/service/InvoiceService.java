@@ -88,9 +88,17 @@ public class InvoiceService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
             BigDecimal quantity = new BigDecimal(lineItemDTO.getQuantity());
+            BigDecimal discountPct = lineItemDTO.getDiscountPercentage() != null
+                ? lineItemDTO.getDiscountPercentage()
+                : BigDecimal.ZERO;
+
             BigDecimal itemSubtotal = product.getPrice().multiply(quantity);
-            BigDecimal itemTax = itemSubtotal.multiply(product.getGst()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
-            BigDecimal itemTotal = itemSubtotal.add(itemTax);
+            BigDecimal discountAmount = itemSubtotal.multiply(discountPct)
+                .divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+            BigDecimal taxableAmount = itemSubtotal.subtract(discountAmount);
+            BigDecimal itemTax = taxableAmount.multiply(product.getGst())
+                .divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+            BigDecimal itemTotal = taxableAmount.add(itemTax);
 
             InvoiceLineItem lineItem = InvoiceLineItem.builder()
                 .invoice(invoice)
@@ -98,13 +106,15 @@ public class InvoiceService {
                 .quantity(lineItemDTO.getQuantity())
                 .unitPrice(product.getPrice())
                 .gstPercentage(product.getGst())
+                .discountPercentage(discountPct)
                 .subtotal(itemSubtotal)
+                .discountAmount(discountAmount)
                 .taxAmount(itemTax)
                 .total(itemTotal)
                 .build();
 
             invoice.getLineItems().add(lineItem);
-            subtotal = subtotal.add(itemSubtotal);
+            subtotal = subtotal.add(taxableAmount);
             taxAmount = taxAmount.add(itemTax);
         }
 
@@ -216,7 +226,9 @@ public class InvoiceService {
             lineItem.getQuantity(),
             lineItem.getUnitPrice(),
             lineItem.getGstPercentage(),
+            lineItem.getDiscountPercentage(),
             lineItem.getSubtotal(),
+            lineItem.getDiscountAmount(),
             lineItem.getTaxAmount(),
             lineItem.getTotal()
         );
