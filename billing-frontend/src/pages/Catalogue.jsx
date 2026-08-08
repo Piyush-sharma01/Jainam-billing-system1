@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { productAPI, clientAPI } from '../services/api'
+import { productAPI, clientAPI, brandAPI } from '../services/api'
 import { Package, ShoppingCart, Plus, Minus, Trash2, X, Search, ArrowLeft } from 'lucide-react'
 
 export default function Catalogue() {
@@ -11,6 +11,7 @@ export default function Catalogue() {
 
   const [activeBrand, setActiveBrand] = useState(null) // null = showing brand cards
   const [search, setSearch] = useState('')
+  const [brands, setBrands] = useState([]) // full Brand objects: {id, name, logoUrl}
 
   const [cart, setCart] = useState([])
   const [qtyPicker, setQtyPicker] = useState(null) // product being sized before add
@@ -27,12 +28,14 @@ export default function Catalogue() {
   const loadData = async () => {
     try {
       setLoading(true)
-      const [productsRes, clientsRes] = await Promise.all([
+      const [productsRes, clientsRes, brandsRes] = await Promise.all([
         productAPI.getAll(),
         clientAPI.getAll(),
+        brandAPI.getAll(),
       ])
       setProducts(productsRes.data || [])
       setClients(clientsRes.data || [])
+      setBrands(brandsRes.data || [])
     } catch (err) {
       console.error(err)
     } finally {
@@ -40,9 +43,10 @@ export default function Catalogue() {
     }
   }
 
-  const brands = Array.from(new Set(products.map((p) => p.brand).filter(Boolean))).sort()
-
-  const brandCover = (brand) => products.find((p) => p.brand === brand && p.imageUrl)
+  // brandNames = names actually used on products (drives the grid + drill-down)
+  // brandLogo = looked up from the real Brand records for a given name
+  const brandNames = Array.from(new Set(products.map((p) => p.brand).filter(Boolean))).sort()
+  const brandLogo = (brandName) => brands.find((b) => b.name === brandName)?.logoUrl
 
   // Search works across ALL products regardless of which brand is open
   const searchResults = (() => {
@@ -155,14 +159,14 @@ export default function Catalogue() {
               </h2>
               {loading ? (
                 <div className="p-12 text-center text-gray-500">Loading...</div>
-              ) : brands.length === 0 ? (
+              ) : brandNames.length === 0 ? (
                 <div className="p-12 text-center text-gray-500 bg-white rounded-xl border border-gray-100">
                   No brands found — add a brand to your products first
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {brands.map((brand) => {
-                    const cover = brandCover(brand)
+                  {brandNames.map((brand) => {
+                    const logoUrl = brandLogo(brand)
                     const count = products.filter((p) => p.brand === brand).length
                     return (
                       <button
@@ -171,9 +175,9 @@ export default function Catalogue() {
                         className="text-left bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:border-secondary/40 transition-all"
                       >
                         <div className="w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">
-                          {cover?.imageUrl ? (
+                          {logoUrl ? (
                             <img
-                              src={cover.imageUrl}
+                              src={logoUrl}
                               alt={brand}
                               className="w-full h-full object-contain p-3"
                             />
@@ -205,6 +209,13 @@ export default function Catalogue() {
                     <ArrowLeft size={16} />
                     All Brands
                   </button>
+                )}
+                {activeBrand && !search.trim() && brandLogo(activeBrand) && (
+                  <img
+                    src={brandLogo(activeBrand)}
+                    alt={activeBrand}
+                    className="w-6 h-6 object-contain rounded"
+                  />
                 )}
                 <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
                   {search.trim() ? `Search results for "${search}"` : activeBrand}
