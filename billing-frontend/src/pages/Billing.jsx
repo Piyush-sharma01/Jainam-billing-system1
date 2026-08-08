@@ -90,6 +90,7 @@ export default function Billing() {
           stock: product.stock,
           imageUrl: product.imageUrl,
           quantity: 1,
+          discountPercent: 0,
         },
       ]
     })
@@ -110,6 +111,15 @@ export default function Billing() {
     )
   }
 
+  const updateDiscount = (productId, discountPercent) => {
+    const clamped = Math.max(0, Math.min(100, isNaN(discountPercent) ? 0 : discountPercent))
+    setCart((prev) =>
+      prev.map((item) =>
+        item.productId === productId ? { ...item, discountPercent: clamped } : item
+      )
+    )
+  }
+
   const handleSearchKeyDown = (e) => {
     if (!showSuggestions || suggestions.length === 0) return
     if (e.key === 'ArrowDown') {
@@ -126,18 +136,30 @@ export default function Billing() {
     }
   }
 
-  const calculateTotals = () => {
-    let subtotal = 0
-    let tax = 0
-    cart.forEach((item) => {
-      const lineBase = item.price * item.quantity
-      subtotal += lineBase
-      tax += lineBase * (item.gst / 100)
-    })
-    return { subtotal, tax, total: subtotal + tax }
+  // Discount is applied before tax, matching the backend calculation
+  const calculateLineTotals = (item) => {
+    const lineBase = item.price * item.quantity
+    const discountAmount = lineBase * (item.discountPercent / 100)
+    const taxable = lineBase - discountAmount
+    const tax = taxable * (item.gst / 100)
+    const total = taxable + tax
+    return { lineBase, discountAmount, taxable, tax, total }
   }
 
-  const { subtotal, tax, total } = calculateTotals()
+  const calculateTotals = () => {
+    let subtotal = 0
+    let discount = 0
+    let tax = 0
+    cart.forEach((item) => {
+      const { taxable, discountAmount, tax: itemTax } = calculateLineTotals(item)
+      subtotal += taxable
+      discount += discountAmount
+      tax += itemTax
+    })
+    return { subtotal, discount, tax, total: subtotal + tax }
+  }
+
+  const { subtotal, discount, tax, total } = calculateTotals()
 
   const handleCreateInvoice = async () => {
     if (!selectedClient || cart.length === 0) {
@@ -154,6 +176,7 @@ export default function Billing() {
         lineItems: cart.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
+          discountPercentage: item.discountPercent,
         })),
         notes,
       }
@@ -270,7 +293,7 @@ export default function Billing() {
                               <img
                                 src={product.imageUrl}
                                 alt=""
-                               className="w-full h-full object-contain p-2"
+                                className="w-full h-full object-contain"
                                 onError={(e) => { e.target.style.display = 'none' }}
                               />
                             ) : (
@@ -333,20 +356,19 @@ export default function Billing() {
             ) : (
               <div className="divide-y divide-gray-100">
                 {cart.map((item) => {
-                  const lineTotal =
-                    item.price * item.quantity * (1 + item.gst / 100)
+                  const { total: lineTotal } = calculateLineTotals(item)
                   const overStock = item.quantity > item.stock
                   return (
                     <div
                       key={item.productId}
-                      className="flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4"
+                      className="flex flex-wrap items-start gap-3 px-4 sm:px-6 py-4"
                     >
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden mt-0.5">
                         {item.imageUrl ? (
                           <img
                             src={item.imageUrl}
                             alt=""
-                           className="w-full h-full object-contain p-2"
+                            className="w-full h-full object-contain"
                             onError={(e) => { e.target.style.display = 'none' }}
                           />
                         ) : (
@@ -369,8 +391,15 @@ export default function Billing() {
                         )}
                       </div>
 
-                      {/* Quantity, price, delete — wraps to its own row on narrow phones */}
-                      <div className="flex items-center gap-3 sm:gap-4 ml-auto sm:ml-0 shrink-0 w-full sm:w-auto justify-end sm:justify-start pl-12 sm:pl-0">
+                      <button
+                        onClick={() => removeFromCart(item.productId)}
+                        className="text-gray-400 hover:text-red-600 shrink-0 order-1 sm:order-none"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+
+                      {/* Quantity, discount, price row — wraps below on narrow phones */}
+                      <div className="w-full flex flex-wrap items-center gap-3 sm:gap-4 pl-12 sm:pl-12">
                         <div className="flex items-center gap-1 border border-gray-200 rounded-lg shrink-0">
                           <button
                             onClick={() =>
@@ -398,16 +427,23 @@ export default function Billing() {
                           </button>
                         </div>
 
-                        <p className="w-20 sm:w-24 text-right text-sm font-semibold text-gray-800 shrink-0">
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <label className="text-xs text-gray-400">Disc%</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={item.discountPercent}
+                            onChange={(e) =>
+                              updateDiscount(item.productId, parseFloat(e.target.value))
+                            }
+                            className="w-16 text-center text-sm border border-gray-200 rounded-lg py-1.5 focus:outline-none focus:ring-1 focus:ring-secondary"
+                          />
+                        </div>
+
+                        <p className="ml-auto text-right text-sm font-semibold text-gray-800 shrink-0">
                           ₹{lineTotal.toFixed(2)}
                         </p>
-
-                        <button
-                          onClick={() => removeFromCart(item.productId)}
-                          className="text-gray-400 hover:text-red-600 shrink-0"
-                        >
-                          <Trash2 size={18} />
-                        </button>
                       </div>
                     </div>
                   )
@@ -456,6 +492,12 @@ export default function Billing() {
               <span className="text-gray-600">Subtotal</span>
               <span className="font-medium">₹{subtotal.toFixed(2)}</span>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Discount</span>
+                <span className="font-medium">− ₹{discount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-gray-600">Tax (GST)</span>
               <span className="font-medium">₹{tax.toFixed(2)}</span>
