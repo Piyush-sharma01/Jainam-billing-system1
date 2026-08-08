@@ -39,5 +39,10 @@ export const invoiceAPI = {
   sendEmail: (id, email) => api.post(`/invoices/${id}/send-email?email=${encodeURIComponent(email)}`),
   delete: (id) => api.delete(`/invoices/${id}`),
 };
+// Brands API
+export const brandAPI = {
+  getAll: () => api.get('/brands'),
+  create: (data) => api.post('/brands', data),
+};
 
 export default api;
