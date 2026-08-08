@@ -18,7 +18,12 @@ public class BrandService {
             .map(this::convertToDTO)
             .collect(Collectors.toList());
     }
-
+     public void deleteBrand(Long id) {
+    if (!brandRepository.existsById(id)) {
+        throw new RuntimeException("Brand not found");
+    }
+    brandRepository.deleteById(id);
+}
     public BrandDTO createBrand(BrandDTO brandDTO) {
         if (brandRepository.existsByName(brandDTO.getName())) {
             throw new RuntimeException("A brand with this name already exists");
