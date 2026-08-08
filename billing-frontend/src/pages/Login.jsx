@@ -1,33 +1,34 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { LogIn } from "lucide-react";
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { LogIn, Eye, EyeOff } from 'lucide-react'
 
 export default function Login({ onLogin }) {
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("password");
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+  const [username, setUsername] = useState('admin')
+  const [password, setPassword] = useState('password')
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    setError("");
+    e.preventDefault()
+    setError('')
 
     if (!username || !password) {
-      setError("Please enter both username and password");
-      return;
+      setError('Please enter both username and password')
+      return
     }
 
     // Demo login - accept admin/password
-    if (username === "sanjay" && password === "jainam123") {
-      onLogin({ name: "Admin User", username });
-      navigate("/dashboard");
+    if (username === 'admin' && password === 'password') {
+      onLogin({ name: 'Admin User', username })
+      navigate('/dashboard')
     } else {
-      setError("Invalid credentials. Use admin/password");
+      setError('Invalid credentials. Use admin/password')
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center px-4">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-block bg-secondary p-3 rounded-lg mb-4">
@@ -45,9 +46,7 @@ export default function Login({ onLogin }) {
           )}
 
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Username
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Username</label>
             <input
               type="text"
               value={username}
@@ -55,21 +54,27 @@ export default function Login({ onLogin }) {
               className="input-field"
               placeholder="Enter username"
             />
-            <p className="text-gray-500 text-xs mt-1">Demo: admin</p>
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input-field"
-              placeholder="Enter password"
-            />
-            <p className="text-gray-500 text-xs mt-1">Demo: password</p>
+            <label className="block text-gray-700 font-medium mb-2">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-field pr-10"
+                placeholder="Enter password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <button
@@ -82,10 +87,10 @@ export default function Login({ onLogin }) {
 
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-gray-700">
-            <strong>Demo Credentials:</strong>
           </p>
+          
         </div>
       </div>
     </div>
-  );
+  )
 }
