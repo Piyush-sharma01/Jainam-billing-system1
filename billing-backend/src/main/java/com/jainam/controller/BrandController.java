@@ -12,7 +12,15 @@ import java.util.List;
 public class BrandController {
     @Autowired
     private BrandService brandService;
-
+     @DeleteMapping("/{id}")
+   public ResponseEntity<?> deleteBrand(@PathVariable Long id) {
+    try {
+        brandService.deleteBrand(id);
+        return ResponseEntity.noContent().build();
+    } catch (RuntimeException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+}  
     @GetMapping
     public ResponseEntity<List<BrandDTO>> getAllBrands() {
         return ResponseEntity.ok(brandService.getAllBrands());
