@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import ImageUpload from './ImageUpload'
+import BrandModal from './BrandModal'
+import { brandAPI } from '../services/api'
 
-export default function ProductModal({ product, existingBrands = [], onSave, onClose }) {
+const ADD_NEW = '__add_new__'
+
+export default function ProductModal({ product, onSave, onClose }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -13,6 +17,27 @@ export default function ProductModal({ product, existingBrands = [], onSave, onC
     stock: '',
     imageUrl: '',
   })
+
+  const [brands, setBrands] = useState([])
+  const [selectedBrandId, setSelectedBrandId] = useState('')
+  const [brandLogoUrl, setBrandLogoUrl] = useState('')
+  const [brandLocked, setBrandLocked] = useState(false)
+  const [showBrandModal, setShowBrandModal] = useState(false)
+
+  useEffect(() => {
+    brandAPI.getAll().then((res) => {
+      setBrands(res.data)
+      // If editing an existing product, try to match its brand name to a saved brand
+      if (product?.brand) {
+        const match = res.data.find((b) => b.name === product.brand)
+        if (match) {
+          setSelectedBrandId(String(match.id))
+          setBrandLogoUrl(match.logoUrl || '')
+          setBrandLocked(true)
+        }
+      }
+    }).catch((err) => console.error('Failed to load brands', err))
+  }, [])
 
   useEffect(() => {
     if (product) {
@@ -36,6 +61,38 @@ export default function ProductModal({ product, existingBrands = [], onSave, onC
 
   const handleImageChange = (url) => {
     setFormData((prev) => ({ ...prev, imageUrl: url }))
+  }
+
+  const handleBrandSelect = (e) => {
+    const value = e.target.value
+
+    if (value === ADD_NEW) {
+      setShowBrandModal(true)
+      return
+    }
+
+    if (value === '') {
+      setSelectedBrandId('')
+      setBrandLogoUrl('')
+      setBrandLocked(false)
+      setFormData((prev) => ({ ...prev, brand: '' }))
+      return
+    }
+
+    const chosen = brands.find((b) => String(b.id) === value)
+    setSelectedBrandId(value)
+    setBrandLogoUrl(chosen?.logoUrl || '')
+    setBrandLocked(true)
+    setFormData((prev) => ({ ...prev, brand: chosen?.name || '' }))
+  }
+
+  const handleBrandCreated = (newBrand) => {
+    setBrands((prev) => [...prev, newBrand].sort((a, b) => a.name.localeCompare(b.name)))
+    setSelectedBrandId(String(newBrand.id))
+    setBrandLogoUrl(newBrand.logoUrl || '')
+    setBrandLocked(true)
+    setFormData((prev) => ({ ...prev, brand: newBrand.name }))
+    setShowBrandModal(false)
   }
 
   const handleSubmit = (e) => {
@@ -65,7 +122,7 @@ export default function ProductModal({ product, existingBrands = [], onSave, onC
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <ImageUpload value={formData.imageUrl} onChange={handleImageChange} />
+          <ImageUpload value={formData.imageUrl} onChange={handleImageChange} label="Product Image" />
 
           <div>
             <label className="block text-gray-700 font-medium mb-1">Product Name *</label>
@@ -91,38 +148,43 @@ export default function ProductModal({ product, existingBrands = [], onSave, onC
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Category</label>
-              <select name="category" value={formData.category} onChange={handleChange} className="input-field">
-                <option>Pipes</option>
-                <option>Valves</option>
-                <option>Fittings</option>
-                <option>Tools</option>
-                <option>Sealants</option>
-                <option>Pumps</option>
-                <option>Meters</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Brand</label>
-              <input
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                className="input-field"
-                placeholder="e.g. Tata"
-                list="brand-suggestions"
-              />
-              <datalist id="brand-suggestions">
-                {existingBrands.map((b) => (
-                  <option key={b} value={b} />
-                ))}
-              </datalist>
-            </div>
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">Category</label>
+            <select name="category" value={formData.category} onChange={handleChange} className="input-field">
+              <option>Pipes</option>
+              <option>Valves</option>
+              <option>Fittings</option>
+              <option>Tools</option>
+              <option>Sealants</option>
+              <option>Pumps</option>
+              <option>Meters</option>
+            </select>
           </div>
+
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">Brand</label>
+            <select
+              value={selectedBrandId}
+              onChange={handleBrandSelect}
+              className="input-field"
+            >
+              <option value="">Select a brand...</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.id}>{b.name}</option>
+              ))}
+              <option value={ADD_NEW}>+ Add new brand</option>
+            </select>
+          </div>
+
+          {brandLocked && (
+            <div className="rounded-lg border border-gray-200 p-3 bg-gray-50 space-y-3">
+              <div>
+                <label className="block text-gray-500 text-sm font-medium mb-1">Brand Name (locked)</label>
+                <input type="text" value={formData.brand} disabled className="input-field bg-gray-100 text-gray-500" />
+              </div>
+              <ImageUpload value={brandLogoUrl} onChange={() => {}} label="Brand Logo (locked)" disabled />
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -174,6 +236,13 @@ export default function ProductModal({ product, existingBrands = [], onSave, onC
           </div>
         </form>
       </div>
+
+      {showBrandModal && (
+        <BrandModal
+          onCreated={handleBrandCreated}
+          onClose={() => setShowBrandModal(false)}
+        />
+      )}
     </div>
   )
 }
