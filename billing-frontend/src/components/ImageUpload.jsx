@@ -4,7 +4,7 @@ import { Upload, X, Loader2 } from 'lucide-react'
 const CLOUD_NAME = 'kygaxh5x'
 const UPLOAD_PRESET = 'jainam_products'
 
-export default function ImageUpload({ value, onChange }) {
+export default function ImageUpload({ value, onChange, label = 'Product Image', disabled = false }) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
 
@@ -41,21 +41,28 @@ export default function ImageUpload({ value, onChange }) {
 
   return (
     <div>
-      <label className="block text-gray-700 font-medium mb-2">Product Image</label>
+      <label className="block text-gray-700 font-medium mb-2">{label}</label>
 
       {value ? (
         <div className="relative w-full h-40 bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
-          <img src={value} alt="Product" className="w-full h-full object-contain p-2" />
-          <button
-            type="button"
-            onClick={() => onChange('')}
-            className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-red-50"
-          >
-            <X size={16} className="text-red-600" />
-          </button>
+          <img src={value} alt={label} className="w-full h-full object-contain p-2" />
+          {!disabled && (
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-red-50"
+            >
+              <X size={16} className="text-red-600" />
+            </button>
+          )}
+          {disabled && (
+            <span className="absolute bottom-2 left-2 bg-white/90 text-xs text-gray-500 px-2 py-0.5 rounded">
+              From selected brand
+            </span>
+          )}
         </div>
       ) : (
-        <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-secondary hover:bg-gray-50 transition-colors">
+        <label className={`flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-secondary hover:bg-gray-50'}`}>
           {uploading ? (
             <>
               <Loader2 size={28} className="text-gray-400 animate-spin mb-2" />
@@ -72,7 +79,7 @@ export default function ImageUpload({ value, onChange }) {
             accept="image/*"
             onChange={handleFileSelect}
             className="hidden"
-            disabled={uploading}
+            disabled={uploading || disabled}
           />
         </label>
       )}
