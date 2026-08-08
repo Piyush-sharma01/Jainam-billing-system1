@@ -1,18 +1,19 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { BarChart3, Package, Users, FileText, History, LogOut, X } from 'lucide-react'
+import { BarChart3, Package, Users, FileText, History, LogOut, X, BookImage } from 'lucide-react'
 
+  
 export default function Sidebar({ onLogout, isOpen, onClose }) {
   const location = useLocation()
 
-  const navItems = [
+const navItems = [
     { path: '/dashboard', icon: BarChart3, label: 'Dashboard' },
     { path: '/products', icon: Package, label: 'Products' },
+    { path: '/catalogue', icon: BookImage, label: 'Catalogue' },
     { path: '/clients', icon: Users, label: 'Clients' },
     { path: '/billing', icon: FileText, label: 'Billing' },
     { path: '/invoice-history', icon: History, label: 'Invoice History' },
   ]
-
   return (
     <>
       {/* Mobile overlay — click to close */}
