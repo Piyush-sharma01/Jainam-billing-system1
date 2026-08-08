@@ -43,6 +43,7 @@ export const invoiceAPI = {
 export const brandAPI = {
   getAll: () => api.get('/brands'),
   create: (data) => api.post('/brands', data),
+  delete: (id) => api.delete(`/brands/${id}`),
 };
 
 export default api;
