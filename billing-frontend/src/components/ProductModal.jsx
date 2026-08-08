@@ -94,7 +94,21 @@ export default function ProductModal({ product, onSave, onClose }) {
     setFormData((prev) => ({ ...prev, brand: newBrand.name }))
     setShowBrandModal(false)
   }
-
+// add this function inside the component, near handleBrandCreated:
+const handleDeleteBrand = async () => {
+  if (!selectedBrandId) return
+  if (!window.confirm(`Delete brand "${formData.brand}"? This can't be undone.`)) return
+  try {
+    await brandAPI.delete(selectedBrandId)
+    setBrands((prev) => prev.filter((b) => String(b.id) !== selectedBrandId))
+    setSelectedBrandId('')
+    setBrandLogoUrl('')
+    setBrandLocked(false)
+    setFormData((prev) => ({ ...prev, brand: '' }))
+  } catch (err) {
+    alert(err.response?.data || 'Could not delete brand')
+  }
+}
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!formData.name || !formData.price || !formData.stock) {
@@ -176,16 +190,22 @@ export default function ProductModal({ product, onSave, onClose }) {
             </select>
           </div>
 
-          {brandLocked && (
-            <div className="rounded-lg border border-gray-200 p-3 bg-gray-50 space-y-3">
-              <div>
-                <label className="block text-gray-500 text-sm font-medium mb-1">Brand Name (locked)</label>
-                <input type="text" value={formData.brand} disabled className="input-field bg-gray-100 text-gray-500" />
-              </div>
-              <ImageUpload value={brandLogoUrl} onChange={() => {}} label="Brand Logo (locked)" disabled />
-            </div>
-          )}
-
+        {brandLocked && (
+  <div className="rounded-lg border border-gray-200 p-3 bg-gray-50 space-y-3">
+    <div className="flex items-center justify-between">
+      <label className="block text-gray-500 text-sm font-medium">Brand Name (locked)</label>
+      <button
+        type="button"
+        onClick={handleDeleteBrand}
+        className="text-xs text-red-600 hover:text-red-700 font-medium"
+      >
+        Delete brand
+      </button>
+    </div>
+    <input type="text" value={formData.brand} disabled className="input-field bg-gray-100 text-gray-500" />
+    <ImageUpload value={brandLogoUrl} onChange={() => {}} label="Brand Logo (locked)" disabled />
+  </div>
+)
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-gray-700 font-medium mb-1">Price *</label>
