@@ -15,7 +15,9 @@ public class InvoiceLineItemDTO {
     private Integer quantity;
     private BigDecimal unitPrice;
     private BigDecimal gstPercentage;
+    private BigDecimal discountPercentage;
     private BigDecimal subtotal;
+    private BigDecimal discountAmount;
     private BigDecimal taxAmount;
     private BigDecimal total;
 }
