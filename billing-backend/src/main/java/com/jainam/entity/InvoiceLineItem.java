@@ -36,7 +36,15 @@ public class InvoiceLineItem {
     private BigDecimal gstPercentage;
 
     @Column(nullable = false)
+    @Builder.Default
+    private BigDecimal discountPercentage = BigDecimal.ZERO;
+
+    @Column(nullable = false)
     private BigDecimal subtotal;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(nullable = false)
     private BigDecimal taxAmount;
