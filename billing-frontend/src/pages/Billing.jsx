@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { invoiceAPI, clientAPI, productAPI } from '../services/api'import {
+import { invoiceAPI, clientAPI, productAPI } from '../services/api'
+import {
   Plus,
   Minus,
   Trash2,
