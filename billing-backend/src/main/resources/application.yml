@@ -7,8 +7,11 @@ spring:
     password: f6eaec84942d07d9d9f45c9613a89fb48a7f62d5
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      maximum-pool-size: 3
+      maximum-pool-size: 2
       minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 30000
+      max-lifetime: 60000
   jpa:
     hibernate:
       ddl-auto: update
