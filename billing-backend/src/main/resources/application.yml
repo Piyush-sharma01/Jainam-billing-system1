@@ -2,16 +2,13 @@ spring:
   application:
     name: jainam-billing-system
   datasource:
-    url: jdbc:mysql://pyho-0.h.filess.io:61001/jainam_billing_placemanat?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: jainam_billing_placemanat
-    password: f6eaec84942d07d9d9f45c9613a89fb48a7f62d5
+    url: jdbc:mysql://mysql-3e14fa4a-piyushdadhich5445-648b.c.aivencloud.com:12380/defaultdb?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: avnadmin
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      maximum-pool-size: 2
+      maximum-pool-size: 3
       minimum-idle: 1
-      connection-timeout: 20000
-      idle-timeout: 30000
-      max-lifetime: 60000
   jpa:
     hibernate:
       ddl-auto: update
