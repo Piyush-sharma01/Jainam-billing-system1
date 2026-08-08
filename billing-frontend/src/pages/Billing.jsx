@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { invoiceAPI, clientAPI, productAPI } from '../services/api'
-import {
+import { useLocation, useNavigate } from 'react-router-dom'
+import { invoiceAPI, clientAPI, productAPI } from '../services/api'import {
   Plus,
   Minus,
   Trash2,
@@ -24,11 +24,25 @@ export default function Billing() {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(0)
   const searchBoxRef = useRef(null)
-
+const location = useLocation()
+  const navigate = useNavigate()
   useEffect(() => {
     loadData()
   }, [])
-
+// Pre-fill from Catalogue's "Proceed to Bill" hand-off
+  useEffect(() => {
+    if (location.state?.client) {
+      setSelectedClient(location.state.client)
+    }
+    if (location.state?.cartItems) {
+      setCart(location.state.cartItems)
+    }
+    if (location.state) {
+      // Clear the navigation state so a page refresh doesn't re-seed old data
+      navigate(location.pathname, { replace: true, state: null })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchBoxRef.current && !searchBoxRef.current.contains(e.target)) {
