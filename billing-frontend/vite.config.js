@@ -7,37 +7,25 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'Jainam Billing System',
-        short_name: 'Jainam',
-        description: 'Billing, catalogue, and inventory management for Jainam',
-        theme_color: '#EA580C',
-        background_color: '#F5F5F5',
+        short_name: 'Jainam Billing',
+        description: 'Billing and catalogue management for Jainam',
+        theme_color: '#0f172a',
+        background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
+        scope: '/',
         icons: [
-          {
-            src: 'icon-192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+      },
     }),
-  ],
-  server: {
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api')
-      }
-    }
-  }
-})
+  ],})
+  
