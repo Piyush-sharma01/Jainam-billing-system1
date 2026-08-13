@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.jainam_billing_system1.twa",
+      "sha256_cert_fingerprints": [
+        "93:A9:86:F7:62:C0:BF:B2:C1:96:3A:D8:50:BB:80:63:FE:BD:2E:1D:F6:AD:C4:0D:B2:9E:B2:87:07:64:11:5D"
+      ]
+    }
+  }
+]
