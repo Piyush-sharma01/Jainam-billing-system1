@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { startRequest, stopRequest } from './loadingTracker';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
@@ -9,38 +10,31 @@ const api = axios.create({
   }
 });
 
-// Track in-flight requests globally so any page can show a loading state
-// without wiring up its own loading logic. GlobalLoadingBar listens for
-// these events.
-let activeRequests = 0;
+// Track every request/response through this shared instance so the global
+// loading bar (and "waking up the server" banner) can react automatically —
+// every page that uses productAPI, clientAPI, invoiceAPI, brandAPI, etc.
+// is covered without touching each page's code.
+api.interceptors.request.use(
+  (config) => {
+    startRequest();
+    return config;
+  },
+  (error) => {
+    stopRequest();
+    return Promise.reject(error);
+  }
+);
 
-api.interceptors.request.use((config) => {
-  activeRequests += 1;
-  if (activeRequests === 1) {
-    window.dispatchEvent(new Event('api-loading-start'));
+api.interceptors.response.use(
+  (response) => {
+    stopRequest();
+    return response;
+  },
+  (error) => {
+    stopRequest();
+    return Promise.reject(error);
   }
-  return config;
-}, (error) => {
-  activeRequests = Math.max(0, activeRequests - 1);
-  if (activeRequests === 0) {
-    window.dispatchEvent(new Event('api-loading-end'));
-  }
-  return Promise.reject(error);
-});
-
-api.interceptors.response.use((response) => {
-  activeRequests = Math.max(0, activeRequests - 1);
-  if (activeRequests === 0) {
-    window.dispatchEvent(new Event('api-loading-end'));
-  }
-  return response;
-}, (error) => {
-  activeRequests = Math.max(0, activeRequests - 1);
-  if (activeRequests === 0) {
-    window.dispatchEvent(new Event('api-loading-end'));
-  }
-  return Promise.reject(error);
-});
+);
 
 // Products API
 export const productAPI = {

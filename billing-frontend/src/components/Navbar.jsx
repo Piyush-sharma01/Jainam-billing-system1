@@ -1,5 +1,6 @@
-import React from 'react'
-import { User, Menu } from 'lucide-react'
+import React from "react";
+import { User, Menu } from "lucide-react";
+import GlobalLoadingBar from "./GlobalLoadingBar";
 
 export default function Navbar({ user, onLogout, onMenuClick }) {
   return (
@@ -15,20 +16,23 @@ export default function Navbar({ user, onLogout, onMenuClick }) {
           </button>
           <div className="min-w-0">
             <h2 className="text-lg sm:text-2xl font-bold text-gray-800 truncate">
-              Welcome, {user?.name || 'User'}
+              Welcome, {user?.name || "User"}
             </h2>
             <p className="text-gray-500 text-xs sm:text-sm hidden sm:block">
               Manage your billing and invoices
             </p>
+            <GlobalLoadingBar />
           </div>
         </div>
         <div className="flex items-center gap-4 shrink-0">
           <div className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg">
             <User size={18} className="text-gray-600" />
-            <span className="text-gray-700 text-sm hidden sm:inline">{user?.name || 'Guest'}</span>
+            <span className="text-gray-700 text-sm hidden sm:inline">
+              {user?.name || "Guest"}
+            </span>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

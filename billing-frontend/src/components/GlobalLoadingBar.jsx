@@ -1,58 +1,61 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { subscribe } from "../services/loadingTracker";
 
-// Listens for api-loading-start / api-loading-end events fired from
-// services/api.js on every request. Mounted once in App.jsx so it shows
-// on every page without each page needing its own loading state.
+const SLOW_THRESHOLD_MS = 3000;
+
+// Sits right under the "Welcome, Admin" heading. Shows a thin animated bar
+// whenever any API request is in flight, and — only if it drags past 3s —
+// an amber "waking up the server" note (Render free-tier cold start).
 export default function GlobalLoadingBar() {
-  const [loading, setLoading] = useState(false);
-  const [slowLoad, setSlowLoad] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSlow, setIsSlow] = useState(false);
   const slowTimerRef = useRef(null);
 
   useEffect(() => {
-    const handleStart = () => {
-      setLoading(true);
-      slowTimerRef.current = setTimeout(() => setSlowLoad(true), 3000);
-    };
-    const handleEnd = () => {
-      clearTimeout(slowTimerRef.current);
-      setLoading(false);
-      setSlowLoad(false);
-    };
+    const unsubscribe = subscribe((activeCount) => {
+      const loading = activeCount > 0;
+      setIsLoading(loading);
 
-    window.addEventListener("api-loading-start", handleStart);
-    window.addEventListener("api-loading-end", handleEnd);
+      if (loading) {
+        if (!slowTimerRef.current) {
+          slowTimerRef.current = setTimeout(() => {
+            setIsSlow(true);
+          }, SLOW_THRESHOLD_MS);
+        }
+      } else {
+        clearTimeout(slowTimerRef.current);
+        slowTimerRef.current = null;
+        setIsSlow(false);
+      }
+    });
+
     return () => {
-      window.removeEventListener("api-loading-start", handleStart);
-      window.removeEventListener("api-loading-end", handleEnd);
+      unsubscribe();
       clearTimeout(slowTimerRef.current);
     };
   }, []);
 
-  if (!loading) return null;
+  if (!isLoading) return null;
 
   return (
-    <>
-      {/* Slim progress bar pinned to the very top of the viewport */}
-      <div className="fixed top-0 left-0 right-0 z-[100] h-1 bg-secondary/20 overflow-hidden">
-        <div className="h-full w-1/3 bg-secondary animate-[loading-bar_1.1s_ease-in-out_infinite]" />
+    <div className="mt-2">
+      <div className="h-1 w-full max-w-xs overflow-hidden rounded-full bg-gray-200">
+        <div className="h-full w-1/3 animate-loading-bar rounded-full bg-orange-500" />
       </div>
-
-      {/* Only appears once a request has been hanging for 3s+ — this is
-          what catches a Render cold start without flashing on every
-          normal, fast request. */}
-      {slowLoad && (
-        <div className="fixed top-1 left-1/2 -translate-x-1/2 z-[100] bg-amber-50 border border-amber-200 text-amber-800 text-xs sm:text-sm rounded-lg px-4 py-2 shadow-sm mt-2 max-w-[90vw] text-center">
-          Waking up the server — first load can take up to 30 seconds if the app
-          has been idle.
-        </div>
+      {isSlow && (
+        <p className="mt-1.5 text-xs text-amber-600">
+          Waking up the server, this can take a few seconds…
+        </p>
       )}
-
       <style>{`
-        @keyframes loading-bar {
+        @keyframes loading-bar-slide {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(300%); }
         }
+        .animate-loading-bar {
+          animation: loading-bar-slide 1s ease-in-out infinite;
+        }
       `}</style>
-    </>
+    </div>
   );
 }
