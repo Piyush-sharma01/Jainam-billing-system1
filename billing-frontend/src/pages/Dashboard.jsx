@@ -4,7 +4,6 @@ import { Package, Users, FileText, DollarSign } from 'lucide-react'
 import BikeLoader from "../components/BikeLoader";
 import PullToRefresh from "../components/PullToRefresh";
 
-
 export default function Dashboard() {
   const [stats, setStats] = useState({ products: 0, clients: 0, invoices: 0, revenue: 0 })
   const [recentInvoices, setRecentInvoices] = useState([])
@@ -55,82 +54,78 @@ export default function Dashboard() {
     </div>
   )
 
- return (
-  <PullToRefresh onRefresh={loadDashboardData}>
-    <div className="space-y-6">
-      {/* existing dashboard content */}
-    </div>
-  </PullToRefresh>
-)
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-gray-500">Overview of your billing system</p>
-      </div>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
+  return (
+    <PullToRefresh onRefresh={loadDashboardData}>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
+          <p className="text-gray-500">Overview of your billing system</p>
         </div>
-      )}
 
-      {loading ? (
-        <BikeLoader />
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard icon={Package} label="Total Products" value={stats.products} color="bg-blue-500" />
-            <StatCard icon={Users} label="Total Clients" value={stats.clients} color="bg-green-500" />
-            <StatCard icon={FileText} label="Total Invoices" value={stats.invoices} color="bg-purple-500" />
-            <StatCard icon={DollarSign} label="Total Revenue" value={`₹${stats.revenue}`} color="bg-secondary" />
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {error}
           </div>
+        )}
 
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-800">Recent Invoices</h2>
+        {loading ? (
+          <BikeLoader />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard icon={Package} label="Total Products" value={stats.products} color="bg-blue-500" />
+              <StatCard icon={Users} label="Total Clients" value={stats.clients} color="bg-green-500" />
+              <StatCard icon={FileText} label="Total Invoices" value={stats.invoices} color="bg-purple-500" />
+              <StatCard icon={DollarSign} label="Total Revenue" value={`₹${stats.revenue}`} color="bg-secondary" />
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Invoice</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Client</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentInvoices.length === 0 ? (
+
+            <div className="bg-white rounded-lg shadow">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-bold text-gray-800">Recent Invoices</h2>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
-                        No invoices found
-                      </td>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Invoice</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Client</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Status</th>
                     </tr>
-                  ) : (
-                    recentInvoices.map((invoice) => (
-                      <tr key={invoice.id} className="border-b hover:bg-gray-50">
-                        <td className="px-6 py-4 text-sm text-gray-800">{invoice.invoiceNumber}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800">{invoice.client?.company || 'N/A'}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800">₹{invoice.grandTotal?.toFixed(2) || '0.00'}</td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            invoice.status === 'PAID' ? 'bg-green-100 text-green-800' :
-                            invoice.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                            invoice.status === 'OVERDUE' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {invoice.status}
-                          </span>
+                  </thead>
+                  <tbody>
+                    {recentInvoices.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                          No invoices found
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      recentInvoices.map((invoice) => (
+                        <tr key={invoice.id} className="border-b hover:bg-gray-50">
+                          <td className="px-6 py-4 text-sm text-gray-800">{invoice.invoiceNumber}</td>
+                          <td className="px-6 py-4 text-sm text-gray-800">{invoice.client?.company || 'N/A'}</td>
+                          <td className="px-6 py-4 text-sm text-gray-800">₹{invoice.grandTotal?.toFixed(2) || '0.00'}</td>
+                          <td className="px-6 py-4 text-sm">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              invoice.status === 'PAID' ? 'bg-green-100 text-green-800' :
+                              invoice.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                              invoice.status === 'OVERDUE' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {invoice.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        </>
-      )}
-    </div>
+          </>
+        )}
+      </div>
+    </PullToRefresh>
   )
 }
