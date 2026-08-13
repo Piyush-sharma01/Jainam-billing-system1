@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { productAPI, clientAPI, invoiceAPI } from '../services/api'
 import { Package, Users, FileText, DollarSign } from 'lucide-react'
+import BikeLoader from "../components/BikeLoader";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({ products: 0, clients: 0, invoices: 0, revenue: 0 })
@@ -65,10 +66,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {loading ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500">Loading dashboard data...</p>
-        </div>
+     {loading ? <BikeLoader /> : <YourActualContent />}
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
