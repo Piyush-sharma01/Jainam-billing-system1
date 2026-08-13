@@ -21,7 +21,6 @@ export default function Navbar({ user, onLogout, onMenuClick }) {
             <p className="text-gray-500 text-xs sm:text-sm hidden sm:block">
               Manage your billing and invoices
             </p>
-            <GlobalLoadingBar />
           </div>
         </div>
         <div className="flex items-center gap-4 shrink-0">
@@ -33,6 +32,7 @@ export default function Navbar({ user, onLogout, onMenuClick }) {
           </div>
         </div>
       </div>
+      <GlobalLoadingBar />
     </div>
   );
 }
