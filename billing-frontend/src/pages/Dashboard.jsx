@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { productAPI, clientAPI, invoiceAPI } from '../services/api'
 import { Package, Users, FileText, DollarSign } from 'lucide-react'
 import BikeLoader from "../components/BikeLoader";
+import PullToRefresh from "../components/PullToRefresh";
+
 
 export default function Dashboard() {
   const [stats, setStats] = useState({ products: 0, clients: 0, invoices: 0, revenue: 0 })
@@ -53,7 +55,13 @@ export default function Dashboard() {
     </div>
   )
 
-  return (
+ return (
+  <PullToRefresh onRefresh={loadDashboardData}>
+    <div className="space-y-6">
+      {/* existing dashboard content */}
+    </div>
+  </PullToRefresh>
+)
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
