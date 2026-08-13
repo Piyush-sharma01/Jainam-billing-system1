@@ -54,6 +54,17 @@ export default function Catalogue() {
     }
   };
 
+  // Skeleton card used in both the brand grid and product grid while loading
+  const SkeletonCard = () => (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+      <div className="w-full aspect-square bg-gray-100" />
+      <div className="p-3 space-y-2">
+        <div className="h-3.5 bg-gray-100 rounded w-3/4" />
+        <div className="h-3 bg-gray-100 rounded w-1/2" />
+      </div>
+    </div>
+  );
+
   // brandNames = names actually used on products (drives the grid + drill-down)
   // brandLogo = looked up from the real Brand records for a given name
   const brandNames = Array.from(
@@ -189,7 +200,11 @@ export default function Catalogue() {
                 Brands
               </h2>
               {loading ? (
-                <div className="p-12 text-center text-gray-500">Loading...</div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <SkeletonCard key={i} />
+                  ))}
+                </div>
               ) : brandNames.length === 0 ? (
                 <div className="p-12 text-center text-gray-500 bg-white rounded-xl border border-gray-100">
                   No brands found — add a brand to your products first
@@ -263,7 +278,13 @@ export default function Catalogue() {
                 </h2>
               </div>
 
-              {visibleProducts.length === 0 ? (
+              {loading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <SkeletonCard key={i} />
+                  ))}
+                </div>
+              ) : visibleProducts.length === 0 ? (
                 <div className="p-12 text-center text-gray-500 bg-white rounded-xl border border-gray-100">
                   No products found
                 </div>

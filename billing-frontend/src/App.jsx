@@ -14,6 +14,7 @@ import InvoiceHistory from "./pages/InvoiceHistory";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import Catalogue from "./pages/Catalogue";
+import GlobalLoadingBar from "./components/GlobalLoadingBar";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -69,6 +70,7 @@ export default function App() {
 
   return (
     <Router>
+      <GlobalLoadingBar />
       <Routes>
         <Route
           path="/login"

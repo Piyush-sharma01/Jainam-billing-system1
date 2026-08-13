@@ -9,6 +9,39 @@ const api = axios.create({
   }
 });
 
+// Track in-flight requests globally so any page can show a loading state
+// without wiring up its own loading logic. GlobalLoadingBar listens for
+// these events.
+let activeRequests = 0;
+
+api.interceptors.request.use((config) => {
+  activeRequests += 1;
+  if (activeRequests === 1) {
+    window.dispatchEvent(new Event('api-loading-start'));
+  }
+  return config;
+}, (error) => {
+  activeRequests = Math.max(0, activeRequests - 1);
+  if (activeRequests === 0) {
+    window.dispatchEvent(new Event('api-loading-end'));
+  }
+  return Promise.reject(error);
+});
+
+api.interceptors.response.use((response) => {
+  activeRequests = Math.max(0, activeRequests - 1);
+  if (activeRequests === 0) {
+    window.dispatchEvent(new Event('api-loading-end'));
+  }
+  return response;
+}, (error) => {
+  activeRequests = Math.max(0, activeRequests - 1);
+  if (activeRequests === 0) {
+    window.dispatchEvent(new Event('api-loading-end'));
+  }
+  return Promise.reject(error);
+});
+
 // Products API
 export const productAPI = {
   getAll: () => api.get('/products'),
