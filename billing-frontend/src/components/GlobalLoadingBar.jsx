@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Bike } from "lucide-react";
 import { subscribe } from "../services/loadingTracker";
 
 const SLOW_THRESHOLD_MS = 3000;
@@ -40,17 +39,11 @@ export default function GlobalLoadingBar() {
 
   return (
     <div>
-      <div className="relative h-1 w-full overflow-hidden bg-gray-200">
+      <div className="h-1 w-full overflow-hidden bg-gray-200">
         <div className="h-full w-1/3 animate-loading-bar bg-orange-500" />
-        <Bike
-          size={18}
-          strokeWidth={2.5}
-          className="animate-bike-ride absolute -top-2 text-orange-600"
-        />
       </div>
       {isSlow && (
-        <p className="flex items-center gap-1.5 px-4 sm:px-6 py-1 text-xs text-amber-600 bg-amber-50">
-          <Bike size={14} className="animate-bike-bounce shrink-0" />
+        <p className="px-4 sm:px-6 py-1 text-xs text-amber-600 bg-amber-50">
           Waking up the server, this can take a few seconds…
         </p>
       )}
@@ -61,20 +54,6 @@ export default function GlobalLoadingBar() {
         }
         .animate-loading-bar {
           animation: loading-bar-slide 1s ease-in-out infinite;
-        }
-        @keyframes bike-ride {
-          0% { left: -5%; }
-          100% { left: 102%; }
-        }
-        .animate-bike-ride {
-          animation: bike-ride 1.8s linear infinite;
-        }
-        @keyframes bike-bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-2px); }
-        }
-        .animate-bike-bounce {
-          animation: bike-bounce 0.6s ease-in-out infinite;
         }
       `}</style>
     </div>
