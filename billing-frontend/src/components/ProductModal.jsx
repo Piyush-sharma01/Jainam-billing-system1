@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import ImageUpload from './ImageUpload'
 import BrandModal from './BrandModal'
-import { brandAPI } from '../services/api'
+import CategoryModal from './CategoryModal'
+import { brandAPI, categoryAPI } from '../services/api'
 
 const ADD_NEW = '__add_new__'
 
@@ -10,7 +11,7 @@ export default function ProductModal({ product, onSave, onClose }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: 'Pipes',
+    category: '',
     brand: '',
     price: '',
     gst: '',
@@ -23,6 +24,21 @@ export default function ProductModal({ product, onSave, onClose }) {
   const [brandLogoUrl, setBrandLogoUrl] = useState('')
   const [brandLocked, setBrandLocked] = useState(false)
   const [showBrandModal, setShowBrandModal] = useState(false)
+
+  const [categories, setCategories] = useState([])
+  const [selectedCategoryId, setSelectedCategoryId] = useState('')
+  const [showCategoryModal, setShowCategoryModal] = useState(false)
+
+  useEffect(() => {
+    categoryAPI.getAll().then((res) => {
+      setCategories(res.data)
+      // If editing an existing product, try to match its category name to a saved category
+      if (product?.category) {
+        const match = res.data.find((c) => c.name === product.category)
+        if (match) setSelectedCategoryId(String(match.id))
+      }
+    }).catch((err) => console.error('Failed to load categories', err))
+  }, [])
 
   useEffect(() => {
     brandAPI.getAll().then((res) => {
@@ -44,7 +60,7 @@ export default function ProductModal({ product, onSave, onClose }) {
       setFormData({
         name: product.name || '',
         description: product.description || '',
-        category: product.category || 'Pipes',
+        category: product.category || '',
         brand: product.brand || '',
         price: product.price ?? '',
         gst: product.gst ?? '',
@@ -110,6 +126,45 @@ export default function ProductModal({ product, onSave, onClose }) {
     }
   }
 
+  const handleCategorySelect = (e) => {
+    const value = e.target.value
+
+    if (value === ADD_NEW) {
+      setShowCategoryModal(true)
+      return
+    }
+
+    if (value === '') {
+      setSelectedCategoryId('')
+      setFormData((prev) => ({ ...prev, category: '' }))
+      return
+    }
+
+    const chosen = categories.find((c) => String(c.id) === value)
+    setSelectedCategoryId(value)
+    setFormData((prev) => ({ ...prev, category: chosen?.name || '' }))
+  }
+
+  const handleCategoryCreated = (newCategory) => {
+    setCategories((prev) => [...prev, newCategory].sort((a, b) => a.name.localeCompare(b.name)))
+    setSelectedCategoryId(String(newCategory.id))
+    setFormData((prev) => ({ ...prev, category: newCategory.name }))
+    setShowCategoryModal(false)
+  }
+
+  const handleDeleteCategory = async () => {
+    if (!selectedCategoryId) return
+    if (!window.confirm(`Delete category "${formData.category}"? This can't be undone.`)) return
+    try {
+      await categoryAPI.delete(selectedCategoryId)
+      setCategories((prev) => prev.filter((c) => String(c.id) !== selectedCategoryId))
+      setSelectedCategoryId('')
+      setFormData((prev) => ({ ...prev, category: '' }))
+    } catch (err) {
+      alert(err.response?.data || 'Could not delete category')
+    }
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!formData.name || !formData.price || !formData.stock) {
@@ -165,15 +220,28 @@ export default function ProductModal({ product, onSave, onClose }) {
 
           <div>
             <label className="block text-gray-700 font-medium mb-1">Category</label>
-            <select name="category" value={formData.category} onChange={handleChange} className="input-field">
-              <option>Pipes</option>
-              <option>Valves</option>
-              <option>Fittings</option>
-              <option>Tools</option>
-              <option>Sealants</option>
-              <option>Pumps</option>
-              <option>Meters</option>
+            <select
+              value={selectedCategoryId}
+              onChange={handleCategorySelect}
+              className="input-field"
+            >
+              <option value="">Select a category...</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+              <option value={ADD_NEW}>+ Add new category</option>
             </select>
+            {selectedCategoryId && (
+              <div className="flex justify-end mt-1">
+                <button
+                  type="button"
+                  onClick={handleDeleteCategory}
+                  className="text-xs text-red-600 hover:text-red-700 font-medium"
+                >
+                  Delete category
+                </button>
+              </div>
+            )}
           </div>
 
           <div>
@@ -263,6 +331,13 @@ export default function ProductModal({ product, onSave, onClose }) {
         <BrandModal
           onCreated={handleBrandCreated}
           onClose={() => setShowBrandModal(false)}
+        />
+      )}
+
+      {showCategoryModal && (
+        <CategoryModal
+          onCreated={handleCategoryCreated}
+          onClose={() => setShowCategoryModal(false)}
         />
       )}
     </div>
