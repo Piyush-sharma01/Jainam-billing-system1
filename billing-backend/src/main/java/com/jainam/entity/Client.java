@@ -62,4 +62,13 @@ public class Client {
     // clients private from one another.
     @Column(name = "created_by")
     private String createdBy;
+
+    // Per-client storefront login credentials. Auto-generated when the
+    // client is created (see ClientService) and given to the client so
+    // they can log in to the storefront themselves.
+    @Column(unique = true)
+    private String username;
+
+    @Column(name = "password_hash")
+    private String passwordHash;
 }
