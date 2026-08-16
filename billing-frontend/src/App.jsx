@@ -11,12 +11,19 @@ import Products from "./pages/Products";
 import Clients from "./pages/Clients";
 import Billing from "./pages/Billing";
 import InvoiceHistory from "./pages/InvoiceHistory";
+import Orders from "./pages/Orders";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import Catalogue from "./pages/Catalogue";
 import MarketingTeam from "./pages/MarketingTeam";
 import GlobalLoadingBar from "./components/GlobalLoadingBar";
 import { setCurrentUser, clearCurrentUser } from "./services/currentUser";
+import { CartProvider } from "./services/cartContext";
+import StorefrontLayout from "./components/storefront/StorefrontLayout";
+import StoreHome from "./pages/storefront/StoreHome";
+import StoreCatalogue from "./pages/storefront/StoreCatalogue";
+import StoreAbout from "./pages/storefront/StoreAbout";
+import StoreContact from "./pages/storefront/StoreContact";
 
 export default function App() {
   // Auth state is intentionally NOT restored from localStorage on load —
@@ -25,6 +32,8 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
+
+  const homePathFor = (role) => (role === "client" ? "/store" : "/dashboard");
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -44,7 +53,7 @@ export default function App() {
     }
     if (allowedRoles && !allowedRoles.includes(user?.role)) {
       // Logged in but wrong role for this page — send them to their own home
-      return <Navigate to={user?.role === 'client' ? '/catalogue' : '/dashboard'} />;
+      return <Navigate to={homePathFor(user?.role)} />;
     }
     return (
       <div className="flex h-screen bg-gray-100 overflow-hidden">
@@ -66,113 +75,154 @@ export default function App() {
     );
   };
 
+  // Storefront pages (client role only) get the public-facing layout
+  // (header nav + footer + cart drawer) instead of the admin sidebar.
+  const ProtectedStorefrontRoute = ({ children }) => {
+    if (!isLoggedIn) {
+      return <Navigate to="/login" />;
+    }
+    if (user?.role !== "client") {
+      return <Navigate to={homePathFor(user?.role)} />;
+    }
+    return (
+      <StorefrontLayout user={user} onLogout={handleLogout}>
+        {children}
+      </StorefrontLayout>
+    );
+  };
+
   return (
     <Router>
       <GlobalLoadingBar />
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            isLoggedIn ? (
-              <Navigate to={user?.role === 'client' ? '/catalogue' : '/dashboard'} />
-            ) : (
-              <Login onLogin={handleLogin} />
-            )
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['admin', 'marketing']}>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/catalogue"
-          element={
-            <ProtectedRoute allowedRoles={['admin', 'client', 'marketing']}>
-              <Catalogue />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/catalogue/:brandName"
-          element={
-            <ProtectedRoute allowedRoles={['admin', 'client', 'marketing']}>
-              <Catalogue />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/products"
-          element={
-            <ProtectedRoute allowedRoles={['admin', 'marketing']}>
-              <Products />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/clients"
-          element={
-            <ProtectedRoute allowedRoles={['admin', 'marketing']}>
-              <Clients />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/billing"
-          element={
-            <ProtectedRoute allowedRoles={['admin', 'marketing']}>
-              <Billing />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/invoice-history"
-          element={
-            <ProtectedRoute allowedRoles={['admin', 'marketing']}>
-              <InvoiceHistory />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/marketing-team"
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <MarketingTeam />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <Navigate
-              to={
-                !isLoggedIn
-                  ? "/login"
-                  : user?.role === "client"
-                    ? "/catalogue"
-                    : "/dashboard"
-              }
-            />
-          }
-        />
-        <Route
-          path="*"
-          element={
-            <Navigate
-              to={
-                !isLoggedIn
-                  ? "/login"
-                  : user?.role === "client"
-                    ? "/catalogue"
-                    : "/dashboard"
-              }
-            />
-          }
-        />
-      </Routes>
+      <CartProvider>
+        <Routes>
+          <Route
+            path="/login"
+            element={
+              isLoggedIn ? (
+                <Navigate to={homePathFor(user?.role)} />
+              ) : (
+                <Login onLogin={handleLogin} />
+              )
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'marketing']}>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/catalogue"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'marketing']}>
+                <Catalogue />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/catalogue/:brandName"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'marketing']}>
+                <Catalogue />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'marketing']}>
+                <Products />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clients"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'marketing']}>
+                <Clients />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'marketing']}>
+                <Orders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/billing"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'marketing']}>
+                <Billing />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invoice-history"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'marketing']}>
+                <InvoiceHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketing-team"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <MarketingTeam />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Client storefront */}
+          <Route
+            path="/store"
+            element={
+              <ProtectedStorefrontRoute>
+                <StoreHome />
+              </ProtectedStorefrontRoute>
+            }
+          />
+          <Route
+            path="/store/catalogue"
+            element={
+              <ProtectedStorefrontRoute>
+                <StoreCatalogue />
+              </ProtectedStorefrontRoute>
+            }
+          />
+          <Route
+            path="/store/about"
+            element={
+              <ProtectedStorefrontRoute>
+                <StoreAbout />
+              </ProtectedStorefrontRoute>
+            }
+          />
+          <Route
+            path="/store/contact"
+            element={
+              <ProtectedStorefrontRoute>
+                <StoreContact />
+              </ProtectedStorefrontRoute>
+            }
+          />
+
+          <Route
+            path="/"
+            element={<Navigate to={!isLoggedIn ? "/login" : homePathFor(user?.role)} />}
+          />
+          <Route
+            path="*"
+            element={<Navigate to={!isLoggedIn ? "/login" : homePathFor(user?.role)} />}
+          />
+        </Routes>
+      </CartProvider>
     </Router>
   );
 }
