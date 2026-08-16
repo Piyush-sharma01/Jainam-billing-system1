@@ -1,23 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Tag, Layers, ShieldCheck, Truck, Headphones, Award } from "lucide-react";
+import { Tag, Layers, ShieldCheck, Truck, Headphones, Award, Package, ShoppingCart } from "lucide-react";
 import HeroSlider from "../components/HeroSlider";
-import { brandAPI, categoryAPI } from "../services/api";
+import { brandAPI, categoryAPI, productAPI } from "../services/api";
+import { useCart } from "../services/cartContext";
 
 export default function StoreHome() {
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [addedId, setAddedId] = useState(null);
+
+  const { addItem } = useCart();
 
   useEffect(() => {
     (async () => {
       try {
-        const [brandsRes, categoriesRes] = await Promise.all([
+        const [brandsRes, categoriesRes, productsRes] = await Promise.all([
           brandAPI.getAll(),
           categoryAPI.getAll(),
+          productAPI.getAll(),
         ]);
         setBrands(brandsRes.data || []);
         setCategories(categoriesRes.data || []);
+        setProducts((productsRes.data || []).filter((p) => p.active !== false));
       } catch (err) {
         console.error(err);
       } finally {
@@ -25,6 +32,14 @@ export default function StoreHome() {
       }
     })();
   }, []);
+
+  const handleAddToCart = (product) => {
+    addItem(product, 1);
+    setAddedId(product.id);
+    setTimeout(() => setAddedId(null), 1200);
+  };
+
+  const featuredProducts = products.slice(0, 8);
 
   return (
     <div>
@@ -122,6 +137,111 @@ export default function StoreHome() {
             </div>
           )}
         </div>
+      </section>
+
+      {/* Featured Products */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+        <div className="flex items-end justify-between mb-2 gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Package className="text-secondary" size={22} />
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Our Products</h2>
+            </div>
+            <p className="text-gray-500">A look at what's in stock right now.</p>
+          </div>
+          <Link
+            to="/store/catalogue"
+            className="hidden sm:block text-sm font-medium text-secondary hover:text-orange-600 shrink-0"
+          >
+            View All →
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse"
+              >
+                <div className="w-full aspect-square bg-gray-100" />
+                <div className="p-3 space-y-2">
+                  <div className="h-3.5 bg-gray-100 rounded w-3/4" />
+                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : featuredProducts.length === 0 ? (
+          <div className="text-center text-gray-400 py-8 mt-6">No products available yet.</div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
+              {featuredProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:border-secondary/40 transition-all"
+                >
+                  <div className="w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-contain p-2"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center text-gray-300">
+                        <Package size={28} />
+                        <span className="text-xs mt-1">No image</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-3">
+                    <p className="text-sm font-medium text-gray-800 truncate">{product.name}</p>
+                    <div className="flex items-center justify-between mt-0.5 mb-2">
+                      <p className="text-xs text-gray-400">{product.brand || product.category}</p>
+                      <p className="text-xs font-semibold text-gray-700">
+                        ₹{Number(product.price).toFixed(2)}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      disabled={product.stock === 0}
+                      className={`w-full flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-lg transition-colors ${
+                        product.stock === 0
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : addedId === product.id
+                            ? "bg-green-600 text-white"
+                            : "bg-secondary text-white hover:bg-orange-600"
+                      }`}
+                    >
+                      {product.stock === 0 ? (
+                        "Out of Stock"
+                      ) : addedId === product.id ? (
+                        "Added ✓"
+                      ) : (
+                        <>
+                          <ShoppingCart size={14} /> Add to Cart
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center mt-8 sm:hidden">
+              <Link
+                to="/store/catalogue"
+                className="inline-block text-sm font-medium text-secondary hover:text-orange-600"
+              >
+                View All →
+              </Link>
+            </div>
+          </>
+        )}
       </section>
 
       {/* Company info */}
