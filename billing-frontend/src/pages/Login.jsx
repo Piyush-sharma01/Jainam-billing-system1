@@ -21,7 +21,7 @@ export default function Login({ onLogin }) {
     }
 
     // Owner login
-    if (username === 'Sanjay' && password === 'Jainam123') {
+    if (username === 'Sanjay123' && password === 'Jainam1234') {
       onLogin({ name: 'Admin User', username, role: 'admin' })
       navigate('/dashboard')
       return
