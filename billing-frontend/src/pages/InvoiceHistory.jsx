@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { invoiceAPI } from '../services/api'
 import { Eye, Download, Mail, Trash2 } from 'lucide-react'
+import BikeLoader from "../components/BikeLoader";
+
 
 export default function InvoiceHistory() {
   const [invoices, setInvoices] = useState([])
@@ -162,8 +164,8 @@ export default function InvoiceHistory() {
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        {loading ? (
-          <div className="p-6 text-center text-gray-500">Loading invoices...</div>
+       {loading ? (
+  <BikeLoader />
         ) : invoices.length === 0 ? (
           <div className="p-6 text-center text-gray-500">No invoices found</div>
         ) : (

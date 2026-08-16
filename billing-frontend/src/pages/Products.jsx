@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { productAPI } from '../services/api'
 import { Plus, Edit2, Trash2, Search, Package } from 'lucide-react'
 import ProductModal from '../components/ProductModal'
+import BikeLoader from "../components/BikeLoader";
+
 
 export default function Products() {
   const [products, setProducts] = useState([])
@@ -151,7 +153,7 @@ export default function Products() {
       </div>
 
       {loading ? (
-        <div className="p-12 text-center text-gray-500">Loading products...</div>
+        <BikeLoader />
       ) : filteredProducts.length === 0 ? (
         <div className="p-12 text-center text-gray-500 bg-white rounded-xl border border-gray-100">
           No products found
