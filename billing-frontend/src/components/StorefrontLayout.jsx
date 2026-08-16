@@ -12,8 +12,8 @@ import {
   Mail,
   MapPin,
 } from "lucide-react";
-import { useCart } from "../../services/cartContext";
-import { orderAPI } from "../../services/api";
+import { useCart } from "../services/cartContext";
+import { orderAPI } from "../services/api";
 
 export default function StorefrontLayout({ children, user, onLogout }) {
   const [menuOpen, setMenuOpen] = useState(false);
