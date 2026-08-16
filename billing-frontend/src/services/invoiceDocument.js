@@ -81,16 +81,22 @@ function invoiceWhatsAppMessage(invoice) {
   )
 }
 
-// Generates the PDF, downloads it, and then tries to hand it straight to
-// WhatsApp:
+// Generates the PDF, downloads it, and then hands it straight to the
+// WhatsApp number of the marketing team member who created the invoice
+// (marketerPhone) — not the client. That keeps the "share to WhatsApp"
+// step on the marketer's own account, so they can review/forward it
+// from there.
 //  1. Native Web Share (navigator.share with a file) — on Android/mobile
 //     Chrome this opens the OS share sheet where the marketer picks
-//     WhatsApp and the PDF goes as a real attachment.
-//  2. Falls back to opening a wa.me chat with a pre-filled message.
-//     Browsers cannot attach a file to WhatsApp via a URL (no such API
-//     exists for security reasons), so in this fallback the already-
-//     downloaded PDF needs to be attached manually from Downloads.
-export async function downloadAndShareInvoice(invoice) {
+//     WhatsApp and the PDF goes as a real attachment. Since it's their
+//     own device/WhatsApp account, this already satisfies "share to
+//     own account" — marketerPhone isn't needed for this path.
+//  2. Falls back to opening a wa.me chat with marketerPhone, pre-filled
+//     with a message. Browsers cannot attach a file to WhatsApp via a
+//     URL (no such API exists for security reasons), so in this
+//     fallback the already-downloaded PDF needs to be attached
+//     manually from Downloads.
+export async function downloadAndShareInvoice(invoice, marketerPhone) {
   const doc = buildInvoicePdf(invoice)
   const fileName = invoiceFileName(invoice)
 
@@ -98,7 +104,7 @@ export async function downloadAndShareInvoice(invoice) {
   doc.save(fileName)
 
   const message = invoiceWhatsAppMessage(invoice)
-  const phoneDigits = (invoice.client?.phone || '').replace(/[^0-9]/g, '')
+  const marketerDigits = (marketerPhone || '').replace(/[^0-9]/g, '')
 
   // 2. Try the native share sheet so the PDF itself can be attached.
   try {
@@ -119,11 +125,13 @@ export async function downloadAndShareInvoice(invoice) {
     console.warn('Native share unavailable or cancelled:', err)
   }
 
-  // 3. Fallback: open WhatsApp (Web on desktop, app on mobile) with the
-  // client's number pre-filled if we have it, plus a ready-made message.
+  // 3. Fallback: open WhatsApp (Web on desktop, app on mobile) in a chat
+  // with the marketer's own number, with a ready-made message. If no
+  // marketer phone is on file, wa.me/ opens WhatsApp's contact picker
+  // instead so the message still isn't lost.
   const encodedMessage = encodeURIComponent(message + '\n(Invoice PDF downloaded — please attach it here)')
-  const waUrl = phoneDigits
-    ? `https://wa.me/${phoneDigits}?text=${encodedMessage}`
+  const waUrl = marketerDigits
+    ? `https://wa.me/${marketerDigits}?text=${encodedMessage}`
     : `https://wa.me/?text=${encodedMessage}`
 
   window.open(waUrl, '_blank')
