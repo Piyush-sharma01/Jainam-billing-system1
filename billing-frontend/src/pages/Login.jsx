@@ -42,6 +42,7 @@ export default function Login({ onLogin }) {
       onLogin({
         name: account.name,
         username: account.username,
+        phone: account.phone,
         role: 'marketing',
       })
       navigate('/dashboard')
