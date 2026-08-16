@@ -14,4 +14,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     List<Client> findByActiveTrue();
 
     List<Client> findByActiveTrueAndCreatedBy(String createdBy);
+
+    java.util.Optional<Client> findByUsername(String username);
+
+    boolean existsByUsername(String username);
 }
