@@ -27,15 +27,25 @@ export default function Login({ onLogin }) {
       return
     }
 
-    // Client login — only gets catalogue access
-    if (username === 'client' && password === 'client123') {
-      onLogin({ name: 'Client', username, role: 'client' })
-      navigate('/catalogue')
+    // Client login — per-client credentials, auto-generated when a
+    // marketer/owner adds the client, checked against the backend.
+    setSubmitting(true)
+    try {
+      const clientRes = await authAPI.clientLogin(username, password)
+      const client = clientRes.data
+      onLogin({
+        name: client.contactPerson || client.company,
+        username: client.username,
+        company: client.company,
+        role: 'client',
+      })
+      navigate('/store')
       return
+    } catch (clientErr) {
+      // Not a client account — fall through and try marketing team accounts
     }
 
     // Otherwise, check against marketing team accounts stored in the database
-    setSubmitting(true)
     try {
       const res = await authAPI.login(username, password)
       const account = res.data
