@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import { productAPI, clientAPI, brandAPI, invoiceAPI } from "../services/api";
 import { downloadAndShareInvoice } from "../services/invoiceDocument";
+import { getCurrentUser } from "../services/currentUser";
 import {
   Package,
   ShoppingCart,
@@ -418,9 +419,11 @@ export default function Catalogue() {
       const res = await invoiceAPI.create(invoiceData);
       const createdInvoice = res.data;
 
-      // Auto-downloads the PDF, then hands it to WhatsApp (native share
-      // sheet if available, otherwise a pre-filled wa.me chat).
-      await downloadAndShareInvoice(createdInvoice);
+      // Auto-downloads the PDF, then hands it to WhatsApp — the phone
+      // used is the logged-in marketer's own number (native share sheet
+      // on mobile shares from their own device/account regardless).
+      const marketerPhone = getCurrentUser()?.phone;
+      await downloadAndShareInvoice(createdInvoice, marketerPhone);
 
       // Reset everything and close the review section.
       setCart([]);
