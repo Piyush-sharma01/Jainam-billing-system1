@@ -10,6 +10,7 @@ export default function MarketingTeam() {
   const [name, setName] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [phone, setPhone] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState('')
@@ -35,7 +36,7 @@ export default function MarketingTeam() {
     e.preventDefault()
     setFormError('')
 
-    if (!name || !username || !password) {
+    if (!name || !username || !password || !phone) {
       setFormError('Please fill in all fields')
       return
     }
@@ -46,10 +47,11 @@ export default function MarketingTeam() {
 
     try {
       setSubmitting(true)
-      await userAPI.createMarketingUser({ name, username, password })
+      await userAPI.createMarketingUser({ name, username, password, phone })
       setName('')
       setUsername('')
       setPassword('')
+      setPhone('')
       await loadTeam()
     } catch (err) {
       setFormError(err.response?.data?.message || err.response?.data || 'Could not create account — username may already be taken')
@@ -91,7 +93,7 @@ export default function MarketingTeam() {
           </div>
         )}
 
-        <form onSubmit={handleAdd} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <form onSubmit={handleAdd} className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div>
             <label className="block text-gray-700 text-sm font-medium mb-1">Name</label>
             <input
@@ -110,6 +112,16 @@ export default function MarketingTeam() {
               onChange={(e) => setUsername(e.target.value)}
               className="input-field"
               placeholder="e.g. priya"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 text-sm font-medium mb-1">WhatsApp Number</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="input-field"
+              placeholder="e.g. 9198xxxxxxx"
             />
           </div>
           <div>
@@ -132,7 +144,7 @@ export default function MarketingTeam() {
               </button>
             </div>
           </div>
-          <div className="sm:col-span-3">
+          <div className="sm:col-span-4">
             <button
               type="submit"
               disabled={submitting}
@@ -167,6 +179,7 @@ export default function MarketingTeam() {
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Name</th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Username</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">WhatsApp Number</th>
                   <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">Actions</th>
                 </tr>
               </thead>
@@ -175,6 +188,7 @@ export default function MarketingTeam() {
                   <tr key={member.id} className="border-b hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm text-gray-800">{member.name}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{member.username}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{member.phone || '—'}</td>
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => handleDelete(member.id, member.name)}
