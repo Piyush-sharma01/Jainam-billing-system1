@@ -90,6 +90,13 @@ export const brandAPI = {
   delete: (id) => api.delete(`/brands/${id}`),
 };
 
+// Categories API
+export const categoryAPI = {
+  getAll: () => api.get('/categories'),
+  create: (data) => api.post('/categories', data),
+  delete: (id) => api.delete(`/categories/${id}`),
+};
+
 // Auth API — marketing team login (owner/client login stay hardcoded in Login.jsx)
 export const authAPI = {
   login: (username, password) => api.post('/auth/login', { username, password }),
