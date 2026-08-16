@@ -11,4 +11,5 @@ public class CreateMarketingUserRequest {
     private String name;
     private String username;
     private String password;
+    private String phone;
 }
