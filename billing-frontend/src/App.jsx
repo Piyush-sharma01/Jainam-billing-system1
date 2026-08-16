@@ -17,31 +17,19 @@ import Catalogue from "./pages/Catalogue";
 import GlobalLoadingBar from "./components/GlobalLoadingBar";
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem("authToken"),
-  );
+  // Auth state is intentionally NOT restored from localStorage on load —
+  // this means every fresh page load or reload always starts at /login,
+  // even if someone was logged in before or types /dashboard directly.
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("user");
-    if (!stored) return null;
-    try {
-      return JSON.parse(stored);
-    } catch (err) {
-      localStorage.removeItem("user");
-      return null;
-    }
-  });
+  const [user, setUser] = useState(null);
 
   const handleLogin = (userData) => {
-    localStorage.setItem("authToken", "demo-token-" + Date.now());
-    localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
     setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
     setUser(null);
     setIsLoggedIn(false);
   };
