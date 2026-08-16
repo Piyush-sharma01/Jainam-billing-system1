@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { LogIn, Eye, EyeOff } from 'lucide-react'
 
 export default function Login({ onLogin }) {
-  const [username, setUsername] = useState('admin')
-  const [password, setPassword] = useState('password')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -18,13 +18,21 @@ export default function Login({ onLogin }) {
       return
     }
 
-    // Demo login - accept admin/password
+    // Admin login
     if (username === 'Sanjay' && password === 'Jainam123') {
-      onLogin({ name: 'Admin User', username })
+      onLogin({ name: 'Admin User', username, role: 'admin' })
       navigate('/dashboard')
-    } else {
-      setError('Invalid credentials. Use admin/password')
+      return
     }
+
+    // Client login — only gets catalogue access
+    if (username === 'client' && password === 'client123') {
+      onLogin({ name: 'Client', username, role: 'client' })
+      navigate('/catalogue')
+      return
+    }
+
+    setError('Invalid credentials')
   }
 
   return (
