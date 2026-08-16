@@ -14,6 +14,7 @@ import InvoiceHistory from "./pages/InvoiceHistory";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import Catalogue from "./pages/Catalogue";
+import GlobalLoadingBar from "./components/GlobalLoadingBar";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -45,13 +46,21 @@ export default function App() {
     setIsLoggedIn(false);
   };
 
-  const ProtectedRoute = ({ children }) => {
-    return isLoggedIn ? (
+  const ProtectedRoute = ({ children, allowedRoles }) => {
+    if (!isLoggedIn) {
+      return <Navigate to="/login" />;
+    }
+    if (allowedRoles && !allowedRoles.includes(user?.role)) {
+      // Logged in but wrong role for this page — send them to their own home
+      return <Navigate to={user?.role === 'client' ? '/catalogue' : '/dashboard'} />;
+    }
+    return (
       <div className="flex h-screen bg-gray-100 overflow-hidden">
         <Sidebar
           onLogout={handleLogout}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          role={user?.role}
         />
         <div className="flex-1 flex flex-col min-w-0">
           <Navbar
@@ -62,19 +71,18 @@ export default function App() {
           <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
         </div>
       </div>
-    ) : (
-      <Navigate to="/login" />
     );
   };
 
   return (
     <Router>
+      <GlobalLoadingBar />
       <Routes>
         <Route
           path="/login"
           element={
             isLoggedIn ? (
-              <Navigate to="/dashboard" />
+              <Navigate to={user?.role === 'client' ? '/catalogue' : '/dashboard'} />
             ) : (
               <Login onLogin={handleLogin} />
             )
@@ -83,7 +91,7 @@ export default function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin']}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -91,7 +99,7 @@ export default function App() {
         <Route
           path="/catalogue"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'client']}>
               <Catalogue />
             </ProtectedRoute>
           }
@@ -99,7 +107,7 @@ export default function App() {
         <Route
           path="/catalogue/:brandName"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'client']}>
               <Catalogue />
             </ProtectedRoute>
           }
@@ -107,7 +115,7 @@ export default function App() {
         <Route
           path="/products"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin']}>
               <Products />
             </ProtectedRoute>
           }
@@ -115,7 +123,7 @@ export default function App() {
         <Route
           path="/clients"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin']}>
               <Clients />
             </ProtectedRoute>
           }
@@ -123,7 +131,7 @@ export default function App() {
         <Route
           path="/billing"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin']}>
               <Billing />
             </ProtectedRoute>
           }
@@ -131,18 +139,38 @@ export default function App() {
         <Route
           path="/invoice-history"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin']}>
               <InvoiceHistory />
             </ProtectedRoute>
           }
         />
         <Route
           path="/"
-          element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />}
+          element={
+            <Navigate
+              to={
+                !isLoggedIn
+                  ? "/login"
+                  : user?.role === "client"
+                    ? "/catalogue"
+                    : "/dashboard"
+              }
+            />
+          }
         />
         <Route
           path="*"
-          element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />}
+          element={
+            <Navigate
+              to={
+                !isLoggedIn
+                  ? "/login"
+                  : user?.role === "client"
+                    ? "/catalogue"
+                    : "/dashboard"
+              }
+            />
+          }
         />
       </Routes>
     </Router>
