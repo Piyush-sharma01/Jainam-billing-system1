@@ -97,9 +97,20 @@ export const categoryAPI = {
   delete: (id) => api.delete(`/categories/${id}`),
 };
 
-// Auth API — marketing team login (owner/client login stay hardcoded in Login.jsx)
+// Auth API — marketing team login (owner login stays hardcoded in Login.jsx)
 export const authAPI = {
   login: (username, password) => api.post('/auth/login', { username, password }),
+  clientLogin: (username, password) => api.post('/auth/client-login', { username, password }),
+};
+
+// Orders API — placed by clients from the storefront, routed to whichever
+// marketing member owns that client
+export const orderAPI = {
+  getAll: () => api.get('/orders'),
+  getById: (id) => api.get(`/orders/${id}`),
+  getNewCount: () => api.get('/orders/new-count'),
+  create: (data) => api.post('/orders', data),
+  updateStatus: (id, status) => api.put(`/orders/${id}/status/${status}`),
 };
 
 // Marketing team management (Owner only — page itself is gated by role)
