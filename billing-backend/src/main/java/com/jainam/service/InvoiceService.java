@@ -50,8 +50,14 @@ public class InvoiceService {
 
     private static final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
-    public List<InvoiceDTO> getAllInvoices() {
-        return invoiceRepository.findAllByOrderByInvoiceDateDesc().stream()
+    public List<InvoiceDTO> getVisibleInvoices(String role, String username) {
+        List<Invoice> invoices;
+        if ("MARKETING".equalsIgnoreCase(role) && username != null) {
+            invoices = invoiceRepository.findByCreatedByOrderByInvoiceDateDesc(username);
+        } else {
+            invoices = invoiceRepository.findAllByOrderByInvoiceDateDesc();
+        }
+        return invoices.stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
     }
@@ -62,13 +68,19 @@ public class InvoiceService {
         return convertToDTO(invoice);
     }
 
-    public List<InvoiceDTO> getInvoicesByStatus(InvoiceStatus status) {
-        return invoiceRepository.findByStatusOrderByInvoiceDateDesc(status).stream()
+    public List<InvoiceDTO> getInvoicesByStatus(InvoiceStatus status, String role, String username) {
+        List<Invoice> invoices;
+        if ("MARKETING".equalsIgnoreCase(role) && username != null) {
+            invoices = invoiceRepository.findByStatusAndCreatedByOrderByInvoiceDateDesc(status, username);
+        } else {
+            invoices = invoiceRepository.findByStatusOrderByInvoiceDateDesc(status);
+        }
+        return invoices.stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
     }
 
-    public InvoiceDTO createInvoice(InvoiceDTO invoiceDTO) {
+    public InvoiceDTO createInvoice(InvoiceDTO invoiceDTO, String role, String username) {
         Client client = clientRepository.findById(invoiceDTO.getClient().getId())
             .orElseThrow(() -> new RuntimeException("Client not found"));
 
@@ -79,6 +91,7 @@ public class InvoiceService {
         invoice.setDueDate(invoiceDTO.getDueDate());
         invoice.setNotes(invoiceDTO.getNotes());
         invoice.setStatus(InvoiceStatus.PENDING);
+        invoice.setCreatedBy("MARKETING".equalsIgnoreCase(role) && username != null ? username : "owner");
 
         BigDecimal subtotal = BigDecimal.ZERO;
         BigDecimal taxAmount = BigDecimal.ZERO;
@@ -196,6 +209,7 @@ public class InvoiceService {
         dto.setGrandTotal(invoice.getGrandTotal());
         dto.setStatus(invoice.getStatus());
         dto.setNotes(invoice.getNotes());
+        dto.setCreatedBy(invoice.getCreatedBy());
 
         List<InvoiceLineItemDTO> lineItems = invoice.getLineItems().stream()
             .map(this::convertLineItemToDTO)

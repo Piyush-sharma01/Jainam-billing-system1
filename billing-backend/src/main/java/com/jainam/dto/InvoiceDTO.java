@@ -24,4 +24,5 @@ public class InvoiceDTO {
     private BigDecimal grandTotal;
     private InvoiceStatus status;
     private String notes;
+    private String createdBy;
 }

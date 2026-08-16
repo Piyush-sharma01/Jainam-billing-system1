@@ -10,6 +10,8 @@ import java.util.List;
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     List<Invoice> findByStatusOrderByInvoiceDateDesc(InvoiceStatus status);
     List<Invoice> findAllByOrderByInvoiceDateDesc();
+    List<Invoice> findByCreatedByOrderByInvoiceDateDesc(String createdBy);
+    List<Invoice> findByStatusAndCreatedByOrderByInvoiceDateDesc(InvoiceStatus status, String createdBy);
 
 boolean existsByClientId(Long clientId);
 }

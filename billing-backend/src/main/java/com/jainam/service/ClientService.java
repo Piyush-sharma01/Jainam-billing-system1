@@ -20,9 +20,14 @@ public class ClientService {
     @Autowired
     private ClientRepository clientRepository;
 
-    public List<ClientDTO> getAllClients() {
-        return clientRepository.findByActiveTrue()
-                .stream()
+    public List<ClientDTO> getVisibleClients(String role, String username) {
+        List<Client> clients;
+        if ("MARKETING".equalsIgnoreCase(role) && username != null) {
+            clients = clientRepository.findByActiveTrueAndCreatedBy(username);
+        } else {
+            clients = clientRepository.findByActiveTrue();
+        }
+        return clients.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -39,8 +44,9 @@ public class ClientService {
                 .collect(Collectors.toList());
     }
 
-    public ClientDTO createClient(ClientDTO clientDTO) {
+    public ClientDTO createClient(ClientDTO clientDTO, String role, String username) {
         Client client = convertToEntity(clientDTO);
+        client.setCreatedBy("MARKETING".equalsIgnoreCase(role) && username != null ? username : "owner");
         Client savedClient = clientRepository.save(client);
         return convertToDTO(savedClient);
     }
@@ -79,7 +85,8 @@ public class ClientService {
                 client.getEmail(),
                 client.getGstNumber(),
                 client.getAddress(),
-                client.getActive());
+                client.getActive(),
+                client.getCreatedBy());
     }
 
     private Client convertToEntity(ClientDTO clientDTO) {

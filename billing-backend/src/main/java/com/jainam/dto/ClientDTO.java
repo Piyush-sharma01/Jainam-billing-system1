@@ -16,4 +16,5 @@ public class ClientDTO {
     private String gstNumber;
     private String address;
     private Boolean active;
+    private String createdBy;
 }

@@ -16,8 +16,10 @@ public class InvoiceController {
     private InvoiceService invoiceService;
 
     @GetMapping
-    public ResponseEntity<List<InvoiceDTO>> getAllInvoices() {
-        return ResponseEntity.ok(invoiceService.getAllInvoices());
+    public ResponseEntity<List<InvoiceDTO>> getAllInvoices(
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            @RequestHeader(value = "X-Username", required = false) String username) {
+        return ResponseEntity.ok(invoiceService.getVisibleInvoices(role, username));
     }
 
     @GetMapping("/{id}")
@@ -26,13 +28,19 @@ public class InvoiceController {
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<InvoiceDTO>> getInvoicesByStatus(@PathVariable InvoiceStatus status) {
-        return ResponseEntity.ok(invoiceService.getInvoicesByStatus(status));
+    public ResponseEntity<List<InvoiceDTO>> getInvoicesByStatus(
+            @PathVariable InvoiceStatus status,
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            @RequestHeader(value = "X-Username", required = false) String username) {
+        return ResponseEntity.ok(invoiceService.getInvoicesByStatus(status, role, username));
     }
 
     @PostMapping
-    public ResponseEntity<InvoiceDTO> createInvoice(@RequestBody InvoiceDTO invoiceDTO) {
-        return ResponseEntity.ok(invoiceService.createInvoice(invoiceDTO));
+    public ResponseEntity<InvoiceDTO> createInvoice(
+            @RequestBody InvoiceDTO invoiceDTO,
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            @RequestHeader(value = "X-Username", required = false) String username) {
+        return ResponseEntity.ok(invoiceService.createInvoice(invoiceDTO, role, username));
     }
 
     @PutMapping("/{id}/status/{status}")

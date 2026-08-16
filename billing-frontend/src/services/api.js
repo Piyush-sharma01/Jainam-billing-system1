@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { startRequest, stopRequest } from './loadingTracker';
+import { getCurrentUser } from './currentUser';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
@@ -10,31 +10,48 @@ const api = axios.create({
   }
 });
 
-// Track every request/response through this shared instance so the global
-// loading bar (and "waking up the server" banner) can react automatically —
-// every page that uses productAPI, clientAPI, invoiceAPI, brandAPI, etc.
-// is covered without touching each page's code.
-api.interceptors.request.use(
-  (config) => {
-    startRequest();
-    return config;
-  },
-  (error) => {
-    stopRequest();
-    return Promise.reject(error);
-  }
-);
+// Track in-flight requests globally so any page can show a loading state
+// without wiring up its own loading logic. GlobalLoadingBar listens for
+// these events.
+let activeRequests = 0;
 
-api.interceptors.response.use(
-  (response) => {
-    stopRequest();
-    return response;
-  },
-  (error) => {
-    stopRequest();
-    return Promise.reject(error);
+api.interceptors.request.use((config) => {
+  activeRequests += 1;
+  if (activeRequests === 1) {
+    window.dispatchEvent(new Event('api-loading-start'));
   }
-);
+
+  // Attach who's making the request so the backend can filter clients/
+  // invoices per marketing member. Harmless for admin/client requests —
+  // the backend only filters when role is 'marketing'.
+  const user = getCurrentUser();
+  if (user) {
+    config.headers['X-User-Role'] = user.role || '';
+    config.headers['X-Username'] = user.username || '';
+  }
+
+  return config;
+}, (error) => {
+  activeRequests = Math.max(0, activeRequests - 1);
+  if (activeRequests === 0) {
+    window.dispatchEvent(new Event('api-loading-end'));
+  }
+  return Promise.reject(error);
+});
+
+api.interceptors.response.use((response) => {
+  activeRequests = Math.max(0, activeRequests - 1);
+  if (activeRequests === 0) {
+    window.dispatchEvent(new Event('api-loading-end'));
+  }
+  return response;
+}, (error) => {
+  activeRequests = Math.max(0, activeRequests - 1);
+  if (activeRequests === 0) {
+    window.dispatchEvent(new Event('api-loading-end'));
+  }
+  return Promise.reject(error);
+});
 
 // Products API
 export const productAPI = {
@@ -71,6 +88,18 @@ export const brandAPI = {
   getAll: () => api.get('/brands'),
   create: (data) => api.post('/brands', data),
   delete: (id) => api.delete(`/brands/${id}`),
+};
+
+// Auth API — marketing team login (owner/client login stay hardcoded in Login.jsx)
+export const authAPI = {
+  login: (username, password) => api.post('/auth/login', { username, password }),
+};
+
+// Marketing team management (Owner only — page itself is gated by role)
+export const userAPI = {
+  getMarketingTeam: () => api.get('/users'),
+  createMarketingUser: (data) => api.post('/users', data),
+  delete: (id) => api.delete(`/users/${id}`),
 };
 
 export default api;

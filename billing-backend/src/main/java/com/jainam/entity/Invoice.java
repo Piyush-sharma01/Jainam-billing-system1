@@ -77,4 +77,10 @@ public class Invoice {
     public enum InvoiceStatus {
         PENDING, PAID, OVERDUE, CANCELLED
     }
+
+    // Username of the marketing member who created this invoice. Null/"owner"
+    // for invoices created by the Owner. Used to keep each marketing member's
+    // invoices private from one another.
+    @Column(name = "created_by")
+    private String createdBy;
 }

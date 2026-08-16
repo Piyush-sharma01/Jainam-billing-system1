@@ -56,4 +56,10 @@ public class Client {
     @Column(nullable = false)
     @Builder.Default
     private Boolean active = true;
+
+    // Username of the marketing member who added this client. Null/"owner"
+    // for clients added by the Owner. Used to keep each marketing member's
+    // clients private from one another.
+    @Column(name = "created_by")
+    private String createdBy;
 }

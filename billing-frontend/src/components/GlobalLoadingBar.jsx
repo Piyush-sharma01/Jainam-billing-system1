@@ -38,12 +38,12 @@ export default function GlobalLoadingBar() {
   if (!isLoading) return null;
 
   return (
-    <div className="mt-2">
-      <div className="h-1 w-full max-w-xs overflow-hidden rounded-full bg-gray-200">
-        <div className="h-full w-1/3 animate-loading-bar rounded-full bg-orange-500" />
+    <div>
+      <div className="h-1 w-full overflow-hidden bg-gray-200">
+        <div className="h-full w-1/3 animate-loading-bar bg-orange-500" />
       </div>
       {isSlow && (
-        <p className="mt-1.5 text-xs text-amber-600">
+        <p className="px-4 sm:px-6 py-1 text-xs text-amber-600 bg-amber-50">
           Waking up the server, this can take a few seconds…
         </p>
       )}

@@ -1,19 +1,21 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { BarChart3, Package, Users, FileText, History, LogOut, X, BookImage } from 'lucide-react'
+import { BarChart3, Package, Users, FileText, History, LogOut, X, BookImage, UserCog } from 'lucide-react'
 
   
-export default function Sidebar({ onLogout, isOpen, onClose }) {
+export default function Sidebar({ onLogout, isOpen, onClose, role }) {
   const location = useLocation()
 
-const navItems = [
-    { path: '/dashboard', icon: BarChart3, label: 'Dashboard' },
-    { path: '/products', icon: Package, label: 'Products' },
-    { path: '/catalogue', icon: BookImage, label: 'Catalogue' },
-    { path: '/clients', icon: Users, label: 'Clients' },
-    { path: '/billing', icon: FileText, label: 'Billing' },
-    { path: '/invoice-history', icon: History, label: 'Invoice History' },
+  const allNavItems = [
+    { path: '/dashboard', icon: BarChart3, label: 'Dashboard', roles: ['admin', 'marketing'] },
+    { path: '/products', icon: Package, label: 'Products', roles: ['admin', 'marketing'] },
+    { path: '/catalogue', icon: BookImage, label: 'Catalogue', roles: ['admin', 'client', 'marketing'] },
+    { path: '/clients', icon: Users, label: 'Clients', roles: ['admin', 'marketing'] },
+    { path: '/billing', icon: FileText, label: 'Billing', roles: ['admin', 'marketing'] },
+    { path: '/invoice-history', icon: History, label: 'Invoice History', roles: ['admin', 'marketing'] },
+    { path: '/marketing-team', icon: UserCog, label: 'Marketing Team', roles: ['admin'] },
   ]
+  const navItems = allNavItems.filter((item) => item.roles.includes(role))
   return (
     <>
       {/* Mobile overlay — click to close */}

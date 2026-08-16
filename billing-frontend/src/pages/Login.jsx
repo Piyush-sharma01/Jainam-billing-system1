@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LogIn, Eye, EyeOff } from 'lucide-react'
+import { authAPI } from '../services/api'
 
 export default function Login({ onLogin }) {
-  const [username, setUsername] = useState('admin')
-  const [password, setPassword] = useState('password')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
@@ -18,12 +20,35 @@ export default function Login({ onLogin }) {
       return
     }
 
-    // Demo login - accept admin/password
+    // Owner login
     if (username === 'Sanjay' && password === 'Jainam123') {
-      onLogin({ name: 'Admin User', username })
+      onLogin({ name: 'Admin User', username, role: 'admin' })
       navigate('/dashboard')
-    } else {
-      setError('Invalid credentials. Use admin/password')
+      return
+    }
+
+    // Client login — only gets catalogue access
+    if (username === 'client' && password === 'client123') {
+      onLogin({ name: 'Client', username, role: 'client' })
+      navigate('/catalogue')
+      return
+    }
+
+    // Otherwise, check against marketing team accounts stored in the database
+    setSubmitting(true)
+    try {
+      const res = await authAPI.login(username, password)
+      const account = res.data
+      onLogin({
+        name: account.name,
+        username: account.username,
+        role: 'marketing',
+      })
+      navigate('/dashboard')
+    } catch (err) {
+      setError('Invalid credentials')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -79,9 +104,10 @@ export default function Login({ onLogin }) {
 
           <button
             type="submit"
-            className="w-full bg-secondary text-white py-2 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+            disabled={submitting}
+            className="w-full bg-secondary text-white py-2 rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:opacity-60"
           >
-            Login
+            {submitting ? 'Checking...' : 'Login'}
           </button>
         </form>
 

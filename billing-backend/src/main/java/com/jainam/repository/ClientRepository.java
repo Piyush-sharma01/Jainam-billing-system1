@@ -10,6 +10,8 @@ import java.util.List;
 public interface ClientRepository extends JpaRepository<Client, Long> {
     @Query("SELECT c FROM Client c WHERE LOWER(c.company) LIKE LOWER(CONCAT('%', ?1, '%')) OR LOWER(c.contactPerson) LIKE LOWER(CONCAT('%', ?1, '%')) OR LOWER(c.email) LIKE LOWER(CONCAT('%', ?1, '%'))")
     List<Client> searchClients(String keyword);
-    
+
     List<Client> findByActiveTrue();
+
+    List<Client> findByActiveTrueAndCreatedBy(String createdBy);
 }

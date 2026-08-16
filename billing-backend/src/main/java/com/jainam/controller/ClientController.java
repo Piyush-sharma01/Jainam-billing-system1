@@ -15,8 +15,10 @@ public class ClientController {
     private ClientService clientService;
 
     @GetMapping
-    public ResponseEntity<List<ClientDTO>> getAllClients() {
-        return ResponseEntity.ok(clientService.getAllClients());
+    public ResponseEntity<List<ClientDTO>> getAllClients(
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            @RequestHeader(value = "X-Username", required = false) String username) {
+        return ResponseEntity.ok(clientService.getVisibleClients(role, username));
     }
 
     @GetMapping("/{id}")
@@ -30,8 +32,11 @@ public class ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientDTO> createClient(@RequestBody ClientDTO clientDTO) {
-        return ResponseEntity.ok(clientService.createClient(clientDTO));
+    public ResponseEntity<ClientDTO> createClient(
+            @RequestBody ClientDTO clientDTO,
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            @RequestHeader(value = "X-Username", required = false) String username) {
+        return ResponseEntity.ok(clientService.createClient(clientDTO, role, username));
     }
 
     @PutMapping("/{id}")

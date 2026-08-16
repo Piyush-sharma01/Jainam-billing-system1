@@ -14,44 +14,45 @@ import InvoiceHistory from "./pages/InvoiceHistory";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import Catalogue from "./pages/Catalogue";
+import MarketingTeam from "./pages/MarketingTeam";
+import GlobalLoadingBar from "./components/GlobalLoadingBar";
+import { setCurrentUser, clearCurrentUser } from "./services/currentUser";
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem("authToken"),
-  );
+  // Auth state is intentionally NOT restored from localStorage on load —
+  // this means every fresh page load or reload always starts at /login,
+  // even if someone was logged in before or types /dashboard directly.
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("user");
-    if (!stored) return null;
-    try {
-      return JSON.parse(stored);
-    } catch (err) {
-      localStorage.removeItem("user");
-      return null;
-    }
-  });
+  const [user, setUser] = useState(null);
 
   const handleLogin = (userData) => {
-    localStorage.setItem("authToken", "demo-token-" + Date.now());
-    localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
     setIsLoggedIn(true);
+    setCurrentUser(userData); // lets api.js attach X-Username/X-User-Role headers
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
     setUser(null);
     setIsLoggedIn(false);
+    clearCurrentUser();
   };
 
-  const ProtectedRoute = ({ children }) => {
-    return isLoggedIn ? (
+  const ProtectedRoute = ({ children, allowedRoles }) => {
+    if (!isLoggedIn) {
+      return <Navigate to="/login" />;
+    }
+    if (allowedRoles && !allowedRoles.includes(user?.role)) {
+      // Logged in but wrong role for this page — send them to their own home
+      return <Navigate to={user?.role === 'client' ? '/catalogue' : '/dashboard'} />;
+    }
+    return (
       <div className="flex h-screen bg-gray-100 overflow-hidden">
         <Sidebar
           onLogout={handleLogout}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          role={user?.role}
         />
         <div className="flex-1 flex flex-col min-w-0">
           <Navbar
@@ -62,19 +63,18 @@ export default function App() {
           <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
         </div>
       </div>
-    ) : (
-      <Navigate to="/login" />
     );
   };
 
   return (
     <Router>
+      <GlobalLoadingBar />
       <Routes>
         <Route
           path="/login"
           element={
             isLoggedIn ? (
-              <Navigate to="/dashboard" />
+              <Navigate to={user?.role === 'client' ? '/catalogue' : '/dashboard'} />
             ) : (
               <Login onLogin={handleLogin} />
             )
@@ -83,7 +83,7 @@ export default function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'marketing']}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -91,7 +91,7 @@ export default function App() {
         <Route
           path="/catalogue"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'client', 'marketing']}>
               <Catalogue />
             </ProtectedRoute>
           }
@@ -99,7 +99,7 @@ export default function App() {
         <Route
           path="/catalogue/:brandName"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'client', 'marketing']}>
               <Catalogue />
             </ProtectedRoute>
           }
@@ -107,7 +107,7 @@ export default function App() {
         <Route
           path="/products"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'marketing']}>
               <Products />
             </ProtectedRoute>
           }
@@ -115,7 +115,7 @@ export default function App() {
         <Route
           path="/clients"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'marketing']}>
               <Clients />
             </ProtectedRoute>
           }
@@ -123,7 +123,7 @@ export default function App() {
         <Route
           path="/billing"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'marketing']}>
               <Billing />
             </ProtectedRoute>
           }
@@ -131,18 +131,46 @@ export default function App() {
         <Route
           path="/invoice-history"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin', 'marketing']}>
               <InvoiceHistory />
             </ProtectedRoute>
           }
         />
         <Route
+          path="/marketing-team"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <MarketingTeam />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/"
-          element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />}
+          element={
+            <Navigate
+              to={
+                !isLoggedIn
+                  ? "/login"
+                  : user?.role === "client"
+                    ? "/catalogue"
+                    : "/dashboard"
+              }
+            />
+          }
         />
         <Route
           path="*"
-          element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />}
+          element={
+            <Navigate
+              to={
+                !isLoggedIn
+                  ? "/login"
+                  : user?.role === "client"
+                    ? "/catalogue"
+                    : "/dashboard"
+              }
+            />
+          }
         />
       </Routes>
     </Router>
