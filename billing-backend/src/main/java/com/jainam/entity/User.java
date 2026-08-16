@@ -24,6 +24,10 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
+    // Marketing member's own WhatsApp number, so invoices they create
+    // can be shared straight to their WhatsApp (see InvoiceController).
+    private String phone;
+
     // Stored as a SHA-256 hash — see UserService for hashing logic.
     @Column(nullable = false)
     private String passwordHash;
