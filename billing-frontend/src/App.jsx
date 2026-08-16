@@ -19,11 +19,11 @@ import MarketingTeam from "./pages/MarketingTeam";
 import GlobalLoadingBar from "./components/GlobalLoadingBar";
 import { setCurrentUser, clearCurrentUser } from "./services/currentUser";
 import { CartProvider } from "./services/cartContext";
-import StorefrontLayout from "./components/storefront/StorefrontLayout";
-import StoreHome from "./pages/storefront/StoreHome";
-import StoreCatalogue from "./pages/storefront/StoreCatalogue";
-import StoreAbout from "./pages/storefront/StoreAbout";
-import StoreContact from "./pages/storefront/StoreContact";
+import StorefrontLayout from "./components/StorefrontLayout";
+import StoreHome from "./pages/StoreHome";
+import StoreCatalogue from "./pages/StoreCatalogue";
+import StoreAbout from "./pages/StoreAbout";
+import StoreContact from "./pages/StoreContact";
 
 export default function App() {
   // Auth state is intentionally NOT restored from localStorage on load —
