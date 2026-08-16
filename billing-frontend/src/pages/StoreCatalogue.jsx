@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, ShoppingCart, Plus, Package, X } from "lucide-react";
-import { productAPI, brandAPI, categoryAPI } from "../../services/api";
-import { useCart } from "../../services/cartContext";
+import { productAPI, brandAPI, categoryAPI } from "../services/api";
+import { useCart } from "../services/cartContext";
 
 export default function StoreCatalogue() {
   const [searchParams, setSearchParams] = useSearchParams();
