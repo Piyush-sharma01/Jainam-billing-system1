@@ -1,16 +1,34 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { BarChart3, Package, Users, FileText, History, LogOut, X, BookImage, UserCog } from 'lucide-react'
+import { BarChart3, Package, Users, FileText, History, LogOut, X, BookImage, UserCog, ClipboardList } from 'lucide-react'
+import { orderAPI } from '../services/api'
 
   
 export default function Sidebar({ onLogout, isOpen, onClose, role }) {
   const location = useLocation()
+  const [newOrderCount, setNewOrderCount] = useState(0)
+
+  useEffect(() => {
+    if (role !== 'admin' && role !== 'marketing') return
+    const loadCount = async () => {
+      try {
+        const res = await orderAPI.getNewCount()
+        setNewOrderCount(res.data?.count || 0)
+      } catch {
+        // badge is best-effort — ignore failures
+      }
+    }
+    loadCount()
+    const interval = setInterval(loadCount, 30000)
+    return () => clearInterval(interval)
+  }, [role])
 
   const allNavItems = [
     { path: '/dashboard', icon: BarChart3, label: 'Dashboard', roles: ['admin', 'marketing'] },
     { path: '/products', icon: Package, label: 'Products', roles: ['admin', 'marketing'] },
-    { path: '/catalogue', icon: BookImage, label: 'Catalogue', roles: ['admin', 'client', 'marketing'] },
+    { path: '/catalogue', icon: BookImage, label: 'Catalogue', roles: ['admin', 'marketing'] },
     { path: '/clients', icon: Users, label: 'Clients', roles: ['admin', 'marketing'] },
+    { path: '/orders', icon: ClipboardList, label: 'Orders', roles: ['admin', 'marketing'], badge: newOrderCount },
     { path: '/billing', icon: FileText, label: 'Billing', roles: ['admin', 'marketing'] },
     { path: '/invoice-history', icon: History, label: 'Invoice History', roles: ['admin', 'marketing'] },
     { path: '/marketing-team', icon: UserCog, label: 'Marketing Team', roles: ['admin'] },
@@ -61,7 +79,12 @@ export default function Sidebar({ onLogout, isOpen, onClose, role }) {
                 }`}
               >
                 <Icon size={20} />
-                <span>{item.label}</span>
+                <span className="flex-1">{item.label}</span>
+                {item.badge > 0 && (
+                  <span className="bg-secondary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             )
           })}
