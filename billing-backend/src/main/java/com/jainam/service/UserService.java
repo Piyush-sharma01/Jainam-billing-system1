@@ -27,6 +27,7 @@ public class UserService {
                 .name(request.getName())
                 .username(request.getUsername())
                 .passwordHash(hash(request.getPassword()))
+                .phone(request.getPhone())
                 .role(User.Role.MARKETING)
                 .build();
 
@@ -76,6 +77,6 @@ public class UserService {
     }
 
     private UserDTO convertToDTO(User user) {
-        return new UserDTO(user.getId(), user.getName(), user.getUsername(), user.getRole());
+        return new UserDTO(user.getId(), user.getName(), user.getUsername(), user.getPhone(), user.getRole());
     }
 }
