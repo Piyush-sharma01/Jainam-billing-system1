@@ -4,7 +4,8 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom";
-import { productAPI, clientAPI, brandAPI } from "../services/api";
+import { productAPI, clientAPI, brandAPI, invoiceAPI } from "../services/api";
+import { downloadAndShareInvoice } from "../services/invoiceDocument";
 import {
   Package,
   ShoppingCart,
@@ -14,6 +15,8 @@ import {
   X,
   Search,
   ArrowLeft,
+  FileText,
+  AlertTriangle,
 } from "lucide-react";
 
 export default function Catalogue() {
@@ -44,6 +47,14 @@ export default function Catalogue() {
 
   const [showClientModal, setShowClientModal] = useState(false);
   const [modalClientId, setModalClientId] = useState("");
+
+  // Full invoice review section — opens after a client is chosen,
+  // right here in Catalogue instead of navigating to /billing.
+  const [showInvoiceReview, setShowInvoiceReview] = useState(false);
+  const [invoiceClient, setInvoiceClient] = useState(null);
+  const [invoiceNotes, setInvoiceNotes] = useState("");
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
+  const [invoiceError, setInvoiceError] = useState("");
 
   const searchBoxRef = useRef(null);
 
@@ -284,6 +295,20 @@ export default function Catalogue() {
     );
   };
 
+  const updateCartDiscount = (productId, discountPercent) => {
+    const clamped = Math.max(
+      0,
+      Math.min(100, isNaN(discountPercent) ? 0 : discountPercent)
+    );
+    setCart((prev) =>
+      prev.map((item) =>
+        item.productId === productId
+          ? { ...item, discountPercent: clamped }
+          : item
+      )
+    );
+  };
+
   // --------------------------------------------------
   // CART TOTALS
   // --------------------------------------------------
@@ -301,6 +326,31 @@ export default function Catalogue() {
         item.quantity,
     0
   );
+
+  // Discount is applied before tax, matching the backend calculation
+  // (see Billing.jsx / InvoiceService) so the preview total here always
+  // matches what gets created on the server.
+  const calculateLineTotals = (item) => {
+    const lineBase = Number(item.price) * item.quantity;
+    const discountAmount = lineBase * ((item.discountPercent || 0) / 100);
+    const taxable = lineBase - discountAmount;
+    const tax = taxable * (Number(item.gst || 0) / 100);
+    const total = taxable + tax;
+    return { lineBase, discountAmount, taxable, tax, total };
+  };
+
+  const calculateCartTotals = () => {
+    let subtotal = 0;
+    let discount = 0;
+    let tax = 0;
+    cart.forEach((item) => {
+      const { taxable, discountAmount, tax: itemTax } = calculateLineTotals(item);
+      subtotal += taxable;
+      discount += discountAmount;
+      tax += itemTax;
+    });
+    return { subtotal, discount, tax, total: subtotal + tax };
+  };
 
   // --------------------------------------------------
   // PROCEED TO BILL
@@ -326,12 +376,66 @@ export default function Catalogue() {
 
     if (!client) return;
 
-    navigate("/billing", {
-      state: {
-        client,
-        cartItems: cart,
-      },
-    });
+    setInvoiceClient(client);
+    setInvoiceNotes("");
+    setInvoiceError("");
+    setShowClientModal(false);
+    setShowInvoiceReview(true);
+  };
+
+  const closeInvoiceReview = () => {
+    if (creatingInvoice) return;
+    setShowInvoiceReview(false);
+    setInvoiceClient(null);
+    setInvoiceError("");
+  };
+
+  // --------------------------------------------------
+  // CREATE INVOICE — then auto-download PDF + share on WhatsApp
+  // --------------------------------------------------
+
+  const handleCreateInvoice = async () => {
+    if (!invoiceClient || cart.length === 0) return;
+
+    setCreatingInvoice(true);
+    setInvoiceError("");
+
+    try {
+      const invoiceData = {
+        client: invoiceClient,
+        invoiceDate: new Date().toISOString().split("T")[0],
+        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
+        lineItems: cart.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          discountPercentage: item.discountPercent,
+        })),
+        notes: invoiceNotes,
+      };
+
+      const res = await invoiceAPI.create(invoiceData);
+      const createdInvoice = res.data;
+
+      // Auto-downloads the PDF, then hands it to WhatsApp (native share
+      // sheet if available, otherwise a pre-filled wa.me chat).
+      await downloadAndShareInvoice(createdInvoice);
+
+      // Reset everything and close the review section.
+      setCart([]);
+      setInvoiceClient(null);
+      setInvoiceNotes("");
+      setModalClientId("");
+      setShowInvoiceReview(false);
+    } catch (err) {
+      setInvoiceError(
+        "Failed to create invoice: " +
+          (err.response?.data?.message || err.response?.data || err.message)
+      );
+    } finally {
+      setCreatingInvoice(false);
+    }
   };
 
   // --------------------------------------------------
@@ -879,7 +983,7 @@ export default function Catalogue() {
               }
               className="w-full bg-secondary text-white py-2.5 rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Proceed to Bill
+              Create Invoice
             </button>
 
           </div>
@@ -1100,8 +1204,231 @@ export default function Catalogue() {
               }
               className="w-full bg-secondary text-white py-2.5 rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Continue to Billing
+              Review Invoice
             </button>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ==========================================
+          INVOICE REVIEW SECTION
+          Full invoice details, right here in Catalogue.
+          Creating it auto-downloads the PDF and hands it to WhatsApp.
+      ========================================== */}
+
+      {showInvoiceReview && invoiceClient && (
+        <div className="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full my-4 sm:my-0">
+
+            {/* HEADER */}
+
+            <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100">
+
+              <div className="flex items-center gap-2">
+                <FileText size={18} className="text-gray-500" />
+                <h3 className="font-bold text-gray-800">
+                  Review Invoice
+                </h3>
+              </div>
+
+              <button
+                onClick={closeInvoiceReview}
+                disabled={creatingInvoice}
+                className="text-gray-500 hover:text-gray-700 disabled:opacity-40"
+              >
+                <X size={20} />
+              </button>
+
+            </div>
+
+            <div className="px-5 sm:px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+
+              {/* CLIENT */}
+
+              <div>
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                  Bill To
+                </h4>
+                <p className="text-sm font-medium text-gray-800">
+                  {invoiceClient.company}
+                </p>
+                <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-gray-500 mt-0.5">
+                  <span>{invoiceClient.contactPerson}</span>
+                  <span>{invoiceClient.phone}</span>
+                  <span>GSTIN: {invoiceClient.gstNumber || "N/A"}</span>
+                </div>
+              </div>
+
+              {/* LINE ITEMS */}
+
+              <div>
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Items
+                </h4>
+
+                <div className="border border-gray-100 rounded-lg divide-y divide-gray-100">
+                  {cart.map((item) => {
+                    const { total: lineTotal } = calculateLineTotals(item);
+                    const overStock = item.quantity > item.stock;
+
+                    return (
+                      <div
+                        key={item.productId}
+                        className="p-3 flex flex-wrap items-center gap-3"
+                      >
+                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+                          {item.imageUrl ? (
+                            <img
+                              src={item.imageUrl}
+                              alt=""
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <Package size={16} className="text-primary" />
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-[120px]">
+                          <p className="text-sm font-medium text-gray-800 truncate">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            ₹{Number(item.price).toFixed(2)} · GST {item.gst}%
+                          </p>
+                          {overStock && (
+                            <p className="text-xs text-red-600 flex items-center gap-1 mt-0.5">
+                              <AlertTriangle size={12} />
+                              Only {item.stock} in stock
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1 border border-gray-200 rounded-lg shrink-0">
+                          <button
+                            onClick={() =>
+                              updateCartQuantity(item.productId, item.quantity - 1)
+                            }
+                            className="p-1.5 text-gray-500 hover:text-gray-800"
+                          >
+                            <Minus size={12} />
+                          </button>
+                          <span className="w-6 text-center text-xs">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() =>
+                              updateCartQuantity(item.productId, item.quantity + 1)
+                            }
+                            className="p-1.5 text-gray-500 hover:text-gray-800"
+                          >
+                            <Plus size={12} />
+                          </button>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <label className="text-xs text-gray-400">Disc%</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={item.discountPercent}
+                            onChange={(e) =>
+                              updateCartDiscount(item.productId, parseFloat(e.target.value))
+                            }
+                            className="w-14 text-center text-sm border border-gray-200 rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-secondary"
+                          />
+                        </div>
+
+                        <p className="ml-auto text-sm font-semibold text-gray-800 shrink-0">
+                          ₹{lineTotal.toFixed(2)}
+                        </p>
+
+                        <button
+                          onClick={() => removeFromCart(item.productId)}
+                          className="text-gray-400 hover:text-red-600 shrink-0"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* NOTES */}
+
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                  Notes
+                </label>
+                <textarea
+                  value={invoiceNotes}
+                  onChange={(e) => setInvoiceNotes(e.target.value)}
+                  placeholder="Add notes for this invoice (optional)..."
+                  className="input-field"
+                  rows="2"
+                />
+              </div>
+
+              {/* TOTALS */}
+
+              {(() => {
+                const { subtotal, discount, tax, total } = calculateCartTotals();
+                return (
+                  <div className="border-t border-gray-100 pt-4 space-y-1.5 text-sm">
+                    <div className="flex justify-between text-gray-600">
+                      <span>Subtotal</span>
+                      <span className="font-medium">₹{subtotal.toFixed(2)}</span>
+                    </div>
+                    {discount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Discount</span>
+                        <span className="font-medium">− ₹{discount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-gray-600">
+                      <span>Tax (GST)</span>
+                      <span className="font-medium">₹{tax.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between pt-2 border-t border-gray-100">
+                      <span className="font-bold text-gray-800">Total</span>
+                      <span className="font-bold text-lg text-secondary">
+                        ₹{total.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {invoiceError && (
+                <p className="text-sm text-red-600">{invoiceError}</p>
+              )}
+
+            </div>
+
+            {/* FOOTER */}
+
+            <div className="px-5 sm:px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row gap-2 sm:justify-end">
+              <button
+                onClick={closeInvoiceReview}
+                disabled={creatingInvoice}
+                className="px-4 py-2.5 rounded-lg font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateInvoice}
+                disabled={creatingInvoice || cart.length === 0}
+                className="px-5 py-2.5 rounded-lg font-medium bg-secondary text-white hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {creatingInvoice
+                  ? "Creating..."
+                  : "Create Invoice & Share on WhatsApp"}
+              </button>
+            </div>
 
           </div>
 
