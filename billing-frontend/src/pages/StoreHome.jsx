@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Tag, Layers, ShieldCheck, Truck, Headphones, Award } from "lucide-react";
-import HeroSlider from "../components/HeroSlider";
+import HeroSlider from "../components/storefront/HeroSlider";
 import { brandAPI, categoryAPI } from "../services/api";
 
 export default function StoreHome() {
@@ -30,6 +30,36 @@ export default function StoreHome() {
     <div>
       <HeroSlider />
 
+      {/* Compatible OEM Vehicle Brands — sliding strip */}
+      {!loading && brands.length > 0 && (
+        <section className="bg-white py-10 border-b border-gray-100">
+          <p className="text-center text-primary text-xs sm:text-sm font-bold tracking-widest uppercase mb-8">
+            Compatible OEM Vehicle Brands
+          </p>
+
+          <div className="brand-marquee">
+            <div className="brand-marquee-track">
+              {[...brands, ...brands].map((brand, i) => (
+                <div
+                  key={`${brand.id}-${i}`}
+                  className="flex items-center justify-center shrink-0 w-40 sm:w-48 px-6"
+                >
+                  {brand.logoUrl ? (
+                    <img
+                      src={brand.logoUrl}
+                      alt={brand.name}
+                      className="max-h-12 sm:max-h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all"
+                    />
+                  ) : (
+                    <span className="text-gray-400 font-semibold text-sm">{brand.name}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Shop by Brand */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
         <div className="flex items-center gap-2 mb-2">
@@ -48,16 +78,16 @@ export default function StoreHome() {
               <Link
                 key={brand.id}
                 to={`/store/catalogue?brand=${encodeURIComponent(brand.name)}`}
-                className="bg-white border rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md hover:border-secondary transition-all"
+                className="bg-white border rounded-xl overflow-hidden flex flex-col items-center hover:shadow-md hover:border-secondary transition-all"
               >
-                <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center overflow-hidden">
+                <div className="w-full aspect-square bg-accent flex items-center justify-center overflow-hidden">
                   {brand.logoUrl ? (
-                    <img src={brand.logoUrl} alt={brand.name} className="w-full h-full object-cover" />
+                    <img src={brand.logoUrl} alt={brand.name} className="w-full h-full object-contain p-3" />
                   ) : (
-                    <Tag size={22} className="text-primary" />
+                    <Tag size={28} className="text-primary" />
                   )}
                 </div>
-                <span className="text-sm font-medium text-gray-700 text-center">{brand.name}</span>
+                <span className="text-sm font-medium text-gray-700 text-center py-3 px-2">{brand.name}</span>
               </Link>
             ))}
           </div>
