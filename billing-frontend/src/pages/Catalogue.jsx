@@ -1429,7 +1429,7 @@ export default function Catalogue() {
               >
                 {creatingInvoice
                   ? "Creating..."
-                  : "Create Invoice & Share on WhatsApp"}
+                  : "Create Invoice "}
               </button>
             </div>
 
