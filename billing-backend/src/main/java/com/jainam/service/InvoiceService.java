@@ -228,7 +228,8 @@ public class InvoiceService {
             client.getEmail(),
             client.getGstNumber(),
             client.getAddress(),
-            client.getActive()
+            client.getActive(),
+            client.getCreatedBy()
         );
     }
 
