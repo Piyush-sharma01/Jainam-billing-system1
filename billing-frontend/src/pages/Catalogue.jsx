@@ -3,6 +3,7 @@ import {
   useNavigate,
   useParams,
   useSearchParams,
+  useLocation,
 } from "react-router-dom";
 import { productAPI, clientAPI, brandAPI, invoiceAPI } from "../services/api";
 import { downloadAndShareInvoice } from "../services/invoiceDocument";
@@ -22,6 +23,7 @@ import {
 
 export default function Catalogue() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { brandName } = useParams();
   const [searchParams] = useSearchParams();
 
@@ -118,6 +120,49 @@ export default function Catalogue() {
       setQtyPicker(null);
     }
   }, [productIdFromUrl, products]);
+
+  // --------------------------------------------------
+  // PREFILL FROM AN INCOMING CLIENT ORDER
+  // (navigated here from Orders.jsx with a "Create Invoice" click)
+  // --------------------------------------------------
+
+  useEffect(() => {
+    const prefill = location.state?.fromOrder;
+    if (!prefill || clients.length === 0 || products.length === 0) return;
+
+    const client = clients.find((c) => c.id === prefill.clientId);
+    if (client) {
+      setInvoiceClient(client);
+      setInvoiceNotes(prefill.notes || "");
+      setInvoiceError("");
+      setShowInvoiceReview(true);
+    }
+
+    const prefilledCart = (prefill.items || [])
+      .map((orderItem) => {
+        const product = products.find((p) => p.id === orderItem.productId);
+        if (!product) return null;
+        return {
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          gst: product.gst,
+          stock: product.stock,
+          imageUrl: product.imageUrl,
+          quantity: orderItem.quantity,
+          discountPercent: 0,
+        };
+      })
+      .filter(Boolean);
+
+    if (prefilledCart.length > 0) {
+      setCart(prefilledCart);
+    }
+
+    // Clear the navigation state so a refresh/back doesn't re-prefill.
+    window.history.replaceState({}, "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clients, products]);
 
   // --------------------------------------------------
   // SKELETON
