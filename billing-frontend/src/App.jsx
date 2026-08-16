@@ -64,6 +64,8 @@ export default function App() {
 
   return (
     <Router>
+                    <GlobalLoadingBar />
+
       <Routes>
         <Route
           path="/login"
@@ -75,7 +77,6 @@ export default function App() {
             )
           }
         />
-              <GlobalLoadingBar />
 
         <Route
           path="/dashboard"
