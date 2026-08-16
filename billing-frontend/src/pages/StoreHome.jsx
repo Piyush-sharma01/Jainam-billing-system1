@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Tag, Layers, ShieldCheck, Truck, Headphones, Award } from "lucide-react";
 import HeroSlider from "../components/HeroSlider";
-import { brandAPI, categoryAPI } from "../../services/api";
+import { brandAPI, categoryAPI } from "../services/api";
 
 export default function StoreHome() {
   const [brands, setBrands] = useState([]);
