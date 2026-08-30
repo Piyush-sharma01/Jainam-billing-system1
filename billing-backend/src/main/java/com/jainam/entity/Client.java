@@ -71,4 +71,10 @@ public class Client {
 
     @Column(name = "password_hash")
     private String passwordHash;
+
+    // Plaintext copy of the storefront password, kept so the Owner/marketing
+    // dashboard can display and edit it. (Previously only a one-way hash was
+    // stored and the password was shown once at creation.)
+    @Column(name = "password")
+    private String password;
 }
