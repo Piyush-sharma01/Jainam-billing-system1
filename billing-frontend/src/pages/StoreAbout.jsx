@@ -11,7 +11,7 @@ const pillars = [
 export default function StoreAbout() {
   return (
     <div className="page-enter">
-      {/* Hero section */}
+      {/* Hero section */} 
       <section className="bg-primary py-16 sm:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <p className="font-mono text-[11px] tracking-widest text-secondary uppercase mb-4">
