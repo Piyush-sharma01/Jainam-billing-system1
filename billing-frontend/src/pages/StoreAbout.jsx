@@ -1,43 +1,88 @@
 import React from "react";
 import { ShieldCheck, Truck, Headphones, Award } from "lucide-react";
 
+const pillars = [
+  { icon: ShieldCheck, title: "Trusted Quality",    body: "Every product sourced directly from established manufacturers, verified for spec compliance before reaching our catalogue." },
+  { icon: Truck,       title: "Reliable Supply",    body: "Consistent stock levels maintained so your projects aren't held up waiting for materials." },
+  { icon: Headphones,  title: "Dedicated Support",  body: "Each client has a named account manager — a real person who knows your business and handles your orders personally." },
+  { icon: Award,       title: "Trusted Brands",     body: "We work only with brands whose quality standards meet ours — so you know what you're getting, every time." },
+];
+
 export default function StoreAbout() {
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16">
-      <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">About Jainam</h1>
-      <p className="text-gray-600 text-lg mb-6">
-        Jainam is a dependable supplier of pipes, valves, fittings and related hardware,
-        working directly with leading brands to keep our catalogue current, competitively
-        priced, and consistently in stock.
-      </p>
-      <p className="text-gray-600 mb-6">
-        Every client works with a dedicated account manager who personally handles their
-        orders, pricing, and invoicing — so there's always a familiar face behind every order,
-        not just a form.
-      </p>
-      <p className="text-gray-600 mb-12">
-        Whether you're sourcing for a single project or maintaining an ongoing supply
-        relationship, our team is set up to make ordering simple and predictable.
-      </p>
+    <div className="page-enter">
+      {/* Hero section */}
+      <section className="bg-primary py-16 sm:py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <p className="font-mono text-[11px] tracking-widest text-secondary uppercase mb-4">
+            About Us
+          </p>
+          <h1 className="font-display font-600 text-3xl sm:text-4xl text-white leading-tight">
+            A supplier built on long-term relationships
+          </h1>
+        </div>
+      </section>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white border rounded-xl p-5 text-center">
-          <ShieldCheck className="mx-auto text-primary mb-2" size={28} />
-          <p className="font-semibold text-gray-800">Trusted Quality</p>
+      {/* Body copy */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-6 py-14">
+        <p className="text-ink leading-relaxed text-base mb-5">
+          Jainam is a dependable supplier of pipes, valves, fittings and related hardware,
+          working directly with leading brands to keep our catalogue current, competitively
+          priced, and consistently in stock.
+        </p>
+        <p className="text-ink-muted leading-relaxed mb-5">
+          Every client works with a dedicated account manager who personally handles their
+          orders, pricing, and invoicing — so there's always a familiar face behind every order,
+          not just a form.
+        </p>
+        <p className="text-ink-muted leading-relaxed">
+          Whether you're sourcing for a single project or maintaining an ongoing supply
+          relationship, our team is set up to make ordering simple and predictable.
+        </p>
+      </section>
+
+      {/* Stats */}
+      <section className="border-y border-hairline bg-surface">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+          {[
+            { num: "500+", label: "SKUs in catalogue" },
+            { num: "100+", label: "Active clients" },
+            { num: "10+",  label: "Trusted brands" },
+            { num: "24h",  label: "Order response time" },
+          ].map(({ num, label }) => (
+            <div key={label}>
+              <p className="font-mono font-600 text-2xl sm:text-3xl text-primary">{num}</p>
+              <p className="text-xs text-ink-muted mt-1 font-display">{label}</p>
+            </div>
+          ))}
         </div>
-        <div className="bg-white border rounded-xl p-5 text-center">
-          <Truck className="mx-auto text-primary mb-2" size={28} />
-          <p className="font-semibold text-gray-800">Reliable Supply</p>
+      </section>
+
+      {/* Pillars */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-16">
+        <p className="font-mono text-[11px] tracking-widest text-ink-muted uppercase mb-3">
+          Why Jainam
+        </p>
+        <h2 className="font-display font-600 text-2xl sm:text-3xl text-ink mb-10">
+          What we stand for
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {pillars.map(({ icon: Icon, title, body }) => (
+            <div
+              key={title}
+              className="bg-surface border border-hairline rounded p-6 flex gap-4 hover-lift"
+            >
+              <div className="w-10 h-10 rounded bg-accent flex items-center justify-center shrink-0 mt-0.5">
+                <Icon size={18} className="text-primary" />
+              </div>
+              <div>
+                <h3 className="font-display font-600 text-sm text-ink mb-1">{title}</h3>
+                <p className="text-ink-muted text-sm leading-relaxed">{body}</p>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="bg-white border rounded-xl p-5 text-center">
-          <Headphones className="mx-auto text-primary mb-2" size={28} />
-          <p className="font-semibold text-gray-800">Dedicated Support</p>
-        </div>
-        <div className="bg-white border rounded-xl p-5 text-center">
-          <Award className="mx-auto text-primary mb-2" size={28} />
-          <p className="font-semibold text-gray-800">Trusted Brands</p>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }
