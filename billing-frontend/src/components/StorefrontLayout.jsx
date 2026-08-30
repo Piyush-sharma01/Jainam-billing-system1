@@ -25,6 +25,22 @@ export default function StorefrontLayout({ children, user, onLogout }) {
 
   const { items, updateQuantity, removeItem, clearCart, totalItems, totalValue } = useCart();
 
+  // Mobile nav drawer: close on Escape and lock body scroll while open —
+  // same UX contract as a modal, no extra dependency needed.
+  React.useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [menuOpen]);
+
   const navLinks = [
     { to: "/store", label: "Home", end: true },
     { to: "/store/catalogue", label: "Catalogue" },
@@ -51,13 +67,15 @@ export default function StorefrontLayout({ children, user, onLogout }) {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-canvas flex flex-col font-sans text-ink">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-primary text-white shadow">
+      <header className="sticky top-0 z-40 bg-surface border-b border-hairline">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-          <Link to="/store" className="flex items-center gap-2">
-            <span className="text-xl font-bold tracking-tight">Jainam</span>
-            <span className="hidden sm:inline text-blue-200 text-sm">
+          <Link to="/store" className="flex items-center gap-2 min-w-0">
+            <span className="font-display text-xl font-semibold tracking-tight text-primary">
+              Jainam
+            </span>
+            <span className="hidden sm:inline text-ink-muted text-sm truncate">
               {user?.company || "Storefront"}
             </span>
           </Link>
@@ -69,8 +87,10 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                 to={link.to}
                 end={link.end}
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive ? "bg-secondary text-white" : "text-blue-100 hover:bg-blue-700"
+                  `px-3 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    isActive
+                      ? "text-ink border-secondary"
+                      : "text-ink-muted border-transparent hover:text-ink"
                   }`
                 }
               >
@@ -79,37 +99,64 @@ export default function StorefrontLayout({ children, user, onLogout }) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setCartOpen(true)}
-              className="relative p-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="relative p-2.5 rounded-md hover:bg-accent transition-colors"
               aria-label="Cart"
             >
-              <ShoppingCart size={22} />
+              <ShoppingCart size={22} className="text-ink" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-secondary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                <span className="absolute top-1 right-1 bg-secondary text-white font-mono text-[11px] leading-none w-4 h-4 rounded-full flex items-center justify-center">
                   {totalItems}
                 </span>
               )}
             </button>
             <button
               onClick={onLogout}
-              className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-blue-100 hover:bg-blue-700 text-sm"
+              className="hidden sm:flex items-center gap-2 px-3 py-2.5 rounded-md text-ink-muted hover:text-ink hover:bg-accent text-sm transition-colors"
             >
               <LogOut size={16} /> Logout
             </button>
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-blue-700"
+              className="md:hidden p-2.5 rounded-md hover:bg-accent transition-colors"
               onClick={() => setMenuOpen((v) => !v)}
-              aria-label="Menu"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
             >
-              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+              {menuOpen ? <X size={22} className="text-ink" /> : <Menu size={22} className="text-ink" />}
             </button>
           </div>
         </div>
+      </header>
 
-        {menuOpen && (
-          <nav className="md:hidden bg-primary border-t border-blue-700 px-4 py-3 space-y-1">
+      {/* Mobile nav drawer */}
+      <div
+        className={`md:hidden fixed inset-0 z-50 transition-opacity duration-200 ${
+          menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        aria-hidden={!menuOpen}
+      >
+        <div
+          className="absolute inset-0 bg-black/40"
+          onClick={() => setMenuOpen(false)}
+        />
+        <div
+          className={`absolute inset-y-0 left-0 w-[85%] max-w-xs bg-surface flex flex-col transform transition-transform duration-200 ease-out ${
+            menuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="h-16 flex items-center justify-between px-4 border-b border-hairline">
+            <span className="font-display text-lg font-semibold text-primary">Jainam</span>
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="p-2 rounded-md hover:bg-accent"
+              aria-label="Close menu"
+            >
+              <X size={20} className="text-ink" />
+            </button>
+          </div>
+          <nav className="flex-1 p-2 overflow-y-auto">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
@@ -117,48 +164,50 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                 end={link.end}
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
-                  `block px-4 py-3 rounded-lg text-sm font-medium ${
-                    isActive ? "bg-secondary text-white" : "text-blue-100 hover:bg-blue-700"
+                  `block px-3 py-3.5 rounded-md text-sm font-medium transition-colors ${
+                    isActive ? "bg-accent text-ink" : "text-ink-muted hover:bg-accent hover:text-ink"
                   }`
                 }
               >
                 {link.label}
               </NavLink>
             ))}
+          </nav>
+          <div className="p-2 border-t border-hairline">
             <button
               onClick={onLogout}
-              className="w-full flex items-center gap-2 px-4 py-3 rounded-lg text-blue-100 hover:bg-blue-700 text-sm"
+              className="w-full flex items-center gap-2 px-3 py-3.5 rounded-md text-ink-muted hover:bg-accent hover:text-ink text-sm font-medium transition-colors"
             >
               <LogOut size={16} /> Logout
             </button>
-          </nav>
-        )}
-      </header>
+          </div>
+        </div>
+      </div>
 
       {/* Page content */}
       <main className="flex-1">{children}</main>
 
       {/* Footer */}
-      <footer className="bg-primary text-blue-100 mt-16">
+      <footer className="bg-primary text-white/70 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-white font-bold text-lg mb-3">Jainam</h3>
-            <p className="text-sm text-blue-200">
+            <h3 className="font-display text-white font-semibold text-lg mb-3">Jainam</h3>
+            <p className="text-sm">
               Trusted supplier of quality pipes, valves and fittings — built on decades of
               relationships with our clients.
             </p>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-3">Quick Links</h4>
+            <h4 className="font-display text-white font-medium mb-3">Quick Links</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/store" className="hover:text-white">Home</Link></li>
-              <li><Link to="/store/catalogue" className="hover:text-white">Catalogue</Link></li>
-              <li><Link to="/store/about" className="hover:text-white">About Us</Link></li>
-              <li><Link to="/store/contact" className="hover:text-white">Contact Us</Link></li>
+              <li><Link to="/store" className="hover:text-white transition-colors">Home</Link></li>
+              <li><Link to="/store/catalogue" className="hover:text-white transition-colors">Catalogue</Link></li>
+              <li><Link to="/store/about" className="hover:text-white transition-colors">About Us</Link></li>
+              <li><Link to="/store/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-3">Contact</h4>
+            <h4 className="font-display text-white font-medium mb-3">Contact</h4>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2"><Phone size={14} /> +91 00000 00000</li>
               <li className="flex items-center gap-2"><Mail size={14} /> sales@jainam.example</li>
@@ -166,13 +215,13 @@ export default function StorefrontLayout({ children, user, onLogout }) {
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-3">Your Account</h4>
-            <p className="text-sm text-blue-200">
+            <h4 className="font-display text-white font-medium mb-3">Your Account</h4>
+            <p className="text-sm">
               Logged in as <span className="text-white">{user?.name}</span>
             </p>
           </div>
         </div>
-        <div className="border-t border-blue-700 py-4 text-center text-xs text-blue-300">
+        <div className="border-t border-white/10 py-4 text-center text-xs text-white/50">
           © {new Date().getFullYear()} Jainam. All rights reserved.
         </div>
       </footer>
