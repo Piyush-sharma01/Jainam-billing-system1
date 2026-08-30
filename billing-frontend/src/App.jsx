@@ -17,14 +17,13 @@ import Navbar from "./components/Navbar";
 import Catalogue from "./pages/Catalogue";
 import MarketingTeam from "./pages/MarketingTeam";
 import GlobalLoadingBar from "./components/GlobalLoadingBar";
+import { setCurrentUser, clearCurrentUser, getCurrentUser } from "./services/currentUser";
 import { CartProvider } from "./services/cartContext";
 import StorefrontLayout from "./components/StorefrontLayout";
 import StoreHome from "./pages/StoreHome";
 import StoreCatalogue from "./pages/StoreCatalogue";
 import StoreAbout from "./pages/StoreAbout";
 import StoreContact from "./pages/StoreContact";
-import { setCurrentUser, clearCurrentUser, getCurrentUser } from "./services/currentUser";
-// ^ added getCurrentUser to the import
 
 export default function App() {
   // Auth state is restored from the persisted current user (localStorage)
@@ -35,7 +34,6 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(persistedUser);
 
-  // ...rest of the file is unchanged
   const homePathFor = (role) => (role === "client" ? "/store" : "/dashboard");
 
   const handleLogin = (userData) => {
@@ -79,38 +77,38 @@ export default function App() {
   };
 
   // Storefront pages (client role only) get the public-facing layout
+  // (header nav + footer + cart drawer) instead of the admin sidebar.
+  //
   // TEMPORARY: login requirement disabled for /store — anyone can browse
-// without logging in. Falls back to the logged-in client if there is
-// one, otherwise a placeholder "Guest" user so StorefrontLayout has
-// something to render. NOTE: placing an order still requires a real
-// client identity on the backend (X-Username), so checkout will still
-// fail for guests until that's addressed too.
-// To revert: restore the isLoggedIn/role checks below.
-const ProtectedStorefrontRoute = ({ children }) => {
-  const storefrontUser = isLoggedIn && user?.role === "client"
-    ? user
-    : { role: "client", name: "Guest", company: "Storefront" };
-  return (
-    <StorefrontLayout user={storefrontUser} onLogout={handleLogout}>
-      {children}
-    </StorefrontLayout>
-  );
-};
+  // without logging in. Falls back to the logged-in client if there is
+  // one, otherwise a placeholder "Guest" user so StorefrontLayout has
+  // something to render. NOTE: placing an order still requires a real
+  // client identity on the backend (X-Username), so checkout will still
+  // fail for guests until that's addressed too.
+  // To revert: restore the isLoggedIn/role checks below.
+  const ProtectedStorefrontRoute = ({ children }) => {
+    const storefrontUser = isLoggedIn && user?.role === "client"
+      ? user
+      : { role: "client", name: "Guest", company: "Storefront" };
+    return (
+      <StorefrontLayout user={storefrontUser} onLogout={handleLogout}>
+        {children}
+      </StorefrontLayout>
+    );
+  };
 
   return (
     <Router>
       <GlobalLoadingBar />
       <CartProvider>
         <Routes>
+          {/* TEMPORARY: /login skips the form and goes straight to the
+              storefront. To revert, restore the isLoggedIn/Login version
+              below (kept here commented for easy rollback):
+              isLoggedIn ? <Navigate to={homePathFor(user?.role)} /> : <Login onLogin={handleLogin} /> */}
           <Route
             path="/login"
-            element={
-              isLoggedIn ? (
-                <Navigate to={homePathFor(user?.role)} />
-              ) : (
-                <Login onLogin={handleLogin} />
-              )
-            }
+            element={<Navigate to="/store" />}
           />
           <Route
             path="/dashboard"
@@ -221,11 +219,11 @@ const ProtectedStorefrontRoute = ({ children }) => {
 
           <Route
             path="/"
-            element={<Navigate to={!isLoggedIn ? "/login" : homePathFor(user?.role)} />}
+            element={<Navigate to={!isLoggedIn ? "/store" : homePathFor(user?.role)} />}
           />
           <Route
             path="*"
-            element={<Navigate to={!isLoggedIn ? "/login" : homePathFor(user?.role)} />}
+            element={<Navigate to={!isLoggedIn ? "/store" : homePathFor(user?.role)} />}
           />
         </Routes>
       </CartProvider>
