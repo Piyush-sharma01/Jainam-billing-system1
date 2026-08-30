@@ -78,20 +78,15 @@ export default function App() {
 
   // Storefront pages (client role only) get the public-facing layout
   // (header nav + footer + cart drawer) instead of the admin sidebar.
-  //
-  // TEMPORARY: login requirement disabled for /store — anyone can browse
-  // without logging in. Falls back to the logged-in client if there is
-  // one, otherwise a placeholder "Guest" user so StorefrontLayout has
-  // something to render. NOTE: placing an order still requires a real
-  // client identity on the backend (X-Username), so checkout will still
-  // fail for guests until that's addressed too.
-  // To revert: restore the isLoggedIn/role checks below.
   const ProtectedStorefrontRoute = ({ children }) => {
-    const storefrontUser = isLoggedIn && user?.role === "client"
-      ? user
-      : { role: "client", name: "Guest", company: "Storefront" };
+    if (!isLoggedIn) {
+      return <Navigate to="/login" />;
+    }
+    if (user?.role !== "client") {
+      return <Navigate to={homePathFor(user?.role)} />;
+    }
     return (
-      <StorefrontLayout user={storefrontUser} onLogout={handleLogout}>
+      <StorefrontLayout user={user} onLogout={handleLogout}>
         {children}
       </StorefrontLayout>
     );
@@ -102,13 +97,15 @@ export default function App() {
       <GlobalLoadingBar />
       <CartProvider>
         <Routes>
-          {/* TEMPORARY: /login skips the form and goes straight to the
-              storefront. To revert, restore the isLoggedIn/Login version
-              below (kept here commented for easy rollback):
-              isLoggedIn ? <Navigate to={homePathFor(user?.role)} /> : <Login onLogin={handleLogin} /> */}
           <Route
             path="/login"
-            element={<Navigate to="/store" />}
+            element={
+              isLoggedIn ? (
+                <Navigate to={homePathFor(user?.role)} />
+              ) : (
+                <Login onLogin={handleLogin} />
+              )
+            }
           />
           <Route
             path="/dashboard"
@@ -219,11 +216,11 @@ export default function App() {
 
           <Route
             path="/"
-            element={<Navigate to={!isLoggedIn ? "/store" : homePathFor(user?.role)} />}
+            element={<Navigate to={!isLoggedIn ? "/login" : homePathFor(user?.role)} />}
           />
           <Route
             path="*"
-            element={<Navigate to={!isLoggedIn ? "/store" : homePathFor(user?.role)} />}
+            element={<Navigate to={!isLoggedIn ? "/login" : homePathFor(user?.role)} />}
           />
         </Routes>
       </CartProvider>
