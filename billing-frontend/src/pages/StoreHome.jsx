@@ -10,7 +10,7 @@ import { useCart } from "../services/cartContext";
 
 export default function StoreHome() {
   const [brands, setBrands] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState([]); 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addedId, setAddedId] = useState(null);
