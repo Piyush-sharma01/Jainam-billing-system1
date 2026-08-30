@@ -9,7 +9,7 @@ export default function StoreContact() {
   const validate = () => {
     const e = {};
     if (!form.name.trim())    e.name    = "Name is required.";
-    if (!form.message.trim()) e.message = "Message is required.";
+    if (!form.message.trim()) e.message = "Message is required."; 
     return e;
   };
 
