@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { clientAPI } from "../services/api";
-import { Plus, Edit2, Trash2, Search, Copy, Check, KeyRound } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, Copy, Check, KeyRound, Eye, EyeOff } from "lucide-react";
 export default function Clients() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,13 +15,28 @@ export default function Clients() {
     email: "",
     gstNumber: "",
     address: "",
+    password: "",
   });
 
-  // Storefront login credentials, shown once right after a client is
-  // created — the plaintext password is never returned by the API again
-  // after this, so this is the only chance to copy it for the client.
+  // Storefront login credentials, surfaced right after a client is created
+  // so they can be shared. The password is also now visible/editable later
+  // from the table below and the edit form.
   const [newCredentials, setNewCredentials] = useState(null);
   const [copied, setCopied] = useState("");
+  const [showFormPassword, setShowFormPassword] = useState(false);
+  const [visiblePasswordIds, setVisiblePasswordIds] = useState(new Set());
+
+  const togglePasswordVisible = (id) => {
+    setVisiblePasswordIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     loadClients();
@@ -74,6 +89,7 @@ export default function Clients() {
         email: "",
         gstNumber: "",
         address: "",
+        password: "",
       });
 
       setEditing(false);
@@ -97,6 +113,7 @@ export default function Clients() {
       email: client.email,
       gstNumber: client.gstNumber,
       address: client.address,
+      password: client.password || "",
     });
 
     setShowForm(true);
@@ -159,7 +176,7 @@ export default function Clients() {
             </div>
             <p className="text-sm text-gray-500 mb-4">
               Share these with <span className="font-medium">{newCredentials.company}</span> so
-              they can log in and place orders. The password is shown only this once.
+              they can log in and place orders. You can view or change this password anytime from the clients table.
             </p>
 
             <div className="space-y-3">
@@ -255,6 +272,26 @@ export default function Clients() {
             onChange={handleChange}
           />
 
+          <div className="relative">
+            <input
+              className="w-full border p-2 rounded pr-10"
+              name="password"
+              type={showFormPassword ? "text" : "password"}
+              placeholder={editing ? "Storefront password" : "Storefront password (leave blank to auto-generate)"}
+              value={formData.password}
+              onChange={handleChange}
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowFormPassword((v) => !v)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              tabIndex={-1}
+            >
+              {showFormPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               type="submit"
@@ -304,6 +341,7 @@ export default function Clients() {
                   <th className="p-3 text-left">Phone</th>
                   <th className="p-3 text-left">GST</th>
                   <th className="p-3 text-left">Login</th>
+                  <th className="p-3 text-left">Password</th>
                   <th className="p-3 text-left">Status</th>
                   <th className="p-3 text-center">Action</th>
                 </tr>
@@ -319,6 +357,26 @@ export default function Clients() {
                     <td className="p-3">{client.gstNumber}</td>
                     <td className="p-3 font-mono text-xs text-gray-600">
                       {client.username || "—"}
+                    </td>
+                    <td className="p-3">
+                      {client.password ? (
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs text-gray-600">
+                            {visiblePasswordIds.has(client.id)
+                              ? client.password
+                              : "•".repeat(Math.max(client.password.length, 6))}
+                          </span>
+                          <button
+                            onClick={() => togglePasswordVisible(client.id)}
+                            className="text-gray-400 hover:text-gray-600"
+                            title={visiblePasswordIds.has(client.id) ? "Hide password" : "Show password"}
+                          >
+                            {visiblePasswordIds.has(client.id) ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="p-3">
                       {client.active ? (
