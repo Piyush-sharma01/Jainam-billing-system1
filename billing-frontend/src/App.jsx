@@ -17,7 +17,6 @@ import Navbar from "./components/Navbar";
 import Catalogue from "./pages/Catalogue";
 import MarketingTeam from "./pages/MarketingTeam";
 import GlobalLoadingBar from "./components/GlobalLoadingBar";
-import { setCurrentUser, clearCurrentUser } from "./services/currentUser";
 import { CartProvider } from "./services/cartContext";
 import StorefrontLayout from "./components/StorefrontLayout";
 import StoreHome from "./pages/StoreHome";
