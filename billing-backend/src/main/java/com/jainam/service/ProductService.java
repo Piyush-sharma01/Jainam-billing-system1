@@ -13,13 +13,13 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public List<ProductDTO> getAllProducts() {
-        return productRepository.findAll().stream()
-            .filter(p -> Boolean.TRUE.equals(p.getActive()))
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-    }
-
+  public List<ProductDTO> getAllProducts() {
+    return productRepository.findAll().stream()
+        .filter(p -> Boolean.TRUE.equals(p.getActive()))
+        .sorted((a, b) -> b.getId().compareTo(a.getId())) // newest (highest id) first  ← new line
+        .map(this::convertToDTO)
+        .collect(Collectors.toList());
+}
     public ProductDTO getProductById(Long id) {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Product not found"));
