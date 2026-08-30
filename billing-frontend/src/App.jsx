@@ -24,15 +24,19 @@ import StoreHome from "./pages/StoreHome";
 import StoreCatalogue from "./pages/StoreCatalogue";
 import StoreAbout from "./pages/StoreAbout";
 import StoreContact from "./pages/StoreContact";
+import { setCurrentUser, clearCurrentUser, getCurrentUser } from "./services/currentUser";
+// ^ added getCurrentUser to the import
 
 export default function App() {
-  // Auth state is intentionally NOT restored from localStorage on load —
-  // this means every fresh page load or reload always starts at /login,
-  // even if someone was logged in before or types /dashboard directly.
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Auth state is restored from the persisted current user (localStorage)
+  // on load, so a page refresh — or typing a route directly — keeps the
+  // user logged in instead of bouncing them back to /login.
+  const persistedUser = getCurrentUser();
+  const [isLoggedIn, setIsLoggedIn] = useState(!!persistedUser);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(persistedUser);
 
+  // ...rest of the file is unchanged
   const homePathFor = (role) => (role === "client" ? "/store" : "/dashboard");
 
   const handleLogin = (userData) => {
