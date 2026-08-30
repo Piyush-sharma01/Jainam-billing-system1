@@ -10,7 +10,7 @@ export default function StoreCatalogue() {
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(""); 
   const [addedId, setAddedId] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
 
