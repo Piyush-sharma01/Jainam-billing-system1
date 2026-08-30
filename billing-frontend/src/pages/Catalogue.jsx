@@ -402,13 +402,18 @@ export default function Catalogue() {
   // PROCEED TO BILL
   // --------------------------------------------------
 
-  const handleProceedClick = () => {
-    if (cart.length === 0) return;
+  // --------------------------------------------------
+// PROCEED TO BILL
+// --------------------------------------------------
 
-    setModalClientId("");
-    setShowClientModal(true);
-  };
+const handleProceedClick = () => {
+  if (cart.length === 0) return;
 
+  // Hand off to the main Billing page instead of running a separate
+  // invoice flow here — Billing already picks up `client`/`cartItems`
+  // from navigation state.
+  navigate("/billing", { state: { cartItems: cart } });
+};
   // --------------------------------------------------
   // BILLING
   // --------------------------------------------------
