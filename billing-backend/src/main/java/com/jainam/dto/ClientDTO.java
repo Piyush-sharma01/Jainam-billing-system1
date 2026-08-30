@@ -18,10 +18,8 @@ public class ClientDTO {
     private Boolean active;
     private String createdBy;
 
-    // Storefront login. `username` is always returned so the owner/marketing
-    // member can hand it to the client. `password` is only ever populated
-    // once, right after creation (plaintext, one-time display) — it is never
-    // stored in the DTO on subsequent reads.
+    // Storefront login. `username` and `password` are always returned so
+    // the Owner/marketing dashboard can view and edit them.
     private String username;
     private String password;
 }
