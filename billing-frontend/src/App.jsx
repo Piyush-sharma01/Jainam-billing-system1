@@ -79,20 +79,23 @@ export default function App() {
   };
 
   // Storefront pages (client role only) get the public-facing layout
-  // (header nav + footer + cart drawer) instead of the admin sidebar.
-  const ProtectedStorefrontRoute = ({ children }) => {
-    if (!isLoggedIn) {
-      return <Navigate to="/login" />;
-    }
-    if (user?.role !== "client") {
-      return <Navigate to={homePathFor(user?.role)} />;
-    }
-    return (
-      <StorefrontLayout user={user} onLogout={handleLogout}>
-        {children}
-      </StorefrontLayout>
-    );
-  };
+  // TEMPORARY: login requirement disabled for /store — anyone can browse
+// without logging in. Falls back to the logged-in client if there is
+// one, otherwise a placeholder "Guest" user so StorefrontLayout has
+// something to render. NOTE: placing an order still requires a real
+// client identity on the backend (X-Username), so checkout will still
+// fail for guests until that's addressed too.
+// To revert: restore the isLoggedIn/role checks below.
+const ProtectedStorefrontRoute = ({ children }) => {
+  const storefrontUser = isLoggedIn && user?.role === "client"
+    ? user
+    : { role: "client", name: "Guest", company: "Storefront" };
+  return (
+    <StorefrontLayout user={storefrontUser} onLogout={handleLogout}>
+      {children}
+    </StorefrontLayout>
+  );
+};
 
   return (
     <Router>
