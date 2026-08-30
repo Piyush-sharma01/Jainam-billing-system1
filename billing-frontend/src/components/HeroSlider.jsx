@@ -14,7 +14,7 @@ const slides = [
     subtitle: "Decades of reliable supply and after-sales support.",
     cta: "About Us",
     to: "/store/about",
-  },
+  },  
   {
     title: "Browse Our Full Catalogue",
     subtitle: "Shop by brand or category and place your order in minutes.",
