@@ -56,16 +56,18 @@ public class ClientService {
 
         // Auto-generate storefront login credentials for this client company.
         String generatedUsername = generateUniqueUsername(clientDTO.getCompany());
-        String generatedPassword = generatePassword();
+        String generatedPassword = (clientDTO.getPassword() != null && !clientDTO.getPassword().isBlank())
+                ? clientDTO.getPassword()
+                : generatePassword();
         client.setUsername(generatedUsername);
+        client.setPassword(generatedPassword);
         client.setPasswordHash(hash(generatedPassword));
 
         Client savedClient = clientRepository.save(client);
 
-        // Return the plaintext password exactly once, so the caller can hand
-        // it to the client. It is never persisted or returned again.
+        // Password is now stored (see Client.password) and returned on every
+        // read, so it can be viewed/edited later from the dashboard.
         ClientDTO result = convertToDTO(savedClient);
-        result.setPassword(generatedPassword);
         return result;
     }
 
@@ -125,6 +127,14 @@ public class ClientService {
         client.setGstNumber(clientDTO.getGstNumber());
         client.setAddress(clientDTO.getAddress());
 
+        // Only touch the password if a non-blank one was actually sent —
+        // this lets the dashboard edit it without forcing every save to
+        // reset it.
+        if (clientDTO.getPassword() != null && !clientDTO.getPassword().isBlank()) {
+            client.setPassword(clientDTO.getPassword());
+            client.setPasswordHash(hash(clientDTO.getPassword()));
+        }
+
         Client updatedClient = clientRepository.save(client);
         return convertToDTO(updatedClient);
     }
@@ -151,7 +161,7 @@ public class ClientService {
                 client.getActive(),
                 client.getCreatedBy(),
                 client.getUsername(),
-                null);
+                client.getPassword());
     }
 
     private Client convertToEntity(ClientDTO clientDTO) {
