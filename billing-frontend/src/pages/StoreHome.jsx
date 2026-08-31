@@ -468,8 +468,11 @@ function ProductSection({ products, loading, addedId, onAdd }) {
           {/* Large featured */}
           {featured && (
             <div className="bg-dark-bg lg:row-span-2 flex flex-col">
-              {/* Image */}
-              <div className="flex-1 bg-dark-surface relative overflow-hidden flex items-center justify-center min-h-[280px] sm:min-h-[360px] lg:min-h-[480px] group">
+              {/* Image — links to product detail */}
+              <Link
+                to={`/store/product/${featured.id}`}
+                className="flex-1 bg-dark-surface relative overflow-hidden flex items-center justify-center min-h-[280px] sm:min-h-[360px] lg:min-h-[480px] group block"
+              >
                 {featured.imageUrl ? (
                   <img
                     src={featured.imageUrl}
@@ -485,16 +488,16 @@ function ProductSection({ products, loading, addedId, onAdd }) {
                     Featured
                   </span>
                 </div>
-              </div>
+              </Link>
               {/* Info */}
               <div className="border-t border-dark-border p-5 sm:p-6 flex items-end justify-between gap-4">
                 <div className="min-w-0">
                   <p className="font-mono text-[10px] tracking-widest text-dark-muted uppercase mb-1">
                     {featured.brand || featured.category || ""}
                   </p>
-                  <p className="font-display font-600 text-lg text-dark-text leading-snug">
+                  <Link to={`/store/product/${featured.id}`} className="font-display font-600 text-lg text-dark-text leading-snug hover:text-dark-copper transition-colors">
                     {featured.name}
-                  </p>
+                  </Link>
                   <p className="font-mono font-600 text-dark-copper text-base mt-2">
                     ₹{Number(featured.price).toFixed(2)}
                   </p>
@@ -530,8 +533,12 @@ function SmallProductCard({ product, addedId, onAdd }) {
 
   return (
     <div className="bg-dark-bg flex flex-row sm:flex-col">
-      {/* Image */}
-      <div className="w-24 sm:w-full sm:aspect-square bg-dark-surface flex items-center justify-center overflow-hidden shrink-0 group relative">
+      {/* Image — links to product detail */}
+      <Link
+        to={`/store/product/${product.id}`}
+        className="w-24 sm:w-full sm:aspect-square bg-dark-surface flex items-center justify-center overflow-hidden shrink-0 group relative block"
+        tabIndex={-1}
+      >
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -548,11 +555,11 @@ function SmallProductCard({ product, addedId, onAdd }) {
             </span>
           </div>
         )}
-      </div>
+      </Link>
       {/* Info */}
       <div className="border-t border-dark-border flex items-center justify-between gap-3 px-4 py-3 flex-1 min-w-0">
         <div className="min-w-0">
-          <p className="font-display font-medium text-xs text-dark-text truncate">{product.name}</p>
+          <Link to={`/store/product/${product.id}`} className="font-display font-medium text-xs text-dark-text truncate hover:text-dark-copper transition-colors block">{product.name}</Link>
           <p className="font-mono text-[10px] text-dark-copper mt-0.5">
             ₹{Number(product.price).toFixed(2)}
           </p>
