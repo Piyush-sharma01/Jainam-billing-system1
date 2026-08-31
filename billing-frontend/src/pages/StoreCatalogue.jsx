@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Search, ShoppingCart, Package, X, SlidersHorizontal, Check, ChevronDown } from "lucide-react";
 import { productAPI, brandAPI, categoryAPI } from "../services/api";
 import { useCart } from "../services/cartContext";
@@ -451,8 +451,13 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
 
   return (
     <div className="bg-dark-bg group flex flex-col">
-      {/* Image area */}
-      <div className="relative overflow-hidden aspect-square bg-dark-surface flex items-center justify-center">
+      {/* Image area — links to product detail */}
+      <Link
+        to={`/store/product/${product.id}`}
+        className="relative overflow-hidden aspect-square bg-dark-surface flex items-center justify-center block"
+        tabIndex={-1}
+        aria-label={`View ${product.name}`}
+      >
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -477,7 +482,7 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
 
         {/* Quick-add: icon button pinned to bottom-right, appears on hover */}
         <button
-          onClick={() => !outOfStock && onAdd(product)}
+          onClick={(e) => { e.preventDefault(); if (!outOfStock) onAdd(product); }}
           disabled={outOfStock}
           aria-label={`Add ${product.name} to cart`}
           className={`absolute bottom-3 right-3 w-8 h-8 flex items-center justify-center border transition-all duration-200 ${
@@ -490,7 +495,7 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
         >
           {added ? <Check size={12} /> : <ShoppingCart size={12} />}
         </button>
-      </div>
+      </Link>
 
       {/* Info strip */}
       <div className="border-t border-dark-border flex items-end justify-between gap-3 px-3 sm:px-4 py-3 sm:py-4">
@@ -501,9 +506,12 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
               {product.brand || product.category}
             </p>
           )}
-          <p className="font-display font-medium text-xs sm:text-sm text-dark-text leading-snug line-clamp-2">
+          <Link
+            to={`/store/product/${product.id}`}
+            className="font-display font-medium text-xs sm:text-sm text-dark-text leading-snug line-clamp-2 hover:text-dark-copper transition-colors"
+          >
             {product.name}
-          </p>
+          </Link>
           <p className="font-mono font-600 text-sm sm:text-base text-dark-copper mt-1.5">
             ₹{Number(product.price).toFixed(2)}
           </p>
