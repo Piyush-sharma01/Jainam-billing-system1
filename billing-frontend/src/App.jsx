@@ -17,13 +17,15 @@ import Navbar from "./components/Navbar";
 import Catalogue from "./pages/Catalogue";
 import MarketingTeam from "./pages/MarketingTeam";
 import GlobalLoadingBar from "./components/GlobalLoadingBar";
-import { setCurrentUser, clearCurrentUser, getCurrentUser } from "./services/currentUser";
 import { CartProvider } from "./services/cartContext";
 import StorefrontLayout from "./components/StorefrontLayout";
 import StoreHome from "./pages/StoreHome";
 import StoreCatalogue from "./pages/StoreCatalogue";
 import StoreAbout from "./pages/StoreAbout";
 import StoreContact from "./pages/StoreContact";
+import StoreProduct from "./pages/StoreProduct";
+import { setCurrentUser, clearCurrentUser, getCurrentUser } from "./services/currentUser";
+// ^ added getCurrentUser to the import
 
 export default function App() {
   // Auth state is restored from the persisted current user (localStorage)
@@ -34,6 +36,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(persistedUser);
 
+  // ...rest of the file is unchanged
   const homePathFor = (role) => (role === "client" ? "/store" : "/dashboard");
 
   const handleLogin = (userData) => {
@@ -210,6 +213,14 @@ export default function App() {
             element={
               <ProtectedStorefrontRoute>
                 <StoreContact />
+              </ProtectedStorefrontRoute>
+            }
+          />
+          <Route
+            path="/store/product/:id"
+            element={
+              <ProtectedStorefrontRoute>
+                <StoreProduct />
               </ProtectedStorefrontRoute>
             }
           />
