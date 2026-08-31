@@ -1,53 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
-  ShoppingCart,
-  Menu,
-  X,
-  LogOut,
-  Plus,
-  Minus,
-  Trash2,
-  Phone,
-  Mail,
-  MapPin,
+  ShoppingCart, Menu, X, LogOut,
+  Plus, Minus, Trash2, Phone, Mail, MapPin,
+  CheckCircle, Package, ArrowRight,
 } from "lucide-react";
 import { useCart } from "../services/cartContext";
 import { orderAPI } from "../services/api";
 
 export default function StorefrontLayout({ children, user, onLogout }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [placing, setPlacing] = useState(false);
+  /* ── All state & logic — UNCHANGED ── */
+  const [menuOpen,    setMenuOpen]    = useState(false);
+  const [cartOpen,    setCartOpen]    = useState(false);
+  const [placing,     setPlacing]     = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
-  const [orderError, setOrderError] = useState("");
+  const [orderError,  setOrderError]  = useState("");
+  const [scrolled,    setScrolled]    = useState(false);
   const navigate = useNavigate();
 
   const { items, updateQuantity, removeItem, clearCart, totalItems, totalValue } = useCart();
 
-  // Mobile nav drawer: close on Escape and lock body scroll while open —
-  // same UX contract as a modal, no extra dependency needed.
-  React.useEffect(() => {
-    if (!menuOpen) return;
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") setMenuOpen(false);
-    };
-    document.addEventListener("keydown", onKeyDown);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [menuOpen]);
-
   const navLinks = [
-    { to: "/store", label: "Home", end: true },
+    { to: "/store",           label: "Home",       end: true },
     { to: "/store/catalogue", label: "Catalogue" },
-    { to: "/store/about", label: "About" },
-    { to: "/store/contact", label: "Contact Us" },
+    { to: "/store/about",     label: "About" },
+    { to: "/store/contact",   label: "Contact Us" },
   ];
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") { setMenuOpen(false); setCartOpen(false); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen || cartOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen, cartOpen]);
+
+  /* handlePlaceOrder — UNCHANGED */
   const handlePlaceOrder = async () => {
     if (items.length === 0) return;
     setPlacing(true);
@@ -67,30 +66,46 @@ export default function StorefrontLayout({ children, user, onLogout }) {
   };
 
   return (
-    <div className="min-h-screen bg-canvas flex flex-col font-sans text-ink">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-surface border-b border-hairline">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-          <Link to="/store" className="flex items-center gap-2 min-w-0">
-            <span className="font-display text-xl font-semibold tracking-tight text-primary">
+    <div className="min-h-screen bg-dark-bg flex flex-col">
+
+      {/* ══════════════════════════════════════
+          HEADER
+      ══════════════════════════════════════ */}
+      <header
+        className={`sticky top-0 z-40 bg-dark-deep transition-all duration-200 ${
+          scrolled ? "border-b border-dark-border shadow-lg shadow-black/20" : "border-b border-dark-border"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
+
+          {/* Logo */}
+          <Link
+            to="/store"
+            className="flex items-center gap-3 shrink-0"
+            onClick={() => setMenuOpen(false)}
+          >
+            <span className="font-display font-600 text-lg sm:text-xl text-dark-text tracking-tight">
               Jainam
             </span>
-            <span className="hidden sm:inline text-ink-muted text-sm truncate">
-              {user?.company || "Storefront"}
-            </span>
+            {user?.company && (
+              <span className="hidden sm:inline font-mono text-[10px] tracking-widest text-dark-muted uppercase border-l border-dark-border pl-3">
+                {user.company}
+              </span>
+            )}
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.end}
                 className={({ isActive }) =>
-                  `px-3 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  `px-4 py-2 font-mono text-[11px] tracking-[0.12em] uppercase transition-colors ${
                     isActive
-                      ? "text-ink border-secondary"
-                      : "text-ink-muted border-transparent hover:text-ink"
+                      ? "text-dark-copper"
+                      : "text-dark-muted hover:text-dark-text"
                   }`
                 }
               >
@@ -99,152 +114,237 @@ export default function StorefrontLayout({ children, user, onLogout }) {
             ))}
           </nav>
 
+          {/* Right actions */}
           <div className="flex items-center gap-1">
+            {/* Cart trigger */}
             <button
               onClick={() => setCartOpen(true)}
-              className="relative p-2.5 rounded-md hover:bg-accent transition-colors"
-              aria-label="Cart"
+              className="relative flex items-center gap-2 px-3 sm:px-4 py-2 min-h-[44px] text-dark-muted hover:text-dark-text transition-colors"
+              aria-label={`Cart, ${totalItems} items`}
             >
-              <ShoppingCart size={22} className="text-ink" />
-              {totalItems > 0 && (
-                <span className="absolute top-1 right-1 bg-secondary text-white font-mono text-[11px] leading-none w-4 h-4 rounded-full flex items-center justify-center">
+              <ShoppingCart size={18} />
+              {totalItems > 0 ? (
+                <span className="font-mono text-[11px] tracking-widest text-dark-copper">
                   {totalItems}
+                </span>
+              ) : (
+                <span className="hidden sm:inline font-mono text-[11px] tracking-widest uppercase">
+                  Cart
                 </span>
               )}
             </button>
+
+            {/* Logout (desktop) */}
             <button
               onClick={onLogout}
-              className="hidden sm:flex items-center gap-2 px-3 py-2.5 rounded-md text-ink-muted hover:text-ink hover:bg-accent text-sm transition-colors"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 min-h-[44px] font-mono text-[10px] tracking-widest uppercase text-dark-muted hover:text-dark-text transition-colors"
             >
-              <LogOut size={16} /> Logout
+              <LogOut size={14} />
+              <span>Logout</span>
             </button>
+
+            {/* Hamburger (mobile) */}
             <button
-              className="md:hidden p-2.5 rounded-md hover:bg-accent transition-colors"
+              className="md:hidden flex items-center justify-center p-2.5 min-w-[44px] min-h-[44px] text-dark-muted hover:text-dark-text transition-colors"
               onClick={() => setMenuOpen((v) => !v)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
             >
-              {menuOpen ? <X size={22} className="text-ink" /> : <Menu size={22} className="text-ink" />}
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile nav drawer */}
-      <div
-        className={`md:hidden fixed inset-0 z-50 transition-opacity duration-200 ${
-          menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        aria-hidden={!menuOpen}
-      >
-        <div
-          className="absolute inset-0 bg-black/40"
-          onClick={() => setMenuOpen(false)}
-        />
-        <div
-          className={`absolute inset-y-0 left-0 w-[85%] max-w-xs bg-surface flex flex-col transform transition-transform duration-200 ease-out ${
-            menuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
-          <div className="h-16 flex items-center justify-between px-4 border-b border-hairline">
-            <span className="font-display text-lg font-semibold text-primary">Jainam</span>
-            <button
-              onClick={() => setMenuOpen(false)}
-              className="p-2 rounded-md hover:bg-accent"
-              aria-label="Close menu"
-            >
-              <X size={20} className="text-ink" />
-            </button>
-          </div>
-          <nav className="flex-1 p-2 overflow-y-auto">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.end}
+      {/* ══════════════════════════════════════
+          MOBILE NAV DRAWER
+      ══════════════════════════════════════ */}
+      {menuOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed top-0 left-0 z-50 h-full w-[85vw] max-w-xs bg-dark-surface border-r border-dark-border flex flex-col nav-drawer-enter md:hidden">
+            <div className="flex items-center justify-between px-5 h-14 border-b border-dark-border shrink-0">
+              <span className="font-display font-600 text-dark-text text-base">Jainam</span>
+              <button
                 onClick={() => setMenuOpen(false)}
-                className={({ isActive }) =>
-                  `block px-3 py-3.5 rounded-md text-sm font-medium transition-colors ${
-                    isActive ? "bg-accent text-ink" : "text-ink-muted hover:bg-accent hover:text-ink"
-                  }`
-                }
+                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-dark-muted hover:text-dark-text transition-colors"
+                aria-label="Close menu"
               >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="p-2 border-t border-hairline">
-            <button
-              onClick={onLogout}
-              className="w-full flex items-center gap-2 px-3 py-3.5 rounded-md text-ink-muted hover:bg-accent hover:text-ink text-sm font-medium transition-colors"
-            >
-              <LogOut size={16} /> Logout
-            </button>
-          </div>
-        </div>
-      </div>
+                <X size={18} />
+              </button>
+            </div>
 
-      {/* Page content */}
+            <nav className="flex-1 overflow-y-auto px-0 py-2">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  end={link.end}
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center justify-between px-6 py-4 font-mono text-[11px] tracking-[0.15em] uppercase transition-colors min-h-[52px] border-b border-dark-border ${
+                      isActive
+                        ? "text-dark-copper"
+                        : "text-dark-muted hover:text-dark-text"
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      {link.label}
+                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-dark-copper" />}
+                    </>
+                  )}
+                </NavLink>
+              ))}
+            </nav>
+
+            <div className="px-5 py-5 border-t border-dark-border shrink-0 space-y-3">
+              {user?.name && (
+                <p className="font-mono text-[10px] tracking-widest text-dark-muted uppercase">
+                  {user.name}
+                </p>
+              )}
+              <button
+                onClick={() => { setMenuOpen(false); onLogout(); }}
+                className="w-full flex items-center gap-2.5 font-mono text-[11px] tracking-widest uppercase text-dark-muted hover:text-dark-text transition-colors py-2 min-h-[44px]"
+              >
+                <LogOut size={14} />
+                Logout
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ══════════════════════════════════════
+          PAGE CONTENT
+      ══════════════════════════════════════ */}
       <main className="flex-1">{children}</main>
 
-      {/* Footer */}
-      <footer className="bg-primary text-white/70 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+      {/* ══════════════════════════════════════
+          FOOTER
+      ══════════════════════════════════════ */}
+      <footer className="bg-dark-deep border-t border-dark-border text-dark-text">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
           <div>
-            <h3 className="font-display text-white font-semibold text-lg mb-3">Jainam</h3>
-            <p className="text-sm">
+            <h3 className="font-display font-600 text-base text-dark-text mb-3">Jainam</h3>
+            <p className="text-sm text-dark-muted leading-relaxed">
               Trusted supplier of quality pipes, valves and fittings — built on decades of
               relationships with our clients.
             </p>
           </div>
           <div>
-            <h4 className="font-display text-white font-medium mb-3">Quick Links</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/store" className="hover:text-white transition-colors">Home</Link></li>
-              <li><Link to="/store/catalogue" className="hover:text-white transition-colors">Catalogue</Link></li>
-              <li><Link to="/store/about" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link to="/store/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
+            <h4 className="font-mono text-[10px] tracking-[0.2em] text-dark-muted uppercase mb-5">
+              Quick Links
+            </h4>
+            <ul className="space-y-2.5">
+              {navLinks.map((l) => (
+                <li key={l.to}>
+                  <Link
+                    to={l.to}
+                    className="font-mono text-[11px] tracking-widest uppercase text-dark-muted hover:text-dark-text transition-colors"
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
-            <h4 className="font-display text-white font-medium mb-3">Contact</h4>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2"><Phone size={14} /> +91 00000 00000</li>
-              <li className="flex items-center gap-2"><Mail size={14} /> sales@jainam.example</li>
-              <li className="flex items-start gap-2"><MapPin size={14} className="mt-0.5" /> Mumbai, Maharashtra, India</li>
+            <h4 className="font-mono text-[10px] tracking-[0.2em] text-dark-muted uppercase mb-5">
+              Contact
+            </h4>
+            <ul className="space-y-3 text-dark-muted">
+              <li className="flex items-center gap-2.5">
+                <Phone size={12} className="shrink-0 text-dark-copper" />
+                <a href="tel:+910000000000" className="font-mono text-[11px] tracking-wide hover:text-dark-text transition-colors">
+                  +91 00000 00000
+                </a>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Mail size={12} className="shrink-0 text-dark-copper" />
+                <a href="mailto:sales@jainam.example" className="font-mono text-[11px] tracking-wide hover:text-dark-text transition-colors">
+                  sales@jainam.example
+                </a>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <MapPin size={12} className="shrink-0 text-dark-copper mt-0.5" />
+                <span className="font-mono text-[11px] tracking-wide">
+                  Mumbai, Maharashtra, India
+                </span>
+              </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-display text-white font-medium mb-3">Your Account</h4>
-            <p className="text-sm">
-              Logged in as <span className="text-white">{user?.name}</span>
-            </p>
+            <h4 className="font-mono text-[10px] tracking-[0.2em] text-dark-muted uppercase mb-5">
+              Account
+            </h4>
+            {user?.name && (
+              <p className="font-mono text-[11px] tracking-wide text-dark-muted">
+                Signed in as{" "}
+                <span className="text-dark-text">{user.name}</span>
+              </p>
+            )}
           </div>
         </div>
-        <div className="border-t border-white/10 py-4 text-center text-xs text-white/50">
-          © {new Date().getFullYear()} Jainam. All rights reserved.
+        <div className="border-t border-dark-border py-4 text-center">
+          <span className="font-mono text-[10px] tracking-[0.2em] text-dark-muted uppercase">
+            © {new Date().getFullYear()} Jainam · All rights reserved
+          </span>
         </div>
       </footer>
 
-      {/* Cart drawer */}
+      {/* ══════════════════════════════════════
+          CART DRAWER
+      ══════════════════════════════════════ */}
       {cartOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setCartOpen(false)} />
-          <div className="relative bg-white w-full max-w-md h-full flex flex-col shadow-xl">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-bold text-gray-800">Your Cart</h2>
-              <button onClick={() => setCartOpen(false)} className="text-gray-500 hover:text-gray-800">
-                <X size={22} />
+        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Shopping cart">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 modal-backdrop"
+            onClick={() => setCartOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Panel */}
+          <div className="relative bg-dark-surface w-full sm:w-[440px] h-full flex flex-col border-l border-dark-border cart-drawer-enter">
+
+            {/* ── Cart header ── */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-dark-border shrink-0">
+              <div className="flex items-baseline gap-3">
+                <h2 className="font-display font-600 text-dark-text text-base tracking-tight">
+                  Your Cart
+                </h2>
+                {totalItems > 0 && (
+                  <span className="font-mono text-[10px] tracking-widest text-dark-muted uppercase">
+                    {totalItems} {totalItems === 1 ? "item" : "items"}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => setCartOpen(false)}
+                className="flex items-center justify-center w-9 h-9 border border-dark-border text-dark-muted hover:text-dark-text hover:border-dark-text transition-colors"
+                aria-label="Close cart"
+              >
+                <X size={16} />
               </button>
             </div>
 
+            {/* ── ORDER PLACED STATE ── */}
             {orderPlaced ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-                <div className="bg-green-100 text-green-700 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-                  <ShoppingCart size={28} />
+              <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
+                <div className="w-14 h-14 border border-dark-border flex items-center justify-center mb-6">
+                  <CheckCircle size={24} className="text-green-500" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Order placed!</h3>
-                <p className="text-gray-500 mb-6">
+                <h3 className="font-display font-600 text-xl text-dark-text mb-3">
+                  Order placed.
+                </h3>
+                <p className="text-dark-muted text-sm leading-relaxed mb-10 max-w-xs">
                   Your order has been sent to your account manager. They'll follow up with an
                   invoice shortly.
                 </p>
@@ -254,77 +354,156 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                     setCartOpen(false);
                     navigate("/store/catalogue");
                   }}
-                  className="btn-primary"
+                  className="flex items-center gap-2 font-mono text-[11px] tracking-widest uppercase text-dark-muted hover:text-dark-text border border-dark-border px-5 py-3 hover:border-dark-text transition-colors"
                 >
-                  Continue Browsing
+                  Continue Browsing <ArrowRight size={12} />
                 </button>
               </div>
+
             ) : items.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-gray-400">
-                <ShoppingCart size={40} className="mb-3" />
-                <p>Your cart is empty</p>
+              /* ── EMPTY STATE ── */
+              <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
+                <div className="w-14 h-14 border border-dark-border flex items-center justify-center mb-6">
+                  <ShoppingCart size={20} className="text-dark-muted" strokeWidth={1.5} />
+                </div>
+                <p className="font-display font-600 text-base text-dark-text mb-2">
+                  Your cart is empty.
+                </p>
+                <p className="font-mono text-[11px] tracking-widest uppercase text-dark-muted mb-10">
+                  Explore the catalogue and find what you need.
+                </p>
+                <Link
+                  to="/store/catalogue"
+                  onClick={() => setCartOpen(false)}
+                  className="flex items-center gap-2 font-mono text-[11px] tracking-widest uppercase text-dark-muted hover:text-dark-text border border-dark-border px-5 py-3 hover:border-dark-text transition-colors"
+                >
+                  Explore Catalogue <ArrowRight size={12} />
+                </Link>
               </div>
+
             ) : (
               <>
-                <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                  {items.map(({ product, quantity }) => (
-                    <div key={product.id} className="flex gap-3 border-b pb-3">
-                      <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0 flex items-center justify-center">
-                        {product.imageUrl ? (
-                          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <ShoppingCart size={20} className="text-gray-300" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-800 truncate">{product.name}</p>
-                        <p className="text-sm text-gray-500">₹{Number(product.price).toFixed(2)} each</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <button
-                            onClick={() => updateQuantity(product.id, quantity - 1)}
-                            className="w-7 h-7 flex items-center justify-center border rounded hover:bg-gray-50"
-                          >
-                            <Minus size={14} />
-                          </button>
-                          <span className="w-6 text-center text-sm">{quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(product.id, quantity + 1)}
-                            className="w-7 h-7 flex items-center justify-center border rounded hover:bg-gray-50"
-                          >
-                            <Plus size={14} />
-                          </button>
-                          <button
-                            onClick={() => removeItem(product.id)}
-                            className="ml-auto text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                {/* ── LINE ITEMS ── */}
+                <div className="flex-1 overflow-y-auto">
+                  <div className="divide-y divide-dark-border">
+                    {items.map(({ product, quantity }) => {
+                      const linePrice = Number(product.price) * quantity;
+                      return (
+                        <div key={product.id} className="flex gap-4 px-6 py-5">
+
+                          {/* Thumbnail */}
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-dark-bg border border-dark-border flex items-center justify-center overflow-hidden shrink-0">
+                            {product.imageUrl ? (
+                              <img
+                                src={product.imageUrl}
+                                alt={product.name}
+                                className="w-full h-full object-contain p-2"
+                              />
+                            ) : (
+                              <Package size={18} className="text-dark-muted" strokeWidth={1} />
+                            )}
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                            {/* Name + remove */}
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="font-display font-medium text-sm text-dark-text leading-snug line-clamp-2 flex-1">
+                                {product.name}
+                              </p>
+                              <button
+                                onClick={() => removeItem(product.id)}
+                                className="shrink-0 flex items-center justify-center w-7 h-7 text-dark-muted hover:text-red-400 transition-colors mt-0.5"
+                                aria-label={`Remove ${product.name}`}
+                              >
+                                <X size={13} />
+                              </button>
+                            </div>
+
+                            {/* Unit price */}
+                            <p className="font-mono text-[10px] tracking-widest text-dark-muted uppercase">
+                              ₹{Number(product.price).toFixed(2)} / unit
+                            </p>
+
+                            {/* Qty + line total */}
+                            <div className="flex items-center justify-between mt-1">
+                              {/* Quantity stepper */}
+                              <div className="flex items-center border border-dark-border">
+                                <button
+                                  onClick={() => updateQuantity(product.id, quantity - 1)}
+                                  className="w-9 h-9 flex items-center justify-center text-dark-muted hover:text-dark-text hover:bg-dark-bg transition-colors"
+                                  aria-label={`Decrease ${product.name} quantity`}
+                                >
+                                  <Minus size={12} />
+                                </button>
+                                <span className="w-9 h-9 flex items-center justify-center font-mono text-xs text-dark-text border-x border-dark-border select-none">
+                                  {quantity}
+                                </span>
+                                <button
+                                  onClick={() => updateQuantity(product.id, quantity + 1)}
+                                  className="w-9 h-9 flex items-center justify-center text-dark-muted hover:text-dark-text hover:bg-dark-bg transition-colors"
+                                  aria-label={`Increase ${product.name} quantity`}
+                                >
+                                  <Plus size={12} />
+                                </button>
+                              </div>
+
+                              {/* Line price */}
+                              <p className="font-mono font-600 text-sm text-dark-text">
+                                ₹{linePrice.toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })}
+                  </div>
                 </div>
 
-                <div className="border-t p-4 space-y-3">
+                {/* ── CART FOOTER ── */}
+                <div className="border-t border-dark-border bg-dark-deep shrink-0">
+                  {/* Error */}
                   {orderError && (
-                    <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
-                      {orderError}
-                    </p>
+                    <div className="px-6 pt-4">
+                      <p className="text-xs font-mono text-red-400 bg-red-950/40 border border-red-900/60 px-3 py-2.5">
+                        {orderError}
+                      </p>
+                    </div>
                   )}
-                  <div className="flex items-center justify-between font-bold text-gray-800">
-                    <span>Estimated Total</span>
-                    <span>₹{totalValue.toFixed(2)}</span>
+
+                  {/* Subtotal */}
+                  <div className="px-6 py-5 flex items-baseline justify-between border-b border-dark-border">
+                    <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-dark-muted">
+                      Subtotal
+                    </span>
+                    <span className="font-mono font-600 text-xl text-dark-text">
+                      ₹{totalValue.toFixed(2)}
+                    </span>
                   </div>
-                  <button
-                    onClick={handlePlaceOrder}
-                    disabled={placing}
-                    className="btn-primary w-full disabled:opacity-60"
-                  >
-                    {placing ? "Placing Order..." : "Place Order"}
-                  </button>
-                  <p className="text-xs text-gray-400 text-center">
-                    Your account manager will confirm pricing and generate the invoice.
-                  </p>
+
+                  {/* CTA */}
+                  <div className="px-6 py-5 space-y-3">
+                    <button
+                      onClick={handlePlaceOrder}
+                      disabled={placing}
+                      className="w-full flex items-center justify-center gap-2.5 bg-dark-text text-dark-bg font-display font-600 text-sm py-4 hover:bg-dark-copper hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
+                    >
+                      {placing ? (
+                        <span className="font-mono text-xs tracking-widest uppercase">
+                          Placing Order…
+                        </span>
+                      ) : (
+                        <>
+                          Place Order
+                          <ArrowRight size={15} />
+                        </>
+                      )}
+                    </button>
+
+                    <p className="font-mono text-[10px] tracking-widest text-dark-muted text-center uppercase leading-relaxed">
+                      Your account manager confirms pricing and generates the invoice.
+                    </p>
+                  </div>
                 </div>
               </>
             )}
