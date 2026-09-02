@@ -33,9 +33,9 @@ export default function StoreContact() {
   return (
     <div className="page-enter">
       {/* Hero */}
-      <section className="bg-primary py-16 sm:py-20">
+      <section className="bg-navy py-16 sm:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <p className="font-mono text-[11px] tracking-widest text-secondary uppercase mb-4">
+          <p className="font-mono text-[11px] tracking-widest text-coral uppercase mb-4">
             Get in Touch
           </p>
           <h1 className="font-display font-600 text-3xl sm:text-4xl text-white leading-tight">
@@ -55,51 +55,51 @@ export default function StoreContact() {
           <div className="space-y-6">
             {contactInfo.map(({ icon: Icon, label, value, href }) => (
               <div key={label} className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded bg-accent flex items-center justify-center shrink-0">
-                  <Icon size={16} className="text-primary" />
+                <div className="w-10 h-10 bg-line flex items-center justify-center shrink-0">
+                  <Icon size={16} className="text-navy" />
                 </div>
                 <div>
-                  <p className="font-mono text-[10px] tracking-widest text-ink-muted uppercase mb-0.5">
+                  <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase mb-0.5">
                     {label}
                   </p>
                   {href ? (
                     <a
                       href={href}
-                      className="font-display font-medium text-sm text-ink hover:text-secondary transition-colors"
+                      className="font-display font-medium text-sm text-navy hover:text-coral transition-colors"
                     >
                       {value}
                     </a>
                   ) : (
-                    <p className="font-display font-medium text-sm text-ink">{value}</p>
+                    <p className="font-display font-medium text-sm text-navy">{value}</p>
                   )}
                 </div>
               </div>
             ))}
 
-            <p className="text-sm text-ink-muted leading-relaxed pt-4 border-t border-hairline">
+            <p className="text-sm text-ink-soft leading-relaxed pt-4 border-t border-line">
               For order-specific questions, your account manager is always the fastest way to
               get an answer.
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="bg-surface border border-hairline rounded p-6 space-y-5" noValidate>
+          <form onSubmit={handleSubmit} className="bg-white border border-line p-6 space-y-5" noValidate>
             {sent && (
-              <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded p-3">
+              <div className="bg-green-50 border border-green-200 text-green-700 text-sm p-3">
                 Opening your mail client…
               </div>
             )}
 
             <div>
-              <label className="block font-display font-medium text-xs text-ink-muted uppercase tracking-widest mb-2">
+              <label className="block font-display font-medium text-xs text-ink-soft uppercase tracking-widest mb-2">
                 Your Name
               </label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className={`w-full px-3 py-2.5 bg-white border rounded text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:border-ink-muted transition-colors min-h-[44px] ${
-                  errors.name ? "border-red-400" : "border-hairline"
+                className={`w-full px-3 py-2.5 bg-white border text-sm text-navy placeholder:text-ink-soft focus:outline-none focus:border-navy/40 transition-colors min-h-[44px] ${
+                  errors.name ? "border-red-400" : "border-line"
                 }`}
                 placeholder="e.g. Rahul Mehta"
               />
@@ -109,15 +109,15 @@ export default function StoreContact() {
             </div>
 
             <div>
-              <label className="block font-display font-medium text-xs text-ink-muted uppercase tracking-widest mb-2">
+              <label className="block font-display font-medium text-xs text-ink-soft uppercase tracking-widest mb-2">
                 Message
               </label>
               <textarea
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 rows={5}
-                className={`w-full px-3 py-2.5 bg-white border rounded text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:border-ink-muted transition-colors resize-none ${
-                  errors.message ? "border-red-400" : "border-hairline"
+                className={`w-full px-3 py-2.5 bg-white border text-sm text-navy placeholder:text-ink-soft focus:outline-none focus:border-navy/40 transition-colors resize-none ${
+                  errors.message ? "border-red-400" : "border-line"
                 }`}
                 placeholder="Your enquiry…"
               />
@@ -128,7 +128,7 @@ export default function StoreContact() {
 
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 bg-primary text-white py-3 rounded font-display font-medium text-sm hover:bg-primary/90 transition-colors min-h-[48px]"
+              className="w-full flex items-center justify-center gap-2 bg-navy text-white py-3 font-display font-medium text-sm hover:bg-navy/90 transition-colors min-h-[48px]"
             >
               <Send size={15} /> Send Message
             </button>
