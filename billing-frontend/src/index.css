@@ -20,7 +20,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #FAFAF8;
+  background-color: #FFFFFF;
 }
 
 .btn-primary {
@@ -143,6 +143,15 @@ body {
 @keyframes marqueeScroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
+}
+
+/* Asymmetric geometric block used behind the hero product imagery */
+.clip-hero-block {
+  clip-path: polygon(18% 0, 100% 0, 100% 100%, 0% 100%);
+}
+
+.clip-spotlight-block {
+  clip-path: polygon(0 0, 100% 0, 100% 82%, 82% 100%, 0 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
