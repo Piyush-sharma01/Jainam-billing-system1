@@ -7,24 +7,34 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Existing light tokens (admin + storefront shell)
-        primary:    '#142C4C',
-        secondary:  '#E8672A',
+        // ===== JAINAM BRAND SYSTEM (redesign) =====
+        // The three brand colors — used with real visual weight, not just as buttons.
+        navy:   '#1E3A8A',   // Blueprint Navy
+        coral:  '#FF5A5F',   // High-Tech Coral
+        paper:  '#FFFFFF',   // Stark White
+        // Supporting neutrals (structure only — never competing with the 3 brand colors)
+        ink:      '#0F1B3D',
+        'ink-soft': '#4A5578',
+        line:     '#E4E7F2',
+
+        // Legacy tokens kept as aliases so any untouched component still renders
+        // sensibly instead of breaking (mapped onto the new light system).
+        primary:    '#1E3A8A',
+        secondary:  '#FF5A5F',
         accent:     '#F3F1EA',
-        canvas:     '#FAFAF8',
+        canvas:     '#FFFFFF',
         surface:    '#FFFFFF',
-        ink:        '#16181D',
+        ink_old: '#16181D',
         'ink-muted':'#68696B',
-        hairline:   '#E6E4DD',
-        // Dark homepage tokens
+        hairline:   '#E4E7F2',
         dark: {
-          bg:      '#101820',
-          surface: '#18232D',
-          deep:    '#0C1219',
-          border:  '#1E2D3D',
-          text:    '#F4F0E6',
-          muted:   '#8B949E',
-          copper:  '#D9822B',
+          bg:      '#FFFFFF',
+          surface: '#FFFFFF',
+          deep:    '#1E3A8A',
+          border:  '#E4E7F2',
+          text:    '#0F1B3D',
+          muted:   '#4A5578',
+          copper:  '#FF5A5F',
         },
       },
       fontFamily: {
