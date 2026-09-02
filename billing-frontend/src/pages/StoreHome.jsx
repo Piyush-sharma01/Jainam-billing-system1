@@ -351,7 +351,6 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
                     className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-line/50 transition-colors"
                   >
                     <span className="text-sm text-navy truncate">{p.name}</span>
-                    <span className="font-mono text-xs text-coral shrink-0">₹{Number(p.price).toFixed(0)}</span>
                   </Link>
                 ))}
               </div>
@@ -445,9 +444,6 @@ function FeaturedCard({ product, added, onAdd }) {
         >
           {product.name}
         </Link>
-        <p className="font-mono font-600 text-base text-coral mt-2">
-          ₹{Number(product.price).toFixed(2)}
-        </p>
       </div>
     </div>
   );
@@ -517,10 +513,6 @@ function ProductSpotlight({ product }) {
                   <p className="font-display font-600 text-sm text-navy mt-1">{product.category}</p>
                 </div>
               )}
-              <div>
-                <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Price</p>
-                <p className="font-mono font-600 text-lg text-coral mt-1">₹{Number(product.price).toFixed(2)}</p>
-              </div>
             </div>
             <Link
               to={`/store/product/${product.id}`}
