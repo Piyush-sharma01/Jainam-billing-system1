@@ -136,27 +136,58 @@ export default function StoreHome() {
 ───────────────────────────────────────────── */
 function BrandStrip({ brands }) {
   const items = [...brands, ...brands];
+
   return (
-    <div className="border-b border-line bg-white overflow-hidden py-5">
-      <div className="flex w-max animate-ticker gap-0">
+    <section className="relative overflow-hidden bg-royal text-white border-y border-deadly/20">
+      <div className="absolute inset-y-0 left-0 w-32 bg-habanero/20 pointer-events-none" />
+
+      <div className="flex w-max animate-ticker">
         {items.map((brand, i) => (
-          <div key={`${brand.id}-${i}`} className="flex items-center gap-6 px-8 shrink-0">
+          <div
+            key={`${brand.id}-${i}`}
+            className="
+              flex
+              items-center
+              gap-8
+              px-8
+              sm:px-12
+              py-7
+              shrink-0
+            "
+          >
             {brand.logoUrl ? (
               <img
                 src={brand.logoUrl}
                 alt={brand.name}
-                className="h-6 w-auto object-contain opacity-50 hover:opacity-100 transition-opacity grayscale"
+                className="
+                  h-7
+                  w-auto
+                  object-contain
+                  brightness-0
+                  invert
+                  opacity-80
+                  hover:opacity-100
+                  transition-opacity
+                "
               />
             ) : (
-              <span className="font-mono text-[11px] tracking-[0.15em] text-ink-soft uppercase whitespace-nowrap">
+              <span className="
+                font-mono
+                text-[10px]
+                tracking-[0.2em]
+                uppercase
+                whitespace-nowrap
+                text-white/80
+              ">
                 {brand.name}
               </span>
             )}
-            <span className="w-px h-4 bg-line shrink-0" />
+
+            <span className="w-2 h-2 bg-habanero rotate-45 shrink-0" />
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 
