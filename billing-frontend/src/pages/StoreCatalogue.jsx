@@ -87,43 +87,45 @@ export default function StoreCatalogue() {
   }, [drawerOpen]);
 
   return (
-    <div className="bg-dark-bg min-h-screen text-dark-text">
+    <div className="bg-white min-h-screen text-navy">
 
       {/* ══════════════════════════════════════
           CATALOGUE HEADER
       ══════════════════════════════════════ */}
-      <header className="border-b border-dark-border bg-dark-deep relative overflow-hidden">
+      <header className="bg-navy relative overflow-hidden">
         {/* Fine grid */}
         <div
-          className="absolute inset-0 opacity-[0.025] pointer-events-none"
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
           style={{
             backgroundImage:
-              "linear-gradient(#8B949E 1px,transparent 1px),linear-gradient(90deg,#8B949E 1px,transparent 1px)",
+              "linear-gradient(#FFFFFF 1px,transparent 1px),linear-gradient(90deg,#FFFFFF 1px,transparent 1px)",
             backgroundSize: "60px 60px",
           }}
         />
+        {/* Coral structural block, bottom-right — asymmetric accent */}
+        <div className="hidden sm:block absolute -right-10 -bottom-16 w-64 h-64 bg-coral/90 rotate-12" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-8 pt-12 pb-10 sm:pt-16 sm:pb-14">
           {/* Breadcrumb */}
-          <p className="font-mono text-[10px] tracking-[0.2em] text-dark-muted uppercase mb-6 flex items-center gap-2">
+          <p className="font-mono text-[10px] tracking-[0.2em] text-white/50 uppercase mb-6 flex items-center gap-2">
             <span>Jainam</span>
             <span className="opacity-30">/</span>
-            <span className="text-dark-copper">Products</span>
+            <span className="text-coral">Products</span>
           </p>
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
               {/* Eyebrow */}
               <div className="flex items-center gap-3 mb-4">
-                <span className="w-6 h-px bg-dark-copper" />
-                <span className="font-mono text-[11px] tracking-[0.2em] text-dark-copper uppercase">
+                <span className="w-6 h-px bg-coral" />
+                <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
                   Full Range
                 </span>
               </div>
-              <h1 className="font-display font-600 text-display-lg text-dark-text leading-none">
+              <h1 className="font-display font-600 text-display-lg text-white leading-none">
                 Catalogue
               </h1>
-              <p className="text-dark-muted text-sm sm:text-base mt-3 max-w-lg leading-relaxed">
+              <p className="text-white/60 text-sm sm:text-base mt-3 max-w-lg leading-relaxed">
                 Pipes, valves, fittings and industrial hardware — sourced from trusted brands,
                 stocked for consistent availability.
               </p>
@@ -131,11 +133,11 @@ export default function StoreCatalogue() {
 
             {/* Live count */}
             {!loading && (
-              <div className="shrink-0 border border-dark-border px-5 py-3 text-right">
-                <p className="font-mono font-600 text-2xl text-dark-text">
+              <div className="relative shrink-0 border border-white/20 bg-navy px-5 py-3 text-right">
+                <p className="font-mono font-600 text-2xl text-white">
                   {filteredProducts.length}
                 </p>
-                <p className="font-mono text-[10px] tracking-widest text-dark-muted uppercase">
+                <p className="font-mono text-[10px] tracking-widest text-white/50 uppercase">
                   {hasActiveFilter ? "Filtered" : "Products"}
                 </p>
               </div>
@@ -147,27 +149,27 @@ export default function StoreCatalogue() {
       {/* ══════════════════════════════════════
           FILTER + SEARCH BAR
       ══════════════════════════════════════ */}
-      <div className="sticky top-14 sm:top-16 z-30 bg-dark-bg border-b border-dark-border">
+      <div className="sticky top-14 sm:top-16 z-30 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
 
           {/* Desktop filter row */}
-          <div className="hidden md:flex items-stretch gap-0 divide-x divide-dark-border">
+          <div className="hidden md:flex items-stretch gap-0 divide-x divide-gray-200">
 
             {/* Search */}
             <div className="relative flex-1 flex items-center">
-              <Search size={14} className="absolute left-4 text-dark-muted pointer-events-none" />
+              <Search size={14} className="absolute left-4 text-gray-500 pointer-events-none" />
               <input
                 ref={searchRef}
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search products…"
-                className="w-full bg-transparent pl-10 pr-4 py-4 text-sm text-dark-text placeholder:text-dark-muted focus:outline-none"
+                className="w-full bg-transparent pl-10 pr-4 py-4 text-sm text-navy placeholder:text-gray-500 focus:outline-none"
               />
               {search && (
                 <button
                   onClick={() => { setSearch(""); searchRef.current?.focus(); }}
-                  className="absolute right-3 text-dark-muted hover:text-dark-text transition-colors"
+                  className="absolute right-3 text-gray-500 hover:text-navy transition-colors"
                 >
                   <X size={14} />
                 </button>
@@ -198,7 +200,7 @@ export default function StoreCatalogue() {
             {hasActiveFilter && (
               <button
                 onClick={() => setSearchParams({})}
-                className="px-5 text-xs font-mono tracking-widest text-dark-muted hover:text-dark-copper transition-colors uppercase flex items-center gap-2 shrink-0"
+                className="px-5 text-xs font-mono tracking-widest text-gray-500 hover:text-coral transition-colors uppercase flex items-center gap-2 shrink-0"
               >
                 <X size={12} /> Clear
               </button>
@@ -206,21 +208,21 @@ export default function StoreCatalogue() {
           </div>
 
           {/* Mobile filter row */}
-          <div className="md:hidden flex items-stretch gap-0 divide-x divide-dark-border">
+          <div className="md:hidden flex items-stretch gap-0 divide-x divide-gray-200">
             {/* Search */}
             <div className="relative flex-1 flex items-center">
-              <Search size={14} className="absolute left-3.5 text-dark-muted pointer-events-none" />
+              <Search size={14} className="absolute left-3.5 text-gray-500 pointer-events-none" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search…"
-                className="w-full bg-transparent pl-9 pr-3 py-3.5 text-sm text-dark-text placeholder:text-dark-muted focus:outline-none"
+                className="w-full bg-transparent pl-9 pr-3 py-3.5 text-sm text-navy placeholder:text-gray-500 focus:outline-none"
               />
               {search && (
                 <button
                   onClick={() => setSearch("")}
-                  className="absolute right-2.5 text-dark-muted"
+                  className="absolute right-2.5 text-gray-500"
                 >
                   <X size={13} />
                 </button>
@@ -230,12 +232,12 @@ export default function StoreCatalogue() {
             {/* Filter drawer trigger */}
             <button
               onClick={() => setDrawerOpen(true)}
-              className="px-4 flex items-center gap-2 text-xs font-mono tracking-widest text-dark-muted uppercase shrink-0 min-h-[44px]"
+              className="px-4 flex items-center gap-2 text-xs font-mono tracking-widest text-gray-500 uppercase shrink-0 min-h-[44px]"
             >
               <SlidersHorizontal size={14} />
               Filters
               {activeFilterCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-dark-copper text-white text-[9px] font-mono flex items-center justify-center leading-none">
+                <span className="w-4 h-4 rounded-full bg-coral text-white text-[9px] font-mono flex items-center justify-center leading-none">
                   {activeFilterCount}
                 </span>
               )}
@@ -249,7 +251,7 @@ export default function StoreCatalogue() {
       ══════════════════════════════════════ */}
       {!loading && (
         <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-2">
-          <p className="font-mono text-[10px] tracking-[0.15em] text-dark-muted uppercase">
+          <p className="font-mono text-[10px] tracking-[0.15em] text-gray-500 uppercase">
             {search.trim()
               ? `Results for "${search}" — ${filteredProducts.length} products`
               : hasActiveFilter
@@ -269,7 +271,7 @@ export default function StoreCatalogue() {
         ) : filteredProducts.length === 0 ? (
           <EmptyState search={search} hasFilter={hasActiveFilter} onClear={() => { setSearch(""); setSearchParams({}); }} />
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-dark-border border border-dark-border">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-gray-200 border border-gray-200">
             {filteredProducts.map((product, idx) => (
               <CatalogueCard
                 key={product.id}
@@ -292,15 +294,15 @@ export default function StoreCatalogue() {
             className="fixed inset-0 z-40 bg-black/50"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="fixed bottom-0 inset-x-0 z-50 bg-dark-surface border-t border-dark-border rounded-t-lg max-h-[80vh] flex flex-col nav-drawer-enter">
+          <div className="fixed bottom-0 inset-x-0 z-50 bg-gray-50 border-t border-gray-200 rounded-t-lg max-h-[80vh] flex flex-col nav-drawer-enter">
             {/* Handle */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-dark-border shrink-0">
-              <span className="font-mono text-[11px] tracking-widest text-dark-text uppercase">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 shrink-0">
+              <span className="font-mono text-[11px] tracking-widest text-navy uppercase">
                 Filters
               </span>
               <button
                 onClick={() => setDrawerOpen(false)}
-                className="p-2 text-dark-muted hover:text-dark-text transition-colors"
+                className="p-2 text-gray-500 hover:text-navy transition-colors"
               >
                 <X size={18} />
               </button>
@@ -329,16 +331,16 @@ export default function StoreCatalogue() {
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-4 border-t border-dark-border flex gap-3 shrink-0">
+            <div className="px-5 py-4 border-t border-gray-200 flex gap-3 shrink-0">
               <button
                 onClick={() => { setSearchParams({}); setDrawerOpen(false); }}
-                className="flex-1 py-3 border border-dark-border text-dark-muted text-sm font-display font-medium hover:text-dark-text transition-colors"
+                className="flex-1 py-3 border border-gray-200 text-gray-500 text-sm font-display font-medium hover:text-navy transition-colors"
               >
                 Clear all
               </button>
               <button
                 onClick={() => setDrawerOpen(false)}
-                className="flex-1 py-3 bg-dark-copper text-white text-sm font-display font-medium hover:bg-orange-600 transition-colors"
+                className="flex-1 py-3 bg-coral text-white text-sm font-display font-medium hover:opacity-90 transition-colors"
               >
                 Show {filteredProducts.length} results
               </button>
@@ -368,7 +370,7 @@ function FilterDropdown({ label, value, options, onChange }) {
       <button
         onClick={() => setOpen((v) => !v)}
         className={`flex items-center gap-2 px-5 py-4 text-xs font-mono tracking-widest uppercase transition-colors h-full ${
-          value ? "text-dark-copper" : "text-dark-muted hover:text-dark-text"
+          value ? "text-coral" : "text-gray-500 hover:text-navy"
         }`}
       >
         {value || label}
@@ -376,11 +378,11 @@ function FilterDropdown({ label, value, options, onChange }) {
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-0 min-w-[180px] bg-dark-surface border border-dark-border shadow-xl z-50">
+        <div className="absolute top-full left-0 mt-0 min-w-[180px] bg-gray-50 border border-gray-200 shadow-xl z-50">
           <button
             onClick={() => { onChange(""); setOpen(false); }}
             className={`w-full text-left px-4 py-2.5 text-xs font-mono tracking-widest uppercase transition-colors ${
-              !value ? "text-dark-copper" : "text-dark-muted hover:text-dark-text"
+              !value ? "text-coral" : "text-gray-500 hover:text-navy"
             }`}
           >
             All {label}s
@@ -389,8 +391,8 @@ function FilterDropdown({ label, value, options, onChange }) {
             <button
               key={opt}
               onClick={() => { onChange(opt); setOpen(false); }}
-              className={`w-full text-left px-4 py-2.5 text-xs font-mono tracking-widest uppercase transition-colors border-t border-dark-border ${
-                value === opt ? "text-dark-copper bg-dark-bg" : "text-dark-muted hover:text-dark-text"
+              className={`w-full text-left px-4 py-2.5 text-xs font-mono tracking-widest uppercase transition-colors border-t border-gray-200 ${
+                value === opt ? "text-coral bg-white" : "text-gray-500 hover:text-navy"
               }`}
             >
               {opt}
@@ -408,7 +410,7 @@ function FilterDropdown({ label, value, options, onChange }) {
 function FilterGroup({ label, options, active, onSelect }) {
   return (
     <div>
-      <p className="font-mono text-[10px] tracking-[0.2em] text-dark-muted uppercase mb-4">
+      <p className="font-mono text-[10px] tracking-[0.2em] text-gray-500 uppercase mb-4">
         {label}
       </p>
       <div className="space-y-px">
@@ -416,12 +418,12 @@ function FilterGroup({ label, options, active, onSelect }) {
           onClick={() => onSelect("")}
           className={`w-full text-left flex items-center justify-between px-4 py-3 text-sm font-display font-medium transition-colors min-h-[44px] ${
             !active
-              ? "bg-dark-bg text-dark-text border border-dark-copper"
-              : "border border-dark-border text-dark-muted hover:text-dark-text"
+              ? "bg-white text-navy border border-coral"
+              : "border border-gray-200 text-gray-500 hover:text-navy"
           }`}
         >
           All {label}s
-          {!active && <Check size={13} className="text-dark-copper" />}
+          {!active && <Check size={13} className="text-coral" />}
         </button>
         {options.map((opt) => (
           <button
@@ -429,12 +431,12 @@ function FilterGroup({ label, options, active, onSelect }) {
             onClick={() => onSelect(active === opt ? "" : opt)}
             className={`w-full text-left flex items-center justify-between px-4 py-3 text-sm font-display font-medium transition-colors min-h-[44px] ${
               active === opt
-                ? "bg-dark-bg text-dark-text border border-dark-copper"
-                : "border border-dark-border text-dark-muted hover:text-dark-text"
+                ? "bg-white text-navy border border-coral"
+                : "border border-gray-200 text-gray-500 hover:text-navy"
             }`}
           >
             {opt}
-            {active === opt && <Check size={13} className="text-dark-copper" />}
+            {active === opt && <Check size={13} className="text-coral" />}
           </button>
         ))}
       </div>
@@ -450,11 +452,11 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
   const outOfStock = product.stock === 0;
 
   return (
-    <div className="bg-dark-bg group flex flex-col">
+    <div className="bg-white group flex flex-col">
       {/* Image area — links to product detail */}
       <Link
         to={`/store/product/${product.id}`}
-        className="relative overflow-hidden aspect-square bg-dark-surface flex items-center justify-center block"
+        className="relative overflow-hidden aspect-square bg-gray-50 flex items-center justify-center block"
         tabIndex={-1}
         aria-label={`View ${product.name}`}
       >
@@ -466,15 +468,15 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
             loading={idx < 8 ? "eager" : "lazy"}
           />
         ) : (
-          <div className="flex flex-col items-center gap-2 text-dark-border">
+          <div className="flex flex-col items-center gap-2 text-gray-200">
             <Package size={32} strokeWidth={1} />
           </div>
         )}
 
         {/* Out of stock overlay */}
         {outOfStock && (
-          <div className="absolute inset-0 bg-dark-deep/70 flex items-center justify-center">
-            <span className="font-mono text-[9px] tracking-[0.2em] text-dark-muted uppercase">
+          <div className="absolute inset-0 bg-navy/70 flex items-center justify-center">
+            <span className="font-mono text-[9px] tracking-[0.2em] text-white uppercase">
               Out of Stock
             </span>
           </div>
@@ -490,7 +492,7 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
               ? "opacity-0 cursor-not-allowed"
               : added
               ? "bg-green-700 border-green-700 text-white opacity-100"
-              : "bg-dark-bg border-dark-border text-dark-muted hover:border-dark-copper hover:text-dark-copper opacity-0 group-hover:opacity-100"
+              : "bg-white border-gray-200 text-gray-500 hover:border-coral hover:text-coral opacity-0 group-hover:opacity-100"
           }`}
         >
           {added ? <Check size={12} /> : <ShoppingCart size={12} />}
@@ -498,21 +500,21 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
       </Link>
 
       {/* Info strip */}
-      <div className="border-t border-dark-border flex items-end justify-between gap-3 px-3 sm:px-4 py-3 sm:py-4">
+      <div className="border-t border-gray-200 flex items-end justify-between gap-3 px-3 sm:px-4 py-3 sm:py-4">
         <div className="min-w-0 flex-1">
           {/* Brand / category metadata */}
           {(product.brand || product.category) && (
-            <p className="font-mono text-[9px] sm:text-[10px] tracking-widest text-dark-muted uppercase mb-1 truncate">
+            <p className="font-mono text-[9px] sm:text-[10px] tracking-widest text-gray-500 uppercase mb-1 truncate">
               {product.brand || product.category}
             </p>
           )}
           <Link
             to={`/store/product/${product.id}`}
-            className="font-display font-medium text-xs sm:text-sm text-dark-text leading-snug line-clamp-2 hover:text-dark-copper transition-colors"
+            className="font-display font-medium text-xs sm:text-sm text-navy leading-snug line-clamp-2 hover:text-coral transition-colors"
           >
             {product.name}
           </Link>
-          <p className="font-mono font-600 text-sm sm:text-base text-dark-copper mt-1.5">
+          <p className="font-mono font-600 text-sm sm:text-base text-coral mt-1.5">
             ₹{Number(product.price).toFixed(2)}
           </p>
         </div>
@@ -524,10 +526,10 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
           aria-label={`Add ${product.name} to cart`}
           className={`sm:hidden shrink-0 w-9 h-9 flex items-center justify-center border transition-colors ${
             outOfStock
-              ? "border-dark-border text-dark-muted cursor-not-allowed opacity-40"
+              ? "border-gray-200 text-gray-500 cursor-not-allowed opacity-40"
               : added
               ? "bg-green-700 border-green-700 text-white"
-              : "border-dark-border text-dark-muted hover:border-dark-copper hover:text-dark-copper"
+              : "border-gray-200 text-gray-500 hover:border-coral hover:text-coral"
           }`}
         >
           {added ? <Check size={13} /> : <ShoppingCart size={13} />}
@@ -542,14 +544,14 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
 ───────────────────────────────────────────── */
 function SkeletonGrid() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-dark-border border border-dark-border">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-gray-200 border border-gray-200">
       {Array.from({ length: 12 }).map((_, i) => (
-        <div key={i} className="bg-dark-bg flex flex-col">
-          <div className="aspect-square bg-dark-surface animate-pulse" />
-          <div className="border-t border-dark-border px-4 py-4 space-y-2">
-            <div className="h-2.5 bg-dark-surface rounded animate-pulse w-1/3" />
-            <div className="h-3.5 bg-dark-surface rounded animate-pulse w-2/3" />
-            <div className="h-4 bg-dark-surface rounded animate-pulse w-1/2 mt-1" />
+        <div key={i} className="bg-white flex flex-col">
+          <div className="aspect-square bg-gray-50 animate-pulse" />
+          <div className="border-t border-gray-200 px-4 py-4 space-y-2">
+            <div className="h-2.5 bg-gray-50 rounded animate-pulse w-1/3" />
+            <div className="h-3.5 bg-gray-50 rounded animate-pulse w-2/3" />
+            <div className="h-4 bg-gray-50 rounded animate-pulse w-1/2 mt-1" />
           </div>
         </div>
       ))}
@@ -562,22 +564,22 @@ function SkeletonGrid() {
 ───────────────────────────────────────────── */
 function EmptyState({ search, hasFilter, onClear }) {
   return (
-    <div className="border border-dark-border bg-dark-surface py-24 flex flex-col items-center gap-5 text-center px-6">
-      <div className="w-14 h-14 border border-dark-border flex items-center justify-center">
-        <Package size={24} className="text-dark-muted" strokeWidth={1} />
+    <div className="border border-gray-200 bg-gray-50 py-24 flex flex-col items-center gap-5 text-center px-6">
+      <div className="w-14 h-14 border border-gray-200 flex items-center justify-center">
+        <Package size={24} className="text-gray-500" strokeWidth={1} />
       </div>
       <div>
-        <p className="font-display font-600 text-base text-dark-text mb-1">
+        <p className="font-display font-600 text-base text-navy mb-1">
           {search ? `No results for "${search}"` : "No products found"}
         </p>
-        <p className="font-mono text-[11px] tracking-widest text-dark-muted uppercase">
+        <p className="font-mono text-[11px] tracking-widest text-gray-500 uppercase">
           {hasFilter ? "Try adjusting your filters" : "Check back soon"}
         </p>
       </div>
       {(search || hasFilter) && (
         <button
           onClick={onClear}
-          className="px-5 py-2.5 border border-dark-border text-dark-muted text-xs font-mono tracking-widest uppercase hover:text-dark-text hover:border-dark-text transition-colors"
+          className="px-5 py-2.5 border border-gray-200 text-gray-500 text-xs font-mono tracking-widest uppercase hover:text-navy hover:border-navy transition-colors"
         >
           Clear filters
         </button>
