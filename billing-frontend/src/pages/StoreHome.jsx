@@ -75,7 +75,7 @@ export default function StoreHome() {
   };
 
   return (
-    <div className="bg-white text-navy">
+    <div className="bg-luster text-deadly">
 
       {/* ═══════════════════════════════════════
           01 — HERO SLIDER
