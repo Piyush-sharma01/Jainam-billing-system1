@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ShoppingCart, Check, ArrowRight, ChevronRight,
+  ShoppingCart, Check, ArrowRight, ChevronRight, Search,
   Package, Truck, Headphones, ShieldCheck,
 } from "lucide-react";
 import { brandAPI, categoryAPI, productAPI } from "../services/api";
 import { useCart } from "../services/cartContext";
+import HeroSlider from "../components/HeroSlider";
 
 /* ─────────────────────────────────────────────
    UTILITY: simple intersection-observer hook
@@ -37,6 +38,7 @@ export default function StoreHome() {
   const [loading,    setLoading]    = useState(true);
   const [addedId,    setAddedId]    = useState(null);
   const { addItem } = useCart();
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -63,49 +65,66 @@ export default function StoreHome() {
     setTimeout(() => setAddedId(null), 1500);
   };
 
-  const featured   = products.slice(0, 5);
-  const heroProduct = products[0] || null;
+  const featured  = products.slice(0, 8);
+  const spotlight = products[Math.min(3, products.length - 1)] || products[0] || null;
+
+  const stats = {
+    productCount: products.length,
+    categoryCount: categories.length,
+    brandCount: brands.length,
+  };
 
   return (
-    <div className="bg-dark-bg text-dark-text">
+    <div className="bg-white text-navy">
 
       {/* ═══════════════════════════════════════
-          01 — HERO
+          01 — HERO SLIDER
       ═══════════════════════════════════════ */}
-      <HeroSection heroProduct={heroProduct} loading={loading} />
+      {!loading && <HeroSlider products={products} stats={stats} />}
+      {loading && (
+        <div className="h-[560px] sm:h-[620px] bg-navy animate-pulse" />
+      )}
 
       {/* ═══════════════════════════════════════
-          BRAND TICKER
+          BRAND STRIP
       ═══════════════════════════════════════ */}
-      {!loading && brands.length > 0 && <BrandTicker brands={brands} />}
+      {!loading && brands.length > 0 && <BrandStrip brands={brands} />}
 
       {/* ═══════════════════════════════════════
-          02 — CATEGORIES
+          02 — CATEGORY EXPLORER (bento)
       ═══════════════════════════════════════ */}
-      <CategorySection categories={categories} loading={loading} />
+      <CategoryExplorer categories={categories} loading={loading} />
 
       {/* ═══════════════════════════════════════
-          03 — FEATURED PRODUCTS
+          03 — PRODUCT DISCOVERY + FEATURED
       ═══════════════════════════════════════ */}
-      <ProductSection
-        products={featured}
+      <ProductDiscovery
+        products={products}
+        featured={featured}
         loading={loading}
         addedId={addedId}
         onAdd={handleAdd}
+        search={search}
+        setSearch={setSearch}
       />
 
       {/* ═══════════════════════════════════════
-          04 — BRAND / STORY
+          04 — PRODUCT SPOTLIGHT
       ═══════════════════════════════════════ */}
-      <BrandStorySection />
+      {!loading && spotlight && <ProductSpotlight product={spotlight} />}
 
       {/* ═══════════════════════════════════════
-          05 — WHY JAINAM
+          05 — PROCESS FLOW
       ═══════════════════════════════════════ */}
-      <WhySection />
+      <ProcessFlow />
 
       {/* ═══════════════════════════════════════
-          06 — FINAL CTA
+          06 — WHY JAINAM (bento)
+      ═══════════════════════════════════════ */}
+      <WhySection stats={stats} loading={loading} />
+
+      {/* ═══════════════════════════════════════
+          07 — FINAL CTA
       ═══════════════════════════════════════ */}
       <FinalCTA />
     </div>
@@ -113,209 +132,27 @@ export default function StoreHome() {
 }
 
 /* ─────────────────────────────────────────────
-   01 HERO
+   BRAND STRIP
 ───────────────────────────────────────────── */
-function HeroSection({ heroProduct, loading }) {
+function BrandStrip({ brands }) {
+  const items = [...brands, ...brands];
   return (
-    <section className="relative min-h-screen flex flex-col overflow-hidden bg-dark-deep">
-      {/* Fine grid overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(#8B949E 1px,transparent 1px),linear-gradient(90deg,#8B949E 1px,transparent 1px)",
-          backgroundSize: "80px 80px",
-        }}
-      />
-
-      {/* Top rule */}
-      <div className="border-b border-dark-border px-6 sm:px-10 py-4 flex items-center justify-between relative z-10">
-        <span className="font-mono text-[10px] tracking-[0.2em] text-dark-muted uppercase">
-          Industrial Supply Co.
-        </span>
-        <span className="font-mono text-[10px] tracking-[0.2em] text-dark-muted uppercase">
-          Est. Mumbai, India
-        </span>
-      </div>
-
-      {/* Hero body — asymmetric split */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 relative z-10">
-
-        {/* LEFT: editorial text column */}
-        <div className="flex flex-col justify-between px-6 sm:px-10 pt-12 pb-10 lg:border-r border-dark-border">
-          <div>
-            {/* Eyebrow */}
-            <div className="flex items-center gap-3 mb-8">
-              <span className="w-8 h-px bg-dark-copper" />
-              <span className="font-mono text-[11px] tracking-[0.2em] text-dark-copper uppercase">
-                Pipes · Valves · Fittings
-              </span>
-            </div>
-
-            {/* Main headline */}
-            <h1 className="font-display font-600 text-display-xl text-dark-text leading-none mb-6 animate-fade-up">
-              Built for<br />
-              <span className="text-dark-copper">industry.</span><br />
-              Sourced for<br />
-              reliability.
-            </h1>
-
-            <p className="text-dark-muted text-base sm:text-lg leading-relaxed max-w-md mb-10 animate-fade-up-d">
-              Jainam supplies pipes, valves, fittings and hardware to businesses
-              across India — backed by dedicated account management and consistent
-              stock availability.
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-4">
-              <Link
-                to="/store/catalogue"
-                className="inline-flex items-center gap-2 bg-dark-copper text-white font-display font-medium text-sm px-6 py-3.5 hover:bg-orange-600 transition-colors"
-              >
-                Explore Catalogue
-                <ArrowRight size={15} />
-              </Link>
-              <Link
-                to="/store/contact"
-                className="inline-flex items-center gap-2 border border-dark-border text-dark-muted font-display font-medium text-sm px-6 py-3.5 hover:border-dark-text hover:text-dark-text transition-colors"
-              >
-                Contact Us
-              </Link>
-            </div>
-          </div>
-
-          {/* Bottom stat row */}
-          <div className="mt-12 pt-8 border-t border-dark-border grid grid-cols-3 gap-4">
-            {[
-              { val: "500+", label: "SKUs" },
-              { val: "OEM",  label: "Compatible" },
-              { val: "B2B",  label: "Direct Supply" },
-            ].map(({ val, label }) => (
-              <div key={label}>
-                <p className="font-mono font-600 text-xl text-dark-text">{val}</p>
-                <p className="font-mono text-[10px] tracking-widest text-dark-muted uppercase mt-0.5">
-                  {label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* RIGHT: product imagery panel */}
-        <div className="hidden lg:flex flex-col">
-          {/* Large image area */}
-          <div className="flex-1 relative overflow-hidden bg-dark-surface flex items-center justify-center">
-            {/* Corner annotations */}
-            <span className="absolute top-4 left-4 font-mono text-[9px] tracking-widest text-dark-muted uppercase opacity-50">
-              Featured Product
-            </span>
-            <span className="absolute top-4 right-4 font-mono text-[9px] tracking-widest text-dark-muted uppercase opacity-50">
-              ↗ View Catalogue
-            </span>
-
-            {!loading && heroProduct?.imageUrl ? (
-              <img
-                src={heroProduct.imageUrl}
-                alt={heroProduct.name}
-                className="w-full h-full object-contain p-12 animate-fade-in"
-                style={{ maxHeight: "70vh" }}
-              />
-            ) : (
-              <div className="flex flex-col items-center gap-4 text-dark-muted opacity-20">
-                <Package size={64} strokeWidth={1} />
-                <span className="font-mono text-xs tracking-widest uppercase">Your Products Here</span>
-              </div>
-            )}
-
-            {/* Product label strip */}
-            {!loading && heroProduct && (
-              <div className="absolute bottom-0 inset-x-0 border-t border-dark-border px-6 py-4 flex items-center justify-between bg-dark-deep/80 backdrop-blur-sm">
-                <div>
-                  <p className="font-display font-medium text-sm text-dark-text truncate max-w-xs">
-                    {heroProduct.name}
-                  </p>
-                  <p className="font-mono text-xs text-dark-muted mt-0.5">
-                    {heroProduct.brand || heroProduct.category || ""}
-                  </p>
-                </div>
-                <p className="font-mono font-600 text-dark-copper text-base shrink-0 ml-4">
-                  ₹{Number(heroProduct.price).toFixed(2)}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Two thumbnail slots */}
-          <div className="grid grid-cols-2 border-t border-dark-border h-32">
-            {[1, 2].map((idx) => {
-              const p = !loading ? (idx === 1 ? /* products[1] */ null : null) : null;
-              return (
-                <div
-                  key={idx}
-                  className={`relative overflow-hidden bg-dark-surface flex items-center justify-center ${
-                    idx === 1 ? "border-r border-dark-border" : ""
-                  }`}
-                >
-                  <span className="font-mono text-[9px] tracking-widest text-dark-muted uppercase opacity-30">
-                    {idx === 1 ? "Pipes & Valves" : "Fittings & Hardware"}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile product preview */}
-      {!loading && heroProduct?.imageUrl && (
-        <div className="lg:hidden border-t border-dark-border bg-dark-surface flex items-center gap-4 px-6 py-4">
-          <img
-            src={heroProduct.imageUrl}
-            alt={heroProduct.name}
-            className="w-16 h-16 object-contain shrink-0"
-          />
-          <div className="min-w-0">
-            <p className="font-display font-medium text-sm text-dark-text truncate">
-              {heroProduct.name}
-            </p>
-            <p className="font-mono text-xs text-dark-copper mt-0.5">
-              ₹{Number(heroProduct.price).toFixed(2)}
-            </p>
-          </div>
-          <Link to="/store/catalogue" className="ml-auto shrink-0">
-            <ChevronRight size={18} className="text-dark-muted" />
-          </Link>
-        </div>
-      )}
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   BRAND TICKER
-───────────────────────────────────────────── */
-function BrandTicker({ brands }) {
-  const items = [...brands, ...brands]; // doubled for seamless loop
-  return (
-    <div className="border-y border-dark-border bg-dark-surface overflow-hidden py-4">
+    <div className="border-b border-line bg-white overflow-hidden py-5">
       <div className="flex w-max animate-ticker gap-0">
         {items.map((brand, i) => (
-          <div
-            key={`${brand.id}-${i}`}
-            className="flex items-center gap-6 px-8 shrink-0"
-          >
+          <div key={`${brand.id}-${i}`} className="flex items-center gap-6 px-8 shrink-0">
             {brand.logoUrl ? (
               <img
                 src={brand.logoUrl}
                 alt={brand.name}
-                className="h-6 w-auto object-contain opacity-40 hover:opacity-80 transition-opacity grayscale"
+                className="h-6 w-auto object-contain opacity-50 hover:opacity-100 transition-opacity grayscale"
               />
             ) : (
-              <span className="font-mono text-[11px] tracking-[0.15em] text-dark-muted uppercase whitespace-nowrap">
+              <span className="font-mono text-[11px] tracking-[0.15em] text-ink-soft uppercase whitespace-nowrap">
                 {brand.name}
               </span>
             )}
-            <span className="w-px h-4 bg-dark-border shrink-0" />
+            <span className="w-px h-4 bg-line shrink-0" />
           </div>
         ))}
       </div>
@@ -324,48 +161,64 @@ function BrandTicker({ brands }) {
 }
 
 /* ─────────────────────────────────────────────
-   02 CATEGORIES
+   02 CATEGORY EXPLORER — bento composition
 ───────────────────────────────────────────── */
-function CategorySection({ categories, loading }) {
+function CategoryExplorer({ categories, loading }) {
   const [ref, visible] = useReveal();
-
   const display = loading
-    ? Array.from({ length: 4 }, (_, i) => ({ id: i, name: "", _skeleton: true }))
+    ? Array.from({ length: 5 }, (_, i) => ({ id: i, name: "", _skeleton: true }))
     : categories;
 
   return (
-    <section ref={ref} className="bg-dark-bg py-20 sm:py-28">
+    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-line">
       <div className="max-w-7xl mx-auto px-6 sm:px-10">
-
-        {/* Section header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-16">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12 sm:mb-16">
           <div>
-            <span className="font-mono text-[11px] tracking-[0.2em] text-dark-copper uppercase">
+            <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
               02 / Product Range
             </span>
-            <h2 className="font-display font-600 text-display-lg text-dark-text mt-2">
-              Browse by<br />category
+            <h2 className="font-display font-600 text-display-lg text-navy mt-2">
+              Explore our<br />products
             </h2>
           </div>
           <Link
             to="/store/catalogue"
-            className="inline-flex items-center gap-2 text-sm font-display font-medium text-dark-muted hover:text-dark-text transition-colors group"
+            className="inline-flex items-center gap-2 text-sm font-display font-medium text-ink-soft hover:text-navy transition-colors group"
           >
             View full catalogue
             <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
 
-        {/* Category list — editorial numbered style */}
-        <div className="divide-y divide-dark-border border-t border-dark-border">
-          {display.map((cat, idx) => (
-            <CategoryRow
-              key={cat.id}
-              cat={cat}
-              idx={idx}
-              visible={visible}
-              skeleton={cat._skeleton}
+        {/* Bento grid: large navy "PRODUCTS" panel + category tiles */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-line border border-line">
+          {/* Large lead panel */}
+          <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 bg-navy relative overflow-hidden p-8 sm:p-10 flex flex-col justify-between min-h-[220px] sm:min-h-[320px]">
+            <div
+              className="absolute inset-0 opacity-[0.06] pointer-events-none"
+              style={{
+                backgroundImage: "linear-gradient(#FFFFFF 1px,transparent 1px),linear-gradient(90deg,#FFFFFF 1px,transparent 1px)",
+                backgroundSize: "48px 48px",
+              }}
             />
+            <div className="relative z-10 w-10 h-10 bg-coral flex items-center justify-center">
+              <Package size={18} className="text-white" />
+            </div>
+            <div className="relative z-10">
+              <h3 className="font-display font-600 text-display-md text-white leading-none mb-3">
+                Products
+              </h3>
+              <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-sm">
+                {loading
+                  ? "Loading the current catalogue…"
+                  : `${categories.length} categories of pipes, valves, fittings and hardware — all in stock and ready to order.`}
+              </p>
+            </div>
+          </div>
+
+          {/* Category tiles */}
+          {display.map((cat, idx) => (
+            <CategoryTile key={cat.id} cat={cat} idx={idx} visible={visible} skeleton={cat._skeleton} />
           ))}
         </div>
       </div>
@@ -373,333 +226,277 @@ function CategorySection({ categories, loading }) {
   );
 }
 
-function CategoryRow({ cat, idx, visible, skeleton }) {
-  const delay = `${idx * 80}ms`;
-
+function CategoryTile({ cat, idx, visible, skeleton }) {
   if (skeleton) {
-    return (
-      <div className="py-6 flex items-center gap-6">
-        <div className="w-10 h-4 rounded bg-dark-surface" />
-        <div className="flex-1 h-6 rounded bg-dark-surface" />
-      </div>
-    );
+    return <div className="bg-white p-6 min-h-[130px] animate-pulse" />;
   }
-
+  const isCoral = idx % 3 === 1;
   return (
     <Link
       to={`/store/catalogue?category=${encodeURIComponent(cat.name)}`}
-      className="group flex items-center gap-6 sm:gap-10 py-5 sm:py-6 hover:pl-2 transition-all duration-300"
+      className={`group relative flex flex-col justify-between p-6 min-h-[130px] transition-colors duration-300 ${
+        isCoral ? "bg-coral hover:bg-navy" : "bg-white hover:bg-navy"
+      }`}
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? "none" : "translateY(12px)",
-        transition: `opacity 0.5s ${delay}, transform 0.5s ${delay}`,
+        transform: visible ? "none" : "translateY(10px)",
+        transition: `opacity 0.5s ${idx * 70}ms, transform 0.5s ${idx * 70}ms`,
       }}
     >
-      {/* Number */}
-      <span className="font-mono text-[11px] tracking-widest text-dark-muted shrink-0 w-8">
+      <span className={`font-mono text-[10px] tracking-widest ${isCoral ? "text-white/70" : "text-ink-soft"} group-hover:text-white/60`}>
         {String(idx + 1).padStart(2, "0")}
       </span>
-
-      {/* Divider line that grows on hover */}
-      <span className="h-px w-8 sm:w-12 bg-dark-border group-hover:w-16 group-hover:bg-dark-copper transition-all duration-300 shrink-0" />
-
-      {/* Name */}
-      <span className="font-display font-600 text-display-md text-dark-text group-hover:text-dark-copper transition-colors flex-1 truncate">
-        {cat.name}
-      </span>
-
-      {/* Arrow */}
-      <ChevronRight
-        size={20}
-        className="text-dark-muted opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 shrink-0"
-      />
+      <div className="flex items-center justify-between gap-2">
+        <span className={`font-display font-600 text-base sm:text-lg leading-tight ${isCoral ? "text-white" : "text-navy"} group-hover:text-white transition-colors`}>
+          {cat.name}
+        </span>
+        <ChevronRight
+          size={16}
+          className={`shrink-0 ${isCoral ? "text-white" : "text-navy"} group-hover:text-coral group-hover:translate-x-1 transition-all`}
+        />
+      </div>
     </Link>
   );
 }
 
 /* ─────────────────────────────────────────────
-   03 FEATURED PRODUCTS
+   03 PRODUCT DISCOVERY + FEATURED SLIDER
 ───────────────────────────────────────────── */
-function ProductSection({ products, loading, addedId, onAdd }) {
-  const [ref, visible] = useReveal(0.1);
-
-  const [featured, ...rest] = products;
-  const supporting = rest.slice(0, 4);
-
-  if (loading) {
-    return (
-      <section className="bg-dark-surface border-t border-dark-border py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-6 sm:px-10">
-          <SkeletonProducts />
-        </div>
-      </section>
-    );
-  }
-
-  if (products.length === 0) return null;
+function ProductDiscovery({ products, featured, loading, addedId, onAdd, search, setSearch }) {
+  const results = search.trim()
+    ? products.filter((p) => p.name?.toLowerCase().includes(search.toLowerCase())).slice(0, 6)
+    : [];
 
   return (
-    <section ref={ref} className="bg-dark-surface border-t border-dark-border py-20 sm:py-28">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10">
+    <section className="bg-navy py-20 sm:py-28 relative overflow-hidden">
+      <div
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
+        style={{
+          backgroundImage: "linear-gradient(#FFFFFF 1px,transparent 1px),linear-gradient(90deg,#FFFFFF 1px,transparent 1px)",
+          backgroundSize: "64px 64px",
+        }}
+      />
+      <div className="relative max-w-7xl mx-auto px-6 sm:px-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] gap-10 lg:gap-6 mb-16">
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-14">
-          <div>
-            <span className="font-mono text-[11px] tracking-[0.2em] text-dark-copper uppercase">
-              03 / Products
-            </span>
-            <h2 className="font-display font-600 text-display-lg text-dark-text mt-2">
-              Selected<br />products
-            </h2>
-          </div>
-          <Link
-            to="/store/catalogue"
-            className="inline-flex items-center gap-2 text-sm font-display font-medium text-dark-muted hover:text-dark-text transition-colors group"
-          >
-            Full catalogue <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
-
-        {/* Editorial layout: large + grid */}
-        <div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-dark-border"
-          style={{ opacity: visible ? 1 : 0, transition: "opacity 0.6s ease" }}
-        >
-          {/* Large featured */}
-          {featured && (
-            <div className="bg-dark-bg lg:row-span-2 flex flex-col">
-              {/* Image — links to product detail */}
-              <Link
-                to={`/store/product/${featured.id}`}
-                className="flex-1 bg-dark-surface relative overflow-hidden flex items-center justify-center min-h-[280px] sm:min-h-[360px] lg:min-h-[480px] group block"
-              >
-                {featured.imageUrl ? (
-                  <img
-                    src={featured.imageUrl}
-                    alt={featured.name}
-                    className="w-full h-full object-contain p-8 transition-transform duration-700 group-hover:scale-105"
-                  />
-                ) : (
-                  <Package size={48} className="text-dark-border" strokeWidth={1} />
-                )}
-                {/* Overlay label */}
-                <div className="absolute top-4 left-4">
-                  <span className="font-mono text-[9px] tracking-widest text-dark-copper uppercase bg-dark-bg/80 px-2 py-1">
-                    Featured
-                  </span>
-                </div>
-              </Link>
-              {/* Info */}
-              <div className="border-t border-dark-border p-5 sm:p-6 flex items-end justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="font-mono text-[10px] tracking-widest text-dark-muted uppercase mb-1">
-                    {featured.brand || featured.category || ""}
-                  </p>
-                  <Link to={`/store/product/${featured.id}`} className="font-display font-600 text-lg text-dark-text leading-snug hover:text-dark-copper transition-colors">
-                    {featured.name}
-                  </Link>
-                  <p className="font-mono font-600 text-dark-copper text-base mt-2">
-                    ₹{Number(featured.price).toFixed(2)}
-                  </p>
-                </div>
-                <AddButton
-                  product={featured}
-                  addedId={addedId}
-                  onAdd={onAdd}
-                  size="lg"
-                />
-              </div>
+          {/* Search panel */}
+          <div className="bg-coral p-8 sm:p-10 flex flex-col justify-between">
+            <div>
+              <span className="font-mono text-[11px] tracking-[0.2em] text-white/70 uppercase">
+                03 / Product Discovery
+              </span>
+              <h2 className="font-display font-600 text-2xl sm:text-3xl text-white mt-3 mb-6 leading-tight">
+                Find your product
+              </h2>
             </div>
-          )}
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              className="relative"
+            >
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-navy/50" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search products…"
+                className="w-full bg-white pl-11 pr-4 py-3.5 text-sm text-navy placeholder:text-navy/40 focus:outline-none"
+              />
+            </form>
+            <Link
+              to="/store/catalogue"
+              className="inline-flex items-center gap-2 mt-5 font-mono text-[11px] tracking-widest uppercase text-white hover:text-navy transition-colors group"
+            >
+              Full search &amp; filters
+              <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+            </Link>
 
-          {/* Supporting grid */}
-          {supporting.map((product) => (
-            <SmallProductCard
-              key={product.id}
-              product={product}
-              addedId={addedId}
-              onAdd={onAdd}
-              visible={visible}
-            />
-          ))}
+            {/* Live search results */}
+            {results.length > 0 && (
+              <div className="mt-6 bg-white divide-y divide-line">
+                {results.map((p) => (
+                  <Link
+                    key={p.id}
+                    to={`/store/product/${p.id}`}
+                    className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-line/50 transition-colors"
+                  >
+                    <span className="text-sm text-navy truncate">{p.name}</span>
+                    <span className="font-mono text-xs text-coral shrink-0">₹{Number(p.price).toFixed(0)}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Featured heading */}
+          <div className="flex flex-col justify-center">
+            <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase mb-3">
+              Featured Products
+            </span>
+            <h3 className="font-display font-600 text-display-md text-white leading-tight mb-4">
+              A current sample of<br />what's in stock
+            </h3>
+            <p className="text-white/60 text-sm sm:text-base max-w-md leading-relaxed">
+              Scroll to browse — every item shown is live from the catalogue, with real pricing
+              and availability.
+            </p>
+          </div>
         </div>
+
+        {/* Horizontal product slider */}
+        {loading ? (
+          <div className="flex gap-4 overflow-hidden">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="w-[45%] sm:w-[220px] shrink-0 aspect-square bg-white/10 animate-pulse" />
+            ))}
+          </div>
+        ) : featured.length === 0 ? (
+          <p className="text-white/50 text-sm">No products available yet.</p>
+        ) : (
+          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-1 px-1">
+            {featured.map((product) => (
+              <FeaturedCard
+                key={product.id}
+                product={product}
+                added={addedId === product.id}
+                onAdd={() => onAdd(product)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
 }
 
-function SmallProductCard({ product, addedId, onAdd }) {
+function FeaturedCard({ product, added, onAdd }) {
   const outOfStock = product.stock === 0;
-
   return (
-    <div className="bg-dark-bg flex flex-row sm:flex-col">
-      {/* Image — links to product detail */}
+    <div className="w-[70%] xs:w-[55%] sm:w-[240px] shrink-0 snap-start bg-white group flex flex-col">
       <Link
         to={`/store/product/${product.id}`}
-        className="w-24 sm:w-full sm:aspect-square bg-dark-surface flex items-center justify-center overflow-hidden shrink-0 group relative block"
-        tabIndex={-1}
+        className="relative block aspect-square bg-line/40 overflow-hidden"
       >
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <Package size={24} className="text-dark-border" strokeWidth={1} />
-        )}
-        {outOfStock && (
-          <div className="absolute inset-0 bg-dark-bg/70 flex items-center justify-center">
-            <span className="font-mono text-[9px] tracking-widest text-dark-muted uppercase">
-              Out of Stock
-            </span>
+          <div className="w-full h-full flex items-center justify-center">
+            <Package size={32} strokeWidth={1} className="text-navy/20" />
           </div>
         )}
+        <button
+          onClick={(e) => { e.preventDefault(); if (!outOfStock) onAdd(); }}
+          disabled={outOfStock}
+          aria-label={`Add ${product.name} to cart`}
+          className={`absolute bottom-3 right-3 w-9 h-9 flex items-center justify-center transition-colors ${
+            outOfStock
+              ? "opacity-0"
+              : added
+              ? "bg-green-700 text-white"
+              : "bg-navy text-white hover:bg-coral"
+          }`}
+        >
+          {added ? <Check size={14} /> : <ShoppingCart size={14} />}
+        </button>
       </Link>
-      {/* Info */}
-      <div className="border-t border-dark-border flex items-center justify-between gap-3 px-4 py-3 flex-1 min-w-0">
-        <div className="min-w-0">
-          <Link to={`/store/product/${product.id}`} className="font-display font-medium text-xs text-dark-text truncate hover:text-dark-copper transition-colors block">{product.name}</Link>
-          <p className="font-mono text-[10px] text-dark-copper mt-0.5">
-            ₹{Number(product.price).toFixed(2)}
+      <div className="p-4 border-t border-line">
+        {(product.brand || product.category) && (
+          <p className="font-mono text-[9px] tracking-widest text-ink-soft uppercase mb-1 truncate">
+            {product.brand || product.category}
           </p>
-        </div>
-        <AddButton product={product} addedId={addedId} onAdd={onAdd} size="sm" />
-      </div>
-    </div>
-  );
-}
-
-function AddButton({ product, addedId, onAdd, size = "sm" }) {
-  const added      = addedId === product.id;
-  const outOfStock = product.stock === 0;
-
-  if (size === "lg") {
-    return (
-      <button
-        onClick={() => !outOfStock && onAdd(product)}
-        disabled={outOfStock}
-        className={`shrink-0 flex items-center gap-2 px-4 py-2.5 font-display font-medium text-xs transition-colors ${
-          outOfStock
-            ? "border border-dark-border text-dark-muted cursor-not-allowed"
-            : added
-            ? "bg-green-700 text-white"
-            : "bg-dark-copper text-white hover:bg-orange-600"
-        }`}
-      >
-        {outOfStock ? "Out of Stock" : added ? <><Check size={13} /> Added</> : <><ShoppingCart size={13} /> Add to Cart</>}
-      </button>
-    );
-  }
-
-  return (
-    <button
-      onClick={() => !outOfStock && onAdd(product)}
-      disabled={outOfStock}
-      aria-label={`Add ${product.name} to cart`}
-      className={`shrink-0 w-8 h-8 flex items-center justify-center border transition-colors ${
-        outOfStock
-          ? "border-dark-border text-dark-muted cursor-not-allowed"
-          : added
-          ? "bg-green-700 border-green-700 text-white"
-          : "border-dark-border text-dark-muted hover:border-dark-copper hover:text-dark-copper"
-      }`}
-    >
-      {added ? <Check size={12} /> : <ShoppingCart size={12} />}
-    </button>
-  );
-}
-
-function SkeletonProducts() {
-  return (
-    <div>
-      <div className="h-8 w-48 bg-dark-surface rounded mb-14" />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-dark-border">
-        <div className="bg-dark-bg min-h-[360px] animate-pulse" />
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-dark-bg h-20 animate-pulse" />
-        ))}
+        )}
+        <Link
+          to={`/store/product/${product.id}`}
+          className="font-display font-medium text-sm text-navy leading-snug line-clamp-2 hover:text-coral transition-colors block min-h-[2.5em]"
+        >
+          {product.name}
+        </Link>
+        <p className="font-mono font-600 text-base text-coral mt-2">
+          ₹{Number(product.price).toFixed(2)}
+        </p>
       </div>
     </div>
   );
 }
 
 /* ─────────────────────────────────────────────
-   04 BRAND / STORY
+   04 PRODUCT SPOTLIGHT — editorial, dramatic
 ───────────────────────────────────────────── */
-function BrandStorySection() {
-  const [ref, visible] = useReveal(0.1);
-
+function ProductSpotlight({ product }) {
+  const [ref, visible] = useReveal(0.15);
   return (
-    <section
-      ref={ref}
-      className="bg-dark-bg border-t border-dark-border py-20 sm:py-28 overflow-hidden"
-    >
+    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-line overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-0 items-stretch">
 
-          {/* Left: oversized type */}
+          {/* LEFT — huge image on navy, overlapping coral shape */}
           <div
+            className="relative bg-navy min-h-[340px] sm:min-h-[440px] flex items-center justify-center clip-spotlight-block"
             style={{
               opacity: visible ? 1 : 0,
-              transform: visible ? "none" : "translateX(-24px)",
+              transform: visible ? "none" : "translateX(-20px)",
               transition: "opacity 0.7s ease, transform 0.7s ease",
             }}
           >
-            <span className="font-mono text-[11px] tracking-[0.2em] text-dark-copper uppercase">
-              04 / About Jainam
-            </span>
-            <h2 className="font-display font-600 text-display-xl text-dark-text mt-4 leading-none">
-              Industry<br />
-              grade.<br />
-              <span className="text-dark-copper">Every</span><br />
-              time.
-            </h2>
+            <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-coral rotate-12" />
+            {product.imageUrl ? (
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="relative z-10 w-full h-full object-contain p-12 sm:p-16"
+              />
+            ) : (
+              <Package size={80} strokeWidth={1} className="relative z-10 text-white/20" />
+            )}
           </div>
 
-          {/* Right: copy + specs */}
+          {/* RIGHT — copy */}
           <div
-            className="space-y-8"
+            className="bg-navy lg:bg-white flex flex-col justify-center px-8 sm:px-12 py-12 lg:py-0"
             style={{
               opacity: visible ? 1 : 0,
-              transform: visible ? "none" : "translateX(24px)",
-              transition: "opacity 0.7s 0.15s ease, transform 0.7s 0.15s ease",
+              transform: visible ? "none" : "translateX(20px)",
+              transition: "opacity 0.7s 0.1s ease, transform 0.7s 0.1s ease",
             }}
           >
-            <p className="text-dark-muted text-base leading-relaxed">
-              Jainam is a B2B supplier of pipes, valves, fittings and industrial hardware —
-              working directly with OEM-compatible brands to maintain a current, competitively
-              priced catalogue that's consistently in stock.
-            </p>
-            <p className="text-dark-muted text-base leading-relaxed">
-              Every client is paired with a dedicated account manager who handles orders,
-              pricing and invoicing — so you always have a direct line, not a ticket queue.
-            </p>
-
-            {/* Spec lines */}
-            <div className="border-t border-dark-border pt-8 space-y-4">
-              {[
-                { label: "Supply model",   value: "Direct B2B" },
-                { label: "Catalogue",      value: "500+ active SKUs" },
-                { label: "Sourcing",       value: "OEM-compatible brands" },
-                { label: "Account model",  value: "Dedicated manager per client" },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex items-baseline justify-between gap-4">
-                  <span className="font-mono text-[10px] tracking-widest text-dark-muted uppercase">
-                    {label}
-                  </span>
-                  <span className="h-px flex-1 bg-dark-border" />
-                  <span className="font-mono text-xs text-dark-text shrink-0">{value}</span>
+            <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase mb-4">
+              04 / Product Spotlight
+            </span>
+            <h2 className="font-display font-600 text-display-lg text-navy leading-none mb-5">
+              {product.name}
+            </h2>
+            {product.description && (
+              <p className="text-ink-soft text-base leading-relaxed mb-6 max-w-md line-clamp-4">
+                {product.description}
+              </p>
+            )}
+            <div className="flex flex-wrap items-center gap-6 mb-8">
+              {product.brand && (
+                <div>
+                  <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Brand</p>
+                  <p className="font-display font-600 text-sm text-navy mt-1">{product.brand}</p>
                 </div>
-              ))}
+              )}
+              {product.category && (
+                <div>
+                  <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Category</p>
+                  <p className="font-display font-600 text-sm text-navy mt-1">{product.category}</p>
+                </div>
+              )}
+              <div>
+                <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Price</p>
+                <p className="font-mono font-600 text-lg text-coral mt-1">₹{Number(product.price).toFixed(2)}</p>
+              </div>
             </div>
-
             <Link
-              to="/store/about"
-              className="inline-flex items-center gap-2 text-sm font-display font-medium text-dark-muted hover:text-dark-text transition-colors group"
+              to={`/store/product/${product.id}`}
+              className="inline-flex items-center gap-2 bg-navy text-white font-display font-medium text-sm px-6 py-3.5 hover:bg-coral transition-colors w-fit"
             >
-              More about us
-              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+              View Product
+              <ArrowRight size={15} />
             </Link>
           </div>
         </div>
@@ -709,9 +506,61 @@ function BrandStorySection() {
 }
 
 /* ─────────────────────────────────────────────
-   05 WHY JAINAM
+   05 PROCESS FLOW
 ───────────────────────────────────────────── */
-function WhySection() {
+function ProcessFlow() {
+  const [ref, visible] = useReveal(0.1);
+  const steps = [
+    { n: "01", label: "Requirement", body: "Tell us what you need — by phone, message, or the enquiry form." },
+    { n: "02", label: "Product Selection", body: "Browse the catalogue or get help finding the right spec." },
+    { n: "03", label: "Enquiry", body: "Send your enquiry or place an order directly from the storefront." },
+    { n: "04", label: "Confirmation", body: "Your account manager confirms pricing and generates the invoice." },
+    { n: "05", label: "Delivery", body: "Order is fulfilled and shipped to your site." },
+  ];
+  return (
+    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-line">
+      <div className="max-w-7xl mx-auto px-6 sm:px-10">
+        <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
+          05 / How It Works
+        </span>
+        <h2 className="font-display font-600 text-display-lg text-navy mt-2 mb-14">
+          From enquiry to delivery
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-8 sm:gap-4">
+          {steps.map((step, i) => (
+            <div
+              key={step.n}
+              className="relative"
+              style={{
+                opacity: visible ? 1 : 0,
+                transform: visible ? "none" : "translateY(14px)",
+                transition: `opacity 0.5s ${i * 90}ms, transform 0.5s ${i * 90}ms`,
+              }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <span className="font-display font-600 text-3xl text-navy/15">{step.n}</span>
+                <span className="flex-1 h-px bg-line hidden sm:block" />
+                {i < steps.length - 1 && (
+                  <ArrowRight size={14} className="text-coral hidden sm:block" />
+                )}
+              </div>
+              <h3 className="font-display font-600 text-sm text-navy uppercase tracking-wide mb-2">
+                {step.label}
+              </h3>
+              <p className="text-ink-soft text-sm leading-relaxed">{step.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   06 WHY JAINAM — bento
+───────────────────────────────────────────── */
+function WhySection({ stats, loading }) {
   const [ref, visible] = useReveal(0.1);
 
   const pillars = [
@@ -723,7 +572,7 @@ function WhySection() {
     {
       icon: Truck,
       title: "Stock you can rely on",
-      body: "Maintained inventory levels so your procurement doesn't stall. Regular restocking across all major SKUs.",
+      body: "Maintained inventory levels so your procurement doesn't stall. Regular restocking across active SKUs.",
     },
     {
       icon: Headphones,
@@ -738,39 +587,45 @@ function WhySection() {
   ];
 
   return (
-    <section ref={ref} className="bg-dark-surface border-t border-dark-border py-20 sm:py-28">
+    <section ref={ref} className="bg-navy py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-6 sm:px-10">
+        <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
+          06 / Why Jainam
+        </span>
+        <h2 className="font-display font-600 text-display-lg text-white mt-2 mb-14">
+          What sets us apart
+        </h2>
 
-        {/* Header */}
-        <div className="mb-16">
-          <span className="font-mono text-[11px] tracking-[0.2em] text-dark-copper uppercase">
-            05 / Why Jainam
-          </span>
-          <h2 className="font-display font-600 text-display-lg text-dark-text mt-2">
-            What sets us apart
-          </h2>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-white/10 border border-white/10">
+          {/* Large stat tile */}
+          <div className="lg:row-span-2 bg-coral p-8 sm:p-10 flex flex-col justify-between min-h-[220px]">
+            <span className="font-mono text-[10px] tracking-widest text-white/70 uppercase">Live catalogue</span>
+            <div>
+              <p className="font-display font-600 text-5xl sm:text-6xl text-white leading-none">
+                {loading ? "—" : stats.productCount}
+              </p>
+              <p className="font-mono text-[11px] tracking-widest text-white/80 uppercase mt-3">
+                Active products across {loading ? "—" : stats.categoryCount} categories
+                {stats.brandCount ? ` · ${stats.brandCount} brands` : ""}
+              </p>
+            </div>
+          </div>
 
-        {/* 4-column grid with border separators */}
-        <div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-dark-border border border-dark-border"
-          style={{ opacity: visible ? 1 : 0, transition: "opacity 0.6s ease" }}
-        >
           {pillars.map(({ icon: Icon, title, body }, i) => (
             <div
               key={title}
-              className="p-6 sm:p-8 flex flex-col gap-4"
+              className="bg-navy p-6 sm:p-8 flex flex-col gap-4"
               style={{
                 opacity: visible ? 1 : 0,
-                transform: visible ? "none" : "translateY(16px)",
-                transition: `opacity 0.5s ${i * 80}ms ease, transform 0.5s ${i * 80}ms ease`,
+                transform: visible ? "none" : "translateY(14px)",
+                transition: `opacity 0.5s ${i * 80}ms, transform 0.5s ${i * 80}ms`,
               }}
             >
-              <div className="w-8 h-8 border border-dark-border flex items-center justify-center shrink-0">
-                <Icon size={15} className="text-dark-copper" strokeWidth={1.5} />
+              <div className="w-9 h-9 border border-white/20 flex items-center justify-center shrink-0">
+                <Icon size={16} className="text-coral" strokeWidth={1.5} />
               </div>
-              <h3 className="font-display font-600 text-sm text-dark-text">{title}</h3>
-              <p className="font-sans text-sm text-dark-muted leading-relaxed">{body}</p>
+              <h3 className="font-display font-600 text-sm text-white">{title}</h3>
+              <p className="font-sans text-sm text-white/55 leading-relaxed">{body}</p>
             </div>
           ))}
         </div>
@@ -780,25 +635,18 @@ function WhySection() {
 }
 
 /* ─────────────────────────────────────────────
-   06 FINAL CTA
+   07 FINAL CTA
 ───────────────────────────────────────────── */
 function FinalCTA() {
   const [ref, visible] = useReveal(0.2);
 
   return (
-    <section
-      ref={ref}
-      className="bg-dark-bg border-t border-dark-border py-24 sm:py-36 relative overflow-hidden"
-    >
-      {/* Background type watermark */}
+    <section ref={ref} className="bg-white py-24 sm:py-36 relative overflow-hidden">
       <div
         className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
         aria-hidden="true"
       >
-        <span
-          className="font-display font-600 text-[20vw] leading-none text-dark-surface whitespace-nowrap"
-          style={{ userSelect: "none" }}
-        >
+        <span className="font-display font-600 text-[20vw] leading-none text-line whitespace-nowrap">
           JAINAM
         </span>
       </div>
@@ -811,29 +659,29 @@ function FinalCTA() {
           transition: "opacity 0.7s ease, transform 0.7s ease",
         }}
       >
-        <span className="font-mono text-[11px] tracking-[0.2em] text-dark-copper uppercase">
-          06 / Get Started
+        <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
+          07 / Get Started
         </span>
-        <h2 className="font-display font-600 text-display-xl text-dark-text mt-4 mb-6 leading-none">
-          Find the right<br />component.
+        <h2 className="font-display font-600 text-display-xl text-navy mt-4 mb-6 leading-none">
+          Have a requirement?<br />Let's find the right product.
         </h2>
-        <p className="text-dark-muted text-base sm:text-lg max-w-lg mx-auto mb-10 leading-relaxed">
-          Browse 500+ SKUs across pipes, valves, fittings and hardware — filtered by brand,
-          category, or specification.
+        <p className="text-ink-soft text-base sm:text-lg max-w-lg mx-auto mb-10 leading-relaxed">
+          Browse the catalogue by brand, category or specification — or send your requirement
+          straight through to your account manager.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Link
-            to="/store/catalogue"
-            className="inline-flex items-center gap-2 bg-dark-copper text-white font-display font-medium text-sm px-8 py-4 hover:bg-orange-600 transition-colors"
+            to="/store/contact"
+            className="inline-flex items-center gap-2 bg-coral text-white font-display font-medium text-sm px-8 py-4 hover:bg-navy transition-colors"
           >
-            Explore Catalogue
+            Send Enquiry
             <ArrowRight size={15} />
           </Link>
           <Link
-            to="/store/contact"
-            className="inline-flex items-center gap-2 border border-dark-border text-dark-muted font-display font-medium text-sm px-8 py-4 hover:border-dark-text hover:text-dark-text transition-colors"
+            to="/store/catalogue"
+            className="inline-flex items-center gap-2 border border-line text-navy font-display font-medium text-sm px-8 py-4 hover:border-navy transition-colors"
           >
-            Contact Us
+            Explore Catalogue
           </Link>
         </div>
       </div>
