@@ -135,10 +135,10 @@ export default function StoreHome() {
    BRAND STRIP
 ───────────────────────────────────────────── */
 function BrandStrip({ brands }) {
-  const items = [...brands, ...brands];
+  const items = [...brands, ...brands, ...brands, ...brands];
   return (
-    <section className="bg-paper border-y border-tan py-10 sm:py-12 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 mb-6 flex items-center gap-3">
+    <section className="bg-paper border-y border-tan py-14 sm:py-20 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 mb-8 flex items-center gap-3">
         <span className="w-6 h-px bg-habanero shrink-0" />
         <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
           Brands We Carry
@@ -147,23 +147,23 @@ function BrandStrip({ brands }) {
 
       <div className="relative">
         {/* Edge fade masks so the loop reads as continuous, not clipped */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-paper to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-paper to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-40 bg-gradient-to-r from-paper to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-40 bg-gradient-to-l from-paper to-transparent z-10" />
 
         <div className="flex w-max animate-ticker">
           {items.map((brand, i) => (
             <div
               key={`${brand.id}-${i}`}
-              className="flex items-center justify-center h-16 sm:h-20 px-8 sm:px-12 shrink-0 border-r border-tan/70 group"
+              className="flex items-center justify-center h-28 sm:h-36 px-10 sm:px-16 shrink-0 border-r border-tan/70 group"
             >
               {brand.logoUrl ? (
                 <img
                   src={brand.logoUrl}
                   alt={brand.name}
-                  className="h-20 sm:h-20 w-auto object-contain grayscale opacity-55 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300"
+                  className="h-16 sm:h-24 w-auto object-contain grayscale opacity-55 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300"
                 />
               ) : (
-                <span className="font-display font-600 text-sm sm:text-base text-royal/60 group-hover:text-royal tracking-wide uppercase whitespace-nowrap transition-colors duration-300">
+                <span className="font-display font-600 text-xl sm:text-2xl text-royal/60 group-hover:text-royal tracking-wide uppercase whitespace-nowrap transition-colors duration-300">
                   {brand.name}
                 </span>
               )}
