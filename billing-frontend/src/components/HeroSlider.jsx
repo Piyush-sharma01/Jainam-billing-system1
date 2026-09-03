@@ -17,7 +17,7 @@ export default function HeroSlider({ stats = {} }) {
     return [
       {
         icon: Package,
-        image: null, // e.g. "/images/hero-catalogue.jpg" or a full https:// URL
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR87CSfTcCMM85KZqUXTUgHXJUbM0Vv4ststZjvUmFsgg&s=10",
         eyebrow: "Pipes · Valves · Fittings",
         title: "Everything your project needs, in one catalogue.",
         body:
@@ -28,8 +28,8 @@ export default function HeroSlider({ stats = {} }) {
         primaryLabel: "Explore Catalogue",
       },
       {
-        icon: ShieldCheck,
-        image: null, // e.g. "/images/hero-quality.jpg"
+        icon: Pipes,
+        image: "https://png.pngtree.com/thumb_back/fh260/background/20241015/pngtree-steel-pipes-stacked-in-a-factory-closeup-blurred-background-image_16395356.jpg",
         eyebrow: "Quality You Can Trust",
         title: "Sourced from established manufacturers.",
         body: "Every product is verified for spec compliance before it reaches our catalogue — no substitutions, no surprises.",
@@ -38,7 +38,7 @@ export default function HeroSlider({ stats = {} }) {
       },
       {
         icon: Workflow,
-        image: null, // e.g. "/images/hero-process.jpg"
+        image:"https://mediaassets.cbre.com/-/media/project/cbre/shared-site/insights/articles/2023-article-media-folder/now-is-the-time-media-folder/now-is-the-time-hero.jpg",
         eyebrow: "How It Works",
         title: "From enquiry to delivery, simplified.",
         body: "Browse the catalogue, send your requirement, and let a dedicated account manager take it from confirmation to shipment.",
@@ -46,8 +46,8 @@ export default function HeroSlider({ stats = {} }) {
         primaryLabel: "Start Browsing",
       },
       {
-        icon: Headphones,
-        image: null, // e.g. "/images/hero-contact.jpg"
+        icon: Person-working,
+        image:"https://media.istockphoto.com/id/2142837149/photo/engineer-male-work-checking-water-pipe-inspecting-valve-testing-water-pump.jpg?s=612x612&w=0&k=20&c=sXnfOffJSA-aQ5PoL6SFD3C0zzh-5tXZKg4-Npobtt0=",
         eyebrow: "Get In Touch",
         title: "Have a requirement? Let's talk.",
         body: "Send your enquiry directly — our team responds with pricing and availability, fast.",
