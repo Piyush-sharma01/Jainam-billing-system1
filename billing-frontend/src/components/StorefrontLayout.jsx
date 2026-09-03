@@ -72,12 +72,12 @@ export default function StorefrontLayout({ children, user, onLogout }) {
           HEADER
       ══════════════════════════════════════ */}
       <header
-        className={`sticky top-0 z-40 bg-navy transition-all duration-200 ${
+        className={`sticky top-0 z-40 bg-royal transition-all duration-200 ${
           scrolled ? "shadow-lg shadow-navy/20" : ""
         }`}
       >
         {/* Coral rule along the top edge — small structural accent */}
-        <div className="h-[3px] bg-coral" />
+        <div className="h-[3px] bg-habanero" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
 
           {/* Logo */}
@@ -106,7 +106,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                 className={({ isActive }) =>
                   `px-4 py-2 font-mono text-[11px] tracking-[0.12em] uppercase transition-colors border-b-2 ${
                     isActive
-                      ? "text-coral border-coral"
+                      ? "text-habanero border-habanero"
                       : "text-white/60 hover:text-white border-transparent"
                   }`
                 }
@@ -126,7 +126,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
             >
               <ShoppingCart size={18} />
               {totalItems > 0 ? (
-                <span className="font-mono text-[11px] tracking-widest text-coral">
+                <span className="font-mono text-[11px] tracking-widest text-habanero">
                   {totalItems}
                 </span>
               ) : (
@@ -170,10 +170,10 @@ export default function StorefrontLayout({ children, user, onLogout }) {
           />
           <div className="fixed top-0 left-0 z-50 h-full w-[85vw] max-w-xs bg-gray-50 border-r border-gray-200 flex flex-col nav-drawer-enter md:hidden">
             <div className="flex items-center justify-between px-5 h-14 border-b border-gray-200 shrink-0">
-              <span className="font-display font-600 text-navy text-base">Jainam</span>
+              <span className="font-display font-600 text-royal text-base">Jainam</span>
               <button
                 onClick={() => setMenuOpen(false)}
-                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-navy transition-colors"
+                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-royal transition-colors"
                 aria-label="Close menu"
               >
                 <X size={18} />
@@ -190,15 +190,15 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                   className={({ isActive }) =>
                     `flex items-center justify-between px-6 py-4 font-mono text-[11px] tracking-[0.15em] uppercase transition-colors min-h-[52px] border-b border-gray-200 ${
                       isActive
-                        ? "text-coral"
-                        : "text-gray-500 hover:text-navy"
+                        ? "text-habanero"
+                        : "text-gray-500 hover:text-royal"
                     }`
                   }
                 >
                   {({ isActive }) => (
                     <>
                       {link.label}
-                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-coral" />}
+                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-habanero" />}
                     </>
                   )}
                 </NavLink>
@@ -213,7 +213,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
               )}
               <button
                 onClick={() => { setMenuOpen(false); onLogout(); }}
-                className="w-full flex items-center gap-2.5 font-mono text-[11px] tracking-widest uppercase text-gray-500 hover:text-navy transition-colors py-2 min-h-[44px]"
+                className="w-full flex items-center gap-2.5 font-mono text-[11px] tracking-widest uppercase text-gray-500 hover:text-royal transition-colors py-2 min-h-[44px]"
               >
                 <LogOut size={14} />
                 Logout
@@ -231,8 +231,8 @@ export default function StorefrontLayout({ children, user, onLogout }) {
       {/* ══════════════════════════════════════
           FOOTER
       ══════════════════════════════════════ */}
-      <footer className="bg-navy text-white">
-        <div className="h-[3px] bg-coral" />
+      <footer className="bg-royal text-white">
+        <div className="h-[3px] bg-habanero" />
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
           <div>
             <h3 className="font-display font-600 text-base text-white mb-3">Jainam</h3>
@@ -250,7 +250,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                 <li key={l.to}>
                   <Link
                     to={l.to}
-                    className="font-mono text-[11px] tracking-widest uppercase text-white/60 hover:text-coral transition-colors"
+                    className="font-mono text-[11px] tracking-widest uppercase text-white/60 hover:text-habanero transition-colors"
                   >
                     {l.label}
                   </Link>
@@ -264,19 +264,19 @@ export default function StorefrontLayout({ children, user, onLogout }) {
             </h4>
             <ul className="space-y-3 text-white/60">
               <li className="flex items-center gap-2.5">
-                <Phone size={12} className="shrink-0 text-coral" />
-                <a href="tel:+910000000000" className="font-mono text-[11px] tracking-wide hover:text-coral transition-colors">
+                <Phone size={12} className="shrink-0 text-habanero" />
+                <a href="tel:+910000000000" className="font-mono text-[11px] tracking-wide hover:text-habanero transition-colors">
                   +91 00000 00000
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
-                <Mail size={12} className="shrink-0 text-coral" />
-                <a href="mailto:sales@jainam.example" className="font-mono text-[11px] tracking-wide hover:text-coral transition-colors">
+                <Mail size={12} className="shrink-0 text-habanero" />
+                <a href="mailto:sales@jainam.example" className="font-mono text-[11px] tracking-wide hover:text-habanero transition-colors">
                   sales@jainam.example
                 </a>
               </li>
               <li className="flex items-start gap-2.5">
-                <MapPin size={12} className="shrink-0 text-coral mt-0.5" />
+                <MapPin size={12} className="shrink-0 text-habanero mt-0.5" />
                 <span className="font-mono text-[11px] tracking-wide">
                   Mumbai, Maharashtra, India
                 </span>
@@ -320,7 +320,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
             {/* ── Cart header ── */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 shrink-0">
               <div className="flex items-baseline gap-3">
-                <h2 className="font-display font-600 text-navy text-base tracking-tight">
+                <h2 className="font-display font-600 text-royal text-base tracking-tight">
                   Your Cart
                 </h2>
                 {totalItems > 0 && (
@@ -331,7 +331,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
               </div>
               <button
                 onClick={() => setCartOpen(false)}
-                className="flex items-center justify-center w-9 h-9 border border-gray-200 text-gray-500 hover:text-navy hover:border-navy transition-colors"
+                className="flex items-center justify-center w-9 h-9 border border-gray-200 text-gray-500 hover:text-royal hover:border-navy transition-colors"
                 aria-label="Close cart"
               >
                 <X size={16} />
@@ -344,7 +344,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                 <div className="w-14 h-14 border border-gray-200 flex items-center justify-center mb-6">
                   <CheckCircle size={24} className="text-green-500" />
                 </div>
-                <h3 className="font-display font-600 text-xl text-navy mb-3">
+                <h3 className="font-display font-600 text-xl text-royal mb-3">
                   Order placed.
                 </h3>
                 <p className="text-gray-500 text-sm leading-relaxed mb-10 max-w-xs">
@@ -357,7 +357,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                     setCartOpen(false);
                     navigate("/store/catalogue");
                   }}
-                  className="flex items-center gap-2 font-mono text-[11px] tracking-widest uppercase text-gray-500 hover:text-navy border border-gray-200 px-5 py-3 hover:border-navy transition-colors"
+                  className="flex items-center gap-2 font-mono text-[11px] tracking-widest uppercase text-gray-500 hover:text-royal border border-gray-200 px-5 py-3 hover:border-navy transition-colors"
                 >
                   Continue Browsing <ArrowRight size={12} />
                 </button>
@@ -369,7 +369,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                 <div className="w-14 h-14 border border-gray-200 flex items-center justify-center mb-6">
                   <ShoppingCart size={20} className="text-gray-500" strokeWidth={1.5} />
                 </div>
-                <p className="font-display font-600 text-base text-navy mb-2">
+                <p className="font-display font-600 text-base text-royal mb-2">
                   Your cart is empty.
                 </p>
                 <p className="font-mono text-[11px] tracking-widest uppercase text-gray-500 mb-10">
@@ -378,7 +378,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                 <Link
                   to="/store/catalogue"
                   onClick={() => setCartOpen(false)}
-                  className="flex items-center gap-2 font-mono text-[11px] tracking-widest uppercase text-gray-500 hover:text-navy border border-gray-200 px-5 py-3 hover:border-navy transition-colors"
+                  className="flex items-center gap-2 font-mono text-[11px] tracking-widest uppercase text-gray-500 hover:text-royal border border-gray-200 px-5 py-3 hover:border-navy transition-colors"
                 >
                   Explore Catalogue <ArrowRight size={12} />
                 </Link>
@@ -411,7 +411,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                           <div className="flex-1 min-w-0 flex flex-col gap-1.5">
                             {/* Name + remove */}
                             <div className="flex items-start justify-between gap-2">
-                              <p className="font-display font-medium text-sm text-navy leading-snug line-clamp-2 flex-1">
+                              <p className="font-display font-medium text-sm text-royal leading-snug line-clamp-2 flex-1">
                                 {product.name}
                               </p> 
                               <button
@@ -434,17 +434,17 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                               <div className="flex items-center border border-gray-200">
                                 <button
                                   onClick={() => updateQuantity(product.id, quantity - 1)}
-                                  className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-navy hover:bg-white transition-colors"
+                                  className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-royal hover:bg-white transition-colors"
                                   aria-label={`Decrease ${product.name} quantity`}
                                 >
                                   <Minus size={12} />
                                 </button>
-                                <span className="w-9 h-9 flex items-center justify-center font-mono text-xs text-navy border-x border-gray-200 select-none">
+                                <span className="w-9 h-9 flex items-center justify-center font-mono text-xs text-royal border-x border-gray-200 select-none">
                                   {quantity}
                                 </span>
                                 <button
                                   onClick={() => updateQuantity(product.id, quantity + 1)}
-                                  className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-navy hover:bg-white transition-colors"
+                                  className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-royal hover:bg-white transition-colors"
                                   aria-label={`Increase ${product.name} quantity`}
                                 >
                                   <Plus size={12} />
@@ -452,7 +452,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                               </div>
 
                               {/* Line price */}
-                              <p className="font-mono font-600 text-sm text-navy">
+                              <p className="font-mono font-600 text-sm text-royal">
                                 ₹{linePrice.toFixed(2)}
                               </p>
                             </div>
@@ -464,7 +464,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                 </div>
 
                 {/* ── CART FOOTER ── */}
-                <div className="border-t border-white/15 bg-navy shrink-0">
+                <div className="border-t border-white/15 bg-royal shrink-0">
                   {/* Error */}
                   {orderError && (
                     <div className="px-6 pt-4">
@@ -489,7 +489,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                     <button
                       onClick={handlePlaceOrder}
                       disabled={placing}
-                      className="w-full flex items-center justify-center gap-2.5 bg-coral text-white font-display font-600 text-sm py-4 hover:bg-white hover:text-navy transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
+                      className="w-full flex items-center justify-center gap-2.5 bg-habanero text-white font-display font-600 text-sm py-4 hover:bg-white hover:text-royal transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
                     >
                       {placing ? (
                         <span className="font-mono text-xs tracking-widest uppercase">
