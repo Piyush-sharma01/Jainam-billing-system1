@@ -63,7 +63,7 @@ export default function StoreContact() {
                     {label}
                   </p>
                   {href ? (
-                    
+                    <a
                       href={href}
                       className="font-display font-medium text-sm text-navy hover:text-coral transition-colors"
                     >
