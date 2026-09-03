@@ -125,7 +125,7 @@ export default function StoreContact() {
                 <p className="text-xs text-red-600 mt-1">{errors.message}</p>
               )}
             </div>
-
+  
             <button
               type="submit"
               className="w-full flex items-center justify-center gap-2 bg-navy text-white py-3 font-display font-medium text-sm hover:bg-navy/90 transition-colors min-h-[48px]"
