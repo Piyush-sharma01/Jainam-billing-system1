@@ -33,9 +33,9 @@ export default function StoreContact() {
   return (
     <div className="page-enter">
       {/* Hero */}
-      <section className="bg-navy py-16 sm:py-20">
+      <section className="bg-royal py-16 sm:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <p className="font-mono text-[11px] tracking-widest text-coral uppercase mb-4">
+          <p className="font-mono text-[11px] tracking-widest text-habanero uppercase mb-4">
             Get in Touch
           </p>
           <h1 className="font-display font-600 text-3xl sm:text-4xl text-white leading-tight">
@@ -55,8 +55,8 @@ export default function StoreContact() {
           <div className="space-y-6">
             {contactInfo.map(({ icon: Icon, label, value, href }) => (
               <div key={label} className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-line flex items-center justify-center shrink-0">
-                  <Icon size={16} className="text-navy" />
+                <div className="w-10 h-10 bg-tan flex items-center justify-center shrink-0">
+                  <Icon size={16} className="text-royal" />
                 </div>
                 <div>
                   <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase mb-0.5">
@@ -65,12 +65,12 @@ export default function StoreContact() {
                   {href ? (
                     <a
                       href={href}
-                      className="font-display font-medium text-sm text-navy hover:text-coral transition-colors"
+                      className="font-display font-medium text-sm text-royal hover:text-habanero transition-colors"
                     >
                       {value}
                     </a>
                   ) : (
-                    <p className="font-display font-medium text-sm text-navy">{value}</p>
+                    <p className="font-display font-medium text-sm text-royal">{value}</p>
                   )}
                 </div>
               </div>
@@ -98,7 +98,7 @@ export default function StoreContact() {
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className={`w-full px-3 py-2.5 bg-white border text-sm text-navy placeholder:text-ink-soft focus:outline-none focus:border-navy/40 transition-colors min-h-[44px] ${
+                className={`w-full px-3 py-2.5 bg-white border text-sm text-royal placeholder:text-ink-soft focus:outline-none focus:border-royal/40 transition-colors min-h-[44px] ${
                   errors.name ? "border-red-400" : "border-line"
                 }`}
                 placeholder="e.g. Rahul Mehta"
@@ -116,7 +116,7 @@ export default function StoreContact() {
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 rows={5}
-                className={`w-full px-3 py-2.5 bg-white border text-sm text-navy placeholder:text-ink-soft focus:outline-none focus:border-navy/40 transition-colors resize-none ${
+                className={`w-full px-3 py-2.5 bg-white border text-sm text-royal placeholder:text-ink-soft focus:outline-none focus:border-royal/40 transition-colors resize-none ${
                   errors.message ? "border-red-400" : "border-line"
                 }`}
                 placeholder="Your enquiry…"
@@ -128,7 +128,7 @@ export default function StoreContact() {
   
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 bg-navy text-white py-3 font-display font-medium text-sm hover:bg-navy/90 transition-colors min-h-[48px]"
+              className="w-full flex items-center justify-center gap-2 bg-royal text-white py-3 font-display font-medium text-sm hover:bg-royal/90 transition-colors min-h-[48px]"
             >
               <Send size={15} /> Send Message
             </button>
