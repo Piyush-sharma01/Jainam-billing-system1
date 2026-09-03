@@ -28,7 +28,7 @@ export default function StoreAbout() {
   return (
     <div className="page-enter">
       {/* Hero section */}
-      <section className="bg-navy py-16 sm:py-20 relative overflow-hidden">
+      <section className="bg-royal py-16 sm:py-20 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{
@@ -94,7 +94,7 @@ export default function StoreAbout() {
               key={title}
               className="bg-white border border-line p-6 flex gap-4 hover-lift"
             >
-              <div className="w-10 h-10 bg-line flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-10 h-10 bg-tan flex items-center justify-center shrink-0 mt-0.5">
                 <Icon size={18} className="text-navy" />
               </div>
               <div>
