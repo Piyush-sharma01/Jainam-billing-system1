@@ -90,7 +90,7 @@ export default function StoreAbout() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {pillars.map(({ icon: Icon, title, body }) => (
-            <div
+            <div 
               key={title}
               className="bg-white border border-line p-6 flex gap-4 hover-lift"
             >
