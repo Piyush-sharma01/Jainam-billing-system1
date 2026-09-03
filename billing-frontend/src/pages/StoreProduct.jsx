@@ -175,7 +175,7 @@ export default function StoreProduct() {
                     ? "bg-green-700 text-white"
                     : "bg-navy text-white hover:bg-coral"
                 }`}
-              >
+              > 
                 {added ? <Check size={16} /> : <ShoppingCart size={16} />}
                 {added ? "Added to Cart" : "Add to Cart"}
               </button>
