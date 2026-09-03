@@ -8,6 +8,11 @@ export default {
   theme: {
     extend: {
       colors: {
+        // ===== JAINAM BRAND SYSTEM (redesign) =====
+        navy:   '#1E3A8A',   // Blueprint Navy
+        coral:  '#FF5A5F',   // High-Tech Coral
+        paper:  '#FFFFFF',   // Stark White
+
         luster: "#F4F1EC",
         aster: "#9BACD8",
         habanero: "#F98513",
@@ -15,12 +20,12 @@ export default {
         royal: "#223382",
         deadly: "#111144",
 
-        ink: "#111144",
-        "ink-soft": "#5E6680",
-        line: "#DAD1C8",
+        ink: "#0F1B3D",
+        "ink-soft": "#4A5578",
+        line: "#E4E7F2",
 
-        primary: "#223382",
-        secondary: "#F98513",
+        primary: "#1E3A8A",
+        secondary: "#FF5A5F",
         accent: "#9BACD8",
         canvas: "#F4F1EC",
         surface: "#FFFFFF",
