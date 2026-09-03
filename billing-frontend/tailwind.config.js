@@ -9,9 +9,9 @@ export default {
       colors: {
         // ===== JAINAM BRAND SYSTEM (redesign) =====
         // The three brand colors — used with real visual weight, not just as buttons.
-        navy:   '#1E3A8A',   // Blueprint Navy
-        coral:  '#FF5A5F',   // High-Tech Coral
-        paper:  '#FFFFFF',   // Stark White
+        navy:   '#223382',   // Blueprint Navy
+        coral:  '#F98513',   // High-Tech Coral
+        paper:  '#F4F1EC',   // Stark White
         // Supporting neutrals (structure only — never competing with the 3 brand colors)
         ink:      '#0F1B3D',
         'ink-soft': '#4A5578',
@@ -19,22 +19,22 @@ export default {
 
         // Legacy tokens kept as aliases so any untouched component still renders
         // sensibly instead of breaking (mapped onto the new light system).
-        primary:    '#1E3A8A',
-        secondary:  '#FF5A5F',
+        primary:    '#223382',
+        secondary:  '#F98513',
         accent:     '#F3F1EA',
-        canvas:     '#FFFFFF',
-        surface:    '#FFFFFF',
+        canvas:     '#F4F1EC',
+        surface:    '#F4F1EC',
         ink_old: '#16181D',
         'ink-muted':'#68696B',
         hairline:   '#E4E7F2',
         dark: {
-          bg:      '#FFFFFF',
-          surface: '#FFFFFF',
-          deep:    '#1E3A8A',
+          bg:      '#F4F1EC',
+          surface: '#F4F1EC',
+          deep:    '#223382',
           border:  '#E4E7F2',
           text:    '#0F1B3D',
           muted:   '#4A5578',
-          copper:  '#FF5A5F',
+          copper:  '#F98513',
         },
       },
       fontFamily: {
