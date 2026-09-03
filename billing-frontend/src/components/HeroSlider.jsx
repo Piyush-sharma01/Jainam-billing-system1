@@ -1,44 +1,57 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ArrowLeft, Package } from "lucide-react";
+import {
+  ArrowRight, ArrowLeft, Package, ShieldCheck, Workflow, Headphones,
+} from "lucide-react";
 
 /**
- * HeroSlider — asymmetric, product-led hero.
+ * HeroSlider — asymmetric, editorial hero.
  *
- * Slides are generated from REAL data passed in as props:
- *  - `products`: active products from the API (used for the first slides)
- *  - `stats`: real counts computed from the API (categories/brands/products)
- * No fabricated product names, prices or business claims are introduced here.
+ * All slides are static marketing content (no individual product names,
+ * prices, or descriptions are pulled in here). Only `stats` (real counts
+ * computed from the API — categories/brands/products) is used, for the
+ * catalogue slide's copy.
  */
-export default function HeroSlider({ products = [], stats = {} }) {
+export default function HeroSlider({ stats = {} }) {
   const slides = useMemo(() => {
-    const productSlides = products.slice(0, 3).map((p) => ({
-      kind: "product",
-      eyebrow: p.category || p.brand || "Featured",
-      title: p.name,
-      body: p.description || "",
-      price: p.price,
-      image: p.imageUrl,
-      primaryTo: `/store/product/${p.id}`,
-      primaryLabel: "View Product",
-    }));
-
-    const catalogueSlide = {
-      kind: "catalogue",
-      eyebrow: "Pipes · Valves · Fittings",
-      title: "Everything your project needs, in one catalogue.",
-      body:
-        stats.productCount != null
-          ? `Browse ${stats.productCount} active products across ${stats.categoryCount || 0} categories — filtered by brand, category or specification.`
-          : "Browse pipes, valves, fittings and hardware — filtered by brand, category or specification.",
-      image: products[0]?.imageUrl,
-      primaryTo: "/store/catalogue",
-      primaryLabel: "Explore Catalogue",
-    };
-
-    const all = [...productSlides, catalogueSlide];
-    return all.length ? all : [catalogueSlide];
-  }, [products, stats]);
+    return [
+      {
+        icon: Package,
+        eyebrow: "Pipes · Valves · Fittings",
+        title: "Everything your project needs, in one catalogue.",
+        body:
+          stats.productCount != null
+            ? `Browse ${stats.productCount} active products across ${stats.categoryCount || 0} categories — filtered by brand, category or specification.`
+            : "Browse pipes, valves, fittings and hardware — filtered by brand, category or specification.",
+        primaryTo: "/store/catalogue",
+        primaryLabel: "Explore Catalogue",
+      },
+      {
+        icon: ShieldCheck,
+        eyebrow: "Quality You Can Trust",
+        title: "Sourced from established manufacturers.",
+        body: "Every product is verified for spec compliance before it reaches our catalogue — no substitutions, no surprises.",
+        primaryTo: "/store/about",
+        primaryLabel: "About Jainam",
+      },
+      {
+        icon: Workflow,
+        eyebrow: "How It Works",
+        title: "From enquiry to delivery, simplified.",
+        body: "Browse the catalogue, send your requirement, and let a dedicated account manager take it from confirmation to shipment.",
+        primaryTo: "/store/catalogue",
+        primaryLabel: "Start Browsing",
+      },
+      {
+        icon: Headphones,
+        eyebrow: "Get In Touch",
+        title: "Have a requirement? Let's talk.",
+        body: "Send your enquiry directly — our team responds with pricing and availability, fast.",
+        primaryTo: "/store/contact",
+        primaryLabel: "Contact Us",
+      },
+    ];
+  }, [stats]);
 
   const [index, setIndex] = useState(0);
   const timerRef = useRef(null);
@@ -76,6 +89,7 @@ export default function HeroSlider({ products = [], stats = {} }) {
 
   const slide = slides[index];
   const total = slides.length;
+  const Icon = slide.icon || Package;
 
   return (
     <section
@@ -119,14 +133,8 @@ export default function HeroSlider({ products = [], stats = {} }) {
           </h1>
 
           {slide.body && (
-            <p key={`body-${index}`} className="text-white/60 text-base sm:text-lg leading-relaxed max-w-md mb-4 animate-fade-up-d line-clamp-3">
+            <p key={`body-${index}`} className="text-white/60 text-base sm:text-lg leading-relaxed max-w-md mb-8 animate-fade-up-d line-clamp-3">
               {slide.body}
-            </p>
-          )}
-
-          {slide.price != null && (
-            <p className="font-mono font-600 text-2xl text-habanero mb-8">
-              ₹{Number(slide.price).toFixed(2)}
             </p>
           )}
 
@@ -147,22 +155,16 @@ export default function HeroSlider({ products = [], stats = {} }) {
           </div>
         </div>
 
-        {/* RIGHT — large product imagery, overlapping the coral block */}
+        {/* RIGHT — large editorial icon mark, overlapping the coral block */}
         <div className="hidden lg:flex relative items-center justify-center z-10 px-10">
-          <div className="relative w-full max-w-md aspect-square bg-white flex items-center justify-center shadow-2xl">
-            {slide.image ? (
-              <img
-                key={`img-${index}`}
-                src={slide.image}
-                alt={slide.title}
-                className="w-full h-full object-contain p-10 animate-fade-in"
-              />
-            ) : (
-              <Package size={72} strokeWidth={1} className="text-royal/20" />
-            )}
+          <div
+            key={`icon-${index}`}
+            className="relative w-full max-w-md aspect-square bg-white flex items-center justify-center shadow-2xl animate-fade-in"
+          >
+            <Icon size={96} strokeWidth={1} className="text-royal/25" />
             {/* Corner tag */}
             <span className="absolute top-4 left-4 font-mono text-[9px] tracking-widest text-royal/50 uppercase">
-              {slide.kind === "product" ? "Product" : "Catalogue"}
+              {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
             </span>
           </div>
         </div>
