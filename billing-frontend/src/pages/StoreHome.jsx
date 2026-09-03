@@ -75,7 +75,7 @@ export default function StoreHome() {
   };
 
   return (
-    <div className="bg-white bg-habanero">
+    <div className="bg-white">
 
       {/* ═══════════════════════════════════════
           01 — HERO SLIDER
@@ -177,13 +177,13 @@ function CategoryExplorer({ categories, loading }) {
             <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
               02 / Product Range
             </span>
-            <h2 className="font-display font-600 text-display-lg bg-habanero mt-2">
+            <h2 className="font-display font-600 text-display-lg text-navy mt-2">
               Explore our<br />products
             </h2>
           </div>
           <Link
             to="/store/catalogue"
-            className="inline-flex items-center gap-2 text-sm font-display font-medium text-ink-soft hover:bg-habanero transition-colors group"
+            className="inline-flex items-center gap-2 text-sm font-display font-medium text-ink-soft hover:text-navy transition-colors group"
           >
             View full catalogue
             <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
@@ -247,12 +247,12 @@ function CategoryTile({ cat, idx, visible, skeleton }) {
         {String(idx + 1).padStart(2, "0")}
       </span>
       <div className="flex items-center justify-between gap-2">
-        <span className={`font-display font-600 text-base sm:text-lg leading-tight ${isCoral ? "text-white" : "bg-habanero"} group-hover:text-white transition-colors`}>
+        <span className={`font-display font-600 text-base sm:text-lg leading-tight ${isCoral ? "text-white" : "text-navy"} group-hover:text-white transition-colors`}>
           {cat.name}
         </span>
         <ChevronRight
           size={16}
-          className={`shrink-0 ${isCoral ? "text-white" : "bg-habanero"} group-hover:text-habanero group-hover:translate-x-1 transition-all`}
+          className={`shrink-0 ${isCoral ? "text-white" : "text-navy"} group-hover:text-habanero group-hover:translate-x-1 transition-all`}
         />
       </div>
     </Link>
@@ -293,18 +293,18 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
               onSubmit={(e) => e.preventDefault()}
               className="relative"
             >
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 bg-habanero/50" />
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-navy/50" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search products…"
-                className="w-full bg-white pl-11 pr-4 py-3.5 text-sm bg-habanero placeholder:bg-habanero/40 focus:outline-none"
+                className="w-full bg-white pl-11 pr-4 py-3.5 text-sm text-navy placeholder:text-navy/40 focus:outline-none"
               />
             </form>
             <Link
               to="/store/catalogue"
-              className="inline-flex items-center gap-2 mt-5 font-mono text-[11px] tracking-widest uppercase text-white hover:bg-habanero transition-colors group"
+              className="inline-flex items-center gap-2 mt-5 font-mono text-[11px] tracking-widest uppercase text-white hover:text-navy transition-colors group"
             >
               Full search &amp; filters
               <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
@@ -319,7 +319,7 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
                     to={`/store/product/${p.id}`}
                     className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-tan/50 transition-colors"
                   >
-                    <span className="text-sm bg-habanero truncate">{p.name}</span>
+                    <span className="text-sm text-navy truncate">{p.name}</span>
                     <span className="font-mono text-xs text-habanero shrink-0">₹{Number(p.price).toFixed(0)}</span>
                   </Link>
                 ))}
@@ -384,7 +384,7 @@ function FeaturedCard({ product, added, onAdd }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Package size={32} strokeWidth={1} className="bg-habanero/20" />
+            <Package size={32} strokeWidth={1} className="text-navy/20" />
           </div>
         )}
         <button
@@ -410,7 +410,7 @@ function FeaturedCard({ product, added, onAdd }) {
         )}
         <Link
           to={`/store/product/${product.id}`}
-          className="font-display font-medium text-sm bg-habanero leading-snug line-clamp-2 hover:text-habanero transition-colors block min-h-[2.5em]"
+          className="font-display font-medium text-sm text-navy leading-snug line-clamp-2 hover:text-habanero transition-colors block min-h-[2.5em]"
         >
           {product.name}
         </Link>
@@ -455,7 +455,7 @@ function ProductSpotlight({ product }) {
 
           {/* RIGHT — copy */}
           <div
-            className="bg-royal lg:bg-white flex flex-col justify-center px-8 sm:px-12 py-12 lg:py-0"
+            className="bg-white flex flex-col justify-center px-8 sm:px-12 py-12 lg:py-0"
             style={{
               opacity: visible ? 1 : 0,
               transform: visible ? "none" : "translateX(20px)",
@@ -465,7 +465,7 @@ function ProductSpotlight({ product }) {
             <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase mb-4">
               04 / Product Spotlight
             </span>
-            <h2 className="font-display font-600 text-display-lg bg-habanero leading-none mb-5">
+            <h2 className="font-display font-600 text-display-lg text-navy leading-none mb-5">
               {product.name}
             </h2>
             {product.description && (
@@ -477,13 +477,13 @@ function ProductSpotlight({ product }) {
               {product.brand && (
                 <div>
                   <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Brand</p>
-                  <p className="font-display font-600 text-sm bg-habanero mt-1">{product.brand}</p>
+                  <p className="font-display font-600 text-sm text-navy mt-1">{product.brand}</p>
                 </div>
               )}
               {product.category && (
                 <div>
                   <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Category</p>
-                  <p className="font-display font-600 text-sm bg-habanero mt-1">{product.category}</p>
+                  <p className="font-display font-600 text-sm text-navy mt-1">{product.category}</p>
                 </div>
               )}
               <div>
@@ -523,7 +523,7 @@ function ProcessFlow() {
         <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
           05 / How It Works
         </span>
-        <h2 className="font-display font-600 text-display-lg bg-habanero mt-2 mb-14">
+        <h2 className="font-display font-600 text-display-lg text-navy mt-2 mb-14">
           From enquiry to delivery
         </h2>
 
@@ -539,13 +539,13 @@ function ProcessFlow() {
               }}
             >
               <div className="flex items-center gap-3 mb-4">
-                <span className="font-display font-600 text-3xl bg-habanero/15">{step.n}</span>
+                <span className="font-display font-600 text-3xl text-navy/15">{step.n}</span>
                 <span className="flex-1 h-px bg-tan hidden sm:block" />
                 {i < steps.length - 1 && (
                   <ArrowRight size={14} className="text-habanero hidden sm:block" />
                 )}
               </div>
-              <h3 className="font-display font-600 text-sm bg-habanero uppercase tracking-wide mb-2">
+              <h3 className="font-display font-600 text-sm text-navy uppercase tracking-wide mb-2">
                 {step.label}
               </h3>
               <p className="text-ink-soft text-sm leading-relaxed">{step.body}</p>
@@ -662,7 +662,7 @@ function FinalCTA() {
         <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
           07 / Get Started
         </span>
-        <h2 className="font-display font-600 text-display-xl bg-habanero mt-4 mb-6 leading-none">
+        <h2 className="font-display font-600 text-display-xl text-navy mt-4 mb-6 leading-none">
           Have a requirement?<br />Let's find the right product.
         </h2>
         <p className="text-ink-soft text-base sm:text-lg max-w-lg mx-auto mb-10 leading-relaxed">
@@ -679,7 +679,7 @@ function FinalCTA() {
           </Link>
           <Link
             to="/store/catalogue"
-            className="inline-flex items-center gap-2 border border-tan bg-habanero font-display font-medium text-sm px-8 py-4 hover:border-navy transition-colors"
+            className="inline-flex items-center gap-2 border border-tan text-navy font-display font-medium text-sm px-8 py-4 hover:border-navy transition-colors"
           >
             Explore Catalogue
           </Link>
