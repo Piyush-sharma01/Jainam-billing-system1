@@ -403,6 +403,7 @@ function FilterDropdown({ label, value, options, onChange }) {
     </div>
   );
 }
+
 /* ─────────────────────────────────────────────
    FILTER GROUP (mobile drawer)
 ───────────────────────────────────────────── */
