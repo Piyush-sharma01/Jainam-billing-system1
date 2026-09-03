@@ -8,8 +8,8 @@ export default {
     extend: {
 colors: {
   // ===== JAINAM BRAND SYSTEM =====
-  navy:   '#1E3A8A',
-  coral:  '#FF5A5F',
+  royal:  '#1E3A8A',
+  habanero: '#FF5A5F',
   paper:  '#F4F1EC',
 
   // Supporting brand colors
