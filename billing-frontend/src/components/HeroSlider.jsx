@@ -79,7 +79,7 @@ export default function HeroSlider({ products = [], stats = {} }) {
 
   return (
     <section
-      className="relative bg-navy overflow-hidden"
+      className="relative bg-royal overflow-hidden"
       onMouseEnter={pause}
       onMouseLeave={resume}
       onFocusCapture={pause}
@@ -99,14 +99,14 @@ export default function HeroSlider({ products = [], stats = {} }) {
       />
 
       {/* Large coral geometric block — structural accent, offset/asymmetric */}
-      <div className="hidden lg:block absolute top-0 right-0 w-[38%] h-full bg-coral clip-hero-block" />
+      <div className="hidden lg:block absolute top-0 right-0 w-[38%] h-full bg-habanero clip-hero-block" />
 
       <div className="relative grid grid-cols-1 lg:grid-cols-2 min-h-[560px] sm:min-h-[620px]">
         {/* LEFT — editorial text column */}
         <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-16 sm:py-20 z-10">
           <div className="flex items-center gap-3 mb-6">
-            <span className="w-8 h-px bg-coral" />
-            <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
+            <span className="w-8 h-px bg-habanero" />
+            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
               {slide.eyebrow}
             </span>
           </div>
@@ -125,7 +125,7 @@ export default function HeroSlider({ products = [], stats = {} }) {
           )}
 
           {slide.price != null && (
-            <p className="font-mono font-600 text-2xl text-coral mb-8">
+            <p className="font-mono font-600 text-2xl text-habanero mb-8">
               ₹{Number(slide.price).toFixed(2)}
             </p>
           )}
@@ -133,7 +133,7 @@ export default function HeroSlider({ products = [], stats = {} }) {
           <div className="flex flex-wrap items-center gap-4 mt-2">
             <Link
               to={slide.primaryTo}
-              className="inline-flex items-center gap-2 bg-coral text-white font-display font-medium text-sm px-6 py-3.5 hover:bg-white hover:text-navy transition-colors"
+              className="inline-flex items-center gap-2 bg-habanero text-white font-display font-medium text-sm px-6 py-3.5 hover:bg-white hover:text-royal transition-colors"
             >
               {slide.primaryLabel}
               <ArrowRight size={15} />
@@ -158,10 +158,10 @@ export default function HeroSlider({ products = [], stats = {} }) {
                 className="w-full h-full object-contain p-10 animate-fade-in"
               />
             ) : (
-              <Package size={72} strokeWidth={1} className="text-navy/20" />
+              <Package size={72} strokeWidth={1} className="text-royal/20" />
             )}
             {/* Corner tag */}
-            <span className="absolute top-4 left-4 font-mono text-[9px] tracking-widest text-navy/50 uppercase">
+            <span className="absolute top-4 left-4 font-mono text-[9px] tracking-widest text-royal/50 uppercase">
               {slide.kind === "product" ? "Product" : "Catalogue"}
             </span>
           </div>
@@ -183,7 +183,7 @@ export default function HeroSlider({ products = [], stats = {} }) {
                 key={i}
                 onClick={() => goTo(i)}
                 className={`h-1.5 transition-all duration-300 ${
-                  i === index ? "w-7 bg-coral" : "w-1.5 bg-white/25 hover:bg-white/50"
+                  i === index ? "w-7 bg-habanero" : "w-1.5 bg-white/25 hover:bg-white/50"
                 }`}
                 aria-label={`Go to slide ${i + 1}`}
                 aria-current={i === index}
@@ -195,14 +195,14 @@ export default function HeroSlider({ products = [], stats = {} }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => goTo(index - 1)}
-              className="w-9 h-9 flex items-center justify-center border border-white/20 text-white hover:border-coral hover:text-coral transition-colors"
+              className="w-9 h-9 flex items-center justify-center border border-white/20 text-white hover:border-habanero hover:text-habanero transition-colors"
               aria-label="Previous slide"
             >
               <ArrowLeft size={15} />
             </button>
             <button
               onClick={() => goTo(index + 1)}
-              className="w-9 h-9 flex items-center justify-center border border-white/20 text-white hover:border-coral hover:text-coral transition-colors"
+              className="w-9 h-9 flex items-center justify-center border border-white/20 text-white hover:border-habanero hover:text-habanero transition-colors"
               aria-label="Next slide"
             >
               <ArrowRight size={15} />
