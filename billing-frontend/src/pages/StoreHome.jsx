@@ -139,8 +139,8 @@ function BrandStrip({ brands }) {
   return (
     <section className="bg-paper border-y border-tan py-14 sm:py-20 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 sm:px-10 mb-8 flex items-center gap-3">
-        <span className="w-6 h-px bg-habanero shrink-0" />
-        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
+        <span className="w-10 h-px bg-habanero shrink-0" />
+        <span className="font-mono text-[20px] tracking-[0.2em] text-habanero uppercase">
           Brands We Carry
         </span>
       </div>
