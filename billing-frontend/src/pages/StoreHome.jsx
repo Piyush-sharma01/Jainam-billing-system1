@@ -160,7 +160,7 @@ function BrandStrip({ brands }) {
                 <img
                   src={brand.logoUrl}
                   alt={brand.name}
-                  className="h-7 sm:h-9 w-auto object-contain grayscale opacity-55 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300"
+                  className="h-20 sm:h-20 w-auto object-contain grayscale opacity-55 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300"
                 />
               ) : (
                 <span className="font-display font-600 text-sm sm:text-base text-royal/60 group-hover:text-royal tracking-wide uppercase whitespace-nowrap transition-colors duration-300">
