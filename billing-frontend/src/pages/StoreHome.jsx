@@ -75,7 +75,7 @@ export default function StoreHome() {
   };
 
   return (
-    <div className="bg-luster text-deadly">
+    <div className="bg-white text-navy">
 
       {/* ═══════════════════════════════════════
           01 — HERO SLIDER
@@ -136,58 +136,27 @@ export default function StoreHome() {
 ───────────────────────────────────────────── */
 function BrandStrip({ brands }) {
   const items = [...brands, ...brands];
-
   return (
-    <section className="relative overflow-hidden bg-royal text-white border-y border-deadly/20">
-      <div className="absolute inset-y-0 left-0 w-32 bg-habanero/20 pointer-events-none" />
-
-      <div className="flex w-max animate-ticker">
+    <div className="border-b border-line bg-white overflow-hidden py-5">
+      <div className="flex w-max animate-ticker gap-0">
         {items.map((brand, i) => (
-          <div
-            key={`${brand.id}-${i}`}
-            className="
-              flex
-              items-center
-              gap-8
-              px-8
-              sm:px-12
-              py-7
-              shrink-0
-            "
-          >
+          <div key={`${brand.id}-${i}`} className="flex items-center gap-6 px-8 shrink-0">
             {brand.logoUrl ? (
               <img
                 src={brand.logoUrl}
                 alt={brand.name}
-                className="
-                  h-7
-                  w-auto
-                  object-contain
-                  brightness-0
-                  invert
-                  opacity-80
-                  hover:opacity-100
-                  transition-opacity
-                "
+                className="h-6 w-auto object-contain opacity-50 hover:opacity-100 transition-opacity grayscale"
               />
             ) : (
-              <span className="
-                font-mono
-                text-[10px]
-                tracking-[0.2em]
-                uppercase
-                whitespace-nowrap
-                text-white/80
-              ">
+              <span className="font-mono text-[11px] tracking-[0.15em] text-ink-soft uppercase whitespace-nowrap">
                 {brand.name}
               </span>
             )}
-
-            <span className="w-2 h-2 bg-habanero rotate-45 shrink-0" />
+            <span className="w-px h-4 bg-line shrink-0" />
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -351,6 +320,7 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
                     className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-line/50 transition-colors"
                   >
                     <span className="text-sm text-navy truncate">{p.name}</span>
+                    <span className="font-mono text-xs text-coral shrink-0">₹{Number(p.price).toFixed(0)}</span>
                   </Link>
                 ))}
               </div>
@@ -444,6 +414,9 @@ function FeaturedCard({ product, added, onAdd }) {
         >
           {product.name}
         </Link>
+        <p className="font-mono font-600 text-base text-coral mt-2">
+          ₹{Number(product.price).toFixed(2)}
+        </p>
       </div>
     </div>
   );
@@ -513,6 +486,10 @@ function ProductSpotlight({ product }) {
                   <p className="font-display font-600 text-sm text-navy mt-1">{product.category}</p>
                 </div>
               )}
+              <div>
+                <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Price</p>
+                <p className="font-mono font-600 text-lg text-coral mt-1">₹{Number(product.price).toFixed(2)}</p>
+              </div>
             </div>
             <Link
               to={`/store/product/${product.id}`}
