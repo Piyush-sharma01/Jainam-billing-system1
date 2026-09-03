@@ -82,7 +82,7 @@ export default function StoreHome() {
       ═══════════════════════════════════════ */}
       {!loading && <HeroSlider products={products} stats={stats} />}
       {loading && (
-        <div className="h-[560px] sm:h-[620px] bg-royal animate-pulse" />
+        <div className="h-[560px] sm:h-[620px] bg-navy animate-pulse" />
       )}
 
       {/* ═══════════════════════════════════════
@@ -174,7 +174,7 @@ function CategoryExplorer({ categories, loading }) {
       <div className="max-w-7xl mx-auto px-6 sm:px-10">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12 sm:mb-16">
           <div>
-            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
+            <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
               02 / Product Range
             </span>
             <h2 className="font-display font-600 text-display-lg text-navy mt-2">
@@ -193,7 +193,7 @@ function CategoryExplorer({ categories, loading }) {
         {/* Bento grid: large navy "PRODUCTS" panel + category tiles */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-tan border border-tan">
           {/* Large lead panel */}
-          <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 bg-royal relative overflow-hidden p-8 sm:p-10 flex flex-col justify-between min-h-[220px] sm:min-h-[320px]">
+          <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 bg-navy relative overflow-hidden p-8 sm:p-10 flex flex-col justify-between min-h-[220px] sm:min-h-[320px]">
             <div
               className="absolute inset-0 opacity-[0.06] pointer-events-none"
               style={{
@@ -201,7 +201,7 @@ function CategoryExplorer({ categories, loading }) {
                 backgroundSize: "48px 48px",
               }}
             />
-            <div className="relative z-10 w-10 h-10 bg-habanero flex items-center justify-center">
+            <div className="relative z-10 w-10 h-10 bg-coral flex items-center justify-center">
               <Package size={18} className="text-white" />
             </div>
             <div className="relative z-10">
@@ -235,7 +235,7 @@ function CategoryTile({ cat, idx, visible, skeleton }) {
     <Link
       to={`/store/catalogue?category=${encodeURIComponent(cat.name)}`}
       className={`group relative flex flex-col justify-between p-6 min-h-[130px] transition-colors duration-300 ${
-        isCoral ? "bg-habanero hover:bg-royal" : "bg-white hover:bg-royal"
+        isCoral ? "bg-coral hover:bg-navy" : "bg-white hover:bg-navy"
       }`}
       style={{
         opacity: visible ? 1 : 0,
@@ -252,7 +252,7 @@ function CategoryTile({ cat, idx, visible, skeleton }) {
         </span>
         <ChevronRight
           size={16}
-          className={`shrink-0 ${isCoral ? "text-white" : "text-navy"} group-hover:text-habanero group-hover:translate-x-1 transition-all`}
+          className={`shrink-0 ${isCoral ? "text-white" : "text-navy"} group-hover:text-coral group-hover:translate-x-1 transition-all`}
         />
       </div>
     </Link>
@@ -268,7 +268,7 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
     : [];
 
   return (
-    <section className="bg-royal py-20 sm:py-28 relative overflow-hidden">
+    <section className="bg-navy py-20 sm:py-28 relative overflow-hidden">
       <div
         className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{
@@ -280,7 +280,7 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] gap-10 lg:gap-6 mb-16">
 
           {/* Search panel */}
-          <div className="bg-habanero p-8 sm:p-10 flex flex-col justify-between">
+          <div className="bg-coral p-8 sm:p-10 flex flex-col justify-between">
             <div>
               <span className="font-mono text-[11px] tracking-[0.2em] text-white/70 uppercase">
                 03 / Product Discovery
@@ -320,7 +320,7 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
                     className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-tan/50 transition-colors"
                   >
                     <span className="text-sm text-navy truncate">{p.name}</span>
-                    <span className="font-mono text-xs text-habanero shrink-0">₹{Number(p.price).toFixed(0)}</span>
+                    <span className="font-mono text-xs text-coral shrink-0">₹{Number(p.price).toFixed(0)}</span>
                   </Link>
                 ))}
               </div>
@@ -329,7 +329,7 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
 
           {/* Featured heading */}
           <div className="flex flex-col justify-center">
-            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase mb-3">
+            <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase mb-3">
               Featured Products
             </span>
             <h3 className="font-display font-600 text-display-md text-white leading-tight mb-4">
@@ -396,7 +396,7 @@ function FeaturedCard({ product, added, onAdd }) {
               ? "opacity-0"
               : added
               ? "bg-green-700 text-white"
-              : "bg-royal text-white hover:bg-habanero"
+              : "bg-navy text-white hover:bg-coral"
           }`}
         >
           {added ? <Check size={14} /> : <ShoppingCart size={14} />}
@@ -410,11 +410,11 @@ function FeaturedCard({ product, added, onAdd }) {
         )}
         <Link
           to={`/store/product/${product.id}`}
-          className="font-display font-medium text-sm text-navy leading-snug line-clamp-2 hover:text-habanero transition-colors block min-h-[2.5em]"
+          className="font-display font-medium text-sm text-navy leading-snug line-clamp-2 hover:text-coral transition-colors block min-h-[2.5em]"
         >
           {product.name}
         </Link>
-        <p className="font-mono font-600 text-base text-habanero mt-2">
+        <p className="font-mono font-600 text-base text-coral mt-2">
           ₹{Number(product.price).toFixed(2)}
         </p>
       </div>
@@ -434,14 +434,14 @@ function ProductSpotlight({ product }) {
 
           {/* LEFT — huge image on navy, overlapping coral shape */}
           <div
-            className="relative bg-royal min-h-[340px] sm:min-h-[440px] flex items-center justify-center clip-spotlight-block"
+            className="relative bg-navy min-h-[340px] sm:min-h-[440px] flex items-center justify-center clip-spotlight-block"
             style={{
               opacity: visible ? 1 : 0,
               transform: visible ? "none" : "translateX(-20px)",
               transition: "opacity 0.7s ease, transform 0.7s ease",
             }}
           >
-            <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-habanero rotate-12" />
+            <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-coral rotate-12" />
             {product.imageUrl ? (
               <img
                 src={product.imageUrl}
@@ -462,7 +462,7 @@ function ProductSpotlight({ product }) {
               transition: "opacity 0.7s 0.1s ease, transform 0.7s 0.1s ease",
             }}
           >
-            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase mb-4">
+            <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase mb-4">
               04 / Product Spotlight
             </span>
             <h2 className="font-display font-600 text-display-lg text-navy leading-none mb-5">
@@ -488,12 +488,12 @@ function ProductSpotlight({ product }) {
               )}
               <div>
                 <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Price</p>
-                <p className="font-mono font-600 text-lg text-habanero mt-1">₹{Number(product.price).toFixed(2)}</p>
+                <p className="font-mono font-600 text-lg text-coral mt-1">₹{Number(product.price).toFixed(2)}</p>
               </div>
             </div>
             <Link
               to={`/store/product/${product.id}`}
-              className="inline-flex items-center gap-2 bg-royal text-white font-display font-medium text-sm px-6 py-3.5 hover:bg-habanero transition-colors w-fit"
+              className="inline-flex items-center gap-2 bg-navy text-white font-display font-medium text-sm px-6 py-3.5 hover:bg-coral transition-colors w-fit"
             >
               View Product
               <ArrowRight size={15} />
@@ -520,7 +520,7 @@ function ProcessFlow() {
   return (
     <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-tan">
       <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
+        <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
           05 / How It Works
         </span>
         <h2 className="font-display font-600 text-display-lg text-navy mt-2 mb-14">
@@ -542,7 +542,7 @@ function ProcessFlow() {
                 <span className="font-display font-600 text-3xl text-navy/15">{step.n}</span>
                 <span className="flex-1 h-px bg-tan hidden sm:block" />
                 {i < steps.length - 1 && (
-                  <ArrowRight size={14} className="text-habanero hidden sm:block" />
+                  <ArrowRight size={14} className="text-coral hidden sm:block" />
                 )}
               </div>
               <h3 className="font-display font-600 text-sm text-navy uppercase tracking-wide mb-2">
@@ -587,9 +587,9 @@ function WhySection({ stats, loading }) {
   ];
 
   return (
-    <section ref={ref} className="bg-royal py-20 sm:py-28">
+    <section ref={ref} className="bg-navy py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
+        <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
           06 / Why Jainam
         </span>
         <h2 className="font-display font-600 text-display-lg text-white mt-2 mb-14">
@@ -598,7 +598,7 @@ function WhySection({ stats, loading }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-white/10 border border-white/10">
           {/* Large stat tile */}
-          <div className="lg:row-span-2 bg-habanero p-8 sm:p-10 flex flex-col justify-between min-h-[220px]">
+          <div className="lg:row-span-2 bg-coral p-8 sm:p-10 flex flex-col justify-between min-h-[220px]">
             <span className="font-mono text-[10px] tracking-widest text-white/70 uppercase">Live catalogue</span>
             <div>
               <p className="font-display font-600 text-5xl sm:text-6xl text-white leading-none">
@@ -614,7 +614,7 @@ function WhySection({ stats, loading }) {
           {pillars.map(({ icon: Icon, title, body }, i) => (
             <div
               key={title}
-              className="bg-royal p-6 sm:p-8 flex flex-col gap-4"
+              className="bg-navy p-6 sm:p-8 flex flex-col gap-4"
               style={{
                 opacity: visible ? 1 : 0,
                 transform: visible ? "none" : "translateY(14px)",
@@ -622,7 +622,7 @@ function WhySection({ stats, loading }) {
               }}
             >
               <div className="w-9 h-9 border border-white/20 flex items-center justify-center shrink-0">
-                <Icon size={16} className="text-habanero" strokeWidth={1.5} />
+                <Icon size={16} className="text-coral" strokeWidth={1.5} />
               </div>
               <h3 className="font-display font-600 text-sm text-white">{title}</h3>
               <p className="font-sans text-sm text-white/55 leading-relaxed">{body}</p>
@@ -659,7 +659,7 @@ function FinalCTA() {
           transition: "opacity 0.7s ease, transform 0.7s ease",
         }}
       >
-        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
+        <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
           07 / Get Started
         </span>
         <h2 className="font-display font-600 text-display-xl text-navy mt-4 mb-6 leading-none">
@@ -672,7 +672,7 @@ function FinalCTA() {
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Link
             to="/store/contact"
-            className="inline-flex items-center gap-2 bg-habanero text-white font-display font-medium text-sm px-8 py-4 hover:bg-royal transition-colors"
+            className="inline-flex items-center gap-2 bg-coral text-white font-display font-medium text-sm px-8 py-4 hover:bg-navy transition-colors"
           >
             Send Enquiry
             <ArrowRight size={15} />
