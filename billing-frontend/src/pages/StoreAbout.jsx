@@ -28,7 +28,7 @@ export default function StoreAbout() {
   return (
     <div className="page-enter">
       {/* Hero section */}
-      <section className="bg-navy py-16 sm:py-20 relative overflow-hidden">
+      <section className="bg-royal py-16 sm:py-20 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{
@@ -37,7 +37,7 @@ export default function StoreAbout() {
           }}
         />
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6">
-          <p className="font-mono text-[11px] tracking-widest text-coral uppercase mb-4">
+          <p className="font-mono text-[11px] tracking-widest text-habanero uppercase mb-4">
             About Us
           </p>
           <h1 className="font-display font-600 text-3xl sm:text-4xl text-white leading-tight">
@@ -48,7 +48,7 @@ export default function StoreAbout() {
 
       {/* Body copy */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 py-14">
-        <p className="text-navy leading-relaxed text-base mb-5">
+        <p className="text-royal leading-relaxed text-base mb-5">
           Jainam is a dependable supplier of pipes, valves, fittings and related hardware,
           working directly with leading brands to keep our catalogue current, competitively
           priced, and consistently in stock.
@@ -73,7 +73,7 @@ export default function StoreAbout() {
             { num: stats ? stats.brands : "—", label: "Brands carried" },
           ].map(({ num, label }) => (
             <div key={label}>
-              <p className="font-mono font-600 text-2xl sm:text-3xl text-navy">{num}</p>
+              <p className="font-mono font-600 text-2xl sm:text-3xl text-royal">{num}</p>
               <p className="text-xs text-ink-soft mt-1 font-display">{label}</p>
             </div>
           ))}
@@ -82,10 +82,10 @@ export default function StoreAbout() {
 
       {/* Pillars */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-16">
-        <p className="font-mono text-[11px] tracking-widest text-coral uppercase mb-3">
+        <p className="font-mono text-[11px] tracking-widest text-habanero uppercase mb-3">
           Why Jainam
         </p>
-        <h2 className="font-display font-600 text-2xl sm:text-3xl text-navy mb-10">
+        <h2 className="font-display font-600 text-2xl sm:text-3xl text-royal mb-10">
           What we stand for
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -95,10 +95,10 @@ export default function StoreAbout() {
               className="bg-white border border-line p-6 flex gap-4 hover-lift"
             >
               <div className="w-10 h-10 bg-tan flex items-center justify-center shrink-0 mt-0.5">
-                <Icon size={18} className="text-navy" />
+                <Icon size={18} className="text-royal" />
               </div>
               <div>
-                <h3 className="font-display font-600 text-sm text-navy mb-1">{title}</h3>
+                <h3 className="font-display font-600 text-sm text-royal mb-1">{title}</h3>
                 <p className="text-ink-soft text-sm leading-relaxed">{body}</p>
               </div>
             </div>
