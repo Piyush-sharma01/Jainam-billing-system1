@@ -28,7 +28,7 @@ export default function StoreAbout() {
   return (
     <div className="page-enter">
       {/* Hero section */}
-      <section className="bg-royal py-16 sm:py-20 relative overflow-hidden">
+      <section className="bg-navy py-16 sm:py-20 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{
