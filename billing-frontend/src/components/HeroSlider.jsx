@@ -17,6 +17,7 @@ export default function HeroSlider({ stats = {} }) {
     return [
       {
         icon: Package,
+        image: null, // e.g. "/images/hero-catalogue.jpg" or a full https:// URL
         eyebrow: "Pipes · Valves · Fittings",
         title: "Everything your project needs, in one catalogue.",
         body:
@@ -28,6 +29,7 @@ export default function HeroSlider({ stats = {} }) {
       },
       {
         icon: ShieldCheck,
+        image: null, // e.g. "/images/hero-quality.jpg"
         eyebrow: "Quality You Can Trust",
         title: "Sourced from established manufacturers.",
         body: "Every product is verified for spec compliance before it reaches our catalogue — no substitutions, no surprises.",
@@ -36,6 +38,7 @@ export default function HeroSlider({ stats = {} }) {
       },
       {
         icon: Workflow,
+        image: null, // e.g. "/images/hero-process.jpg"
         eyebrow: "How It Works",
         title: "From enquiry to delivery, simplified.",
         body: "Browse the catalogue, send your requirement, and let a dedicated account manager take it from confirmation to shipment.",
@@ -44,6 +47,7 @@ export default function HeroSlider({ stats = {} }) {
       },
       {
         icon: Headphones,
+        image: null, // e.g. "/images/hero-contact.jpg"
         eyebrow: "Get In Touch",
         title: "Have a requirement? Let's talk.",
         body: "Send your enquiry directly — our team responds with pricing and availability, fast.",
@@ -155,15 +159,23 @@ export default function HeroSlider({ stats = {} }) {
           </div>
         </div>
 
-        {/* RIGHT — large editorial icon mark, overlapping the coral block */}
+        {/* RIGHT — image or editorial icon mark, overlapping the coral block */}
         <div className="hidden lg:flex relative items-center justify-center z-10 px-10">
           <div
-            key={`icon-${index}`}
-            className="relative w-full max-w-md aspect-square bg-white flex items-center justify-center shadow-2xl animate-fade-in"
+            key={`visual-${index}`}
+            className="relative w-full max-w-md aspect-square bg-white flex items-center justify-center shadow-2xl animate-fade-in overflow-hidden"
           >
-            <Icon size={96} strokeWidth={1} className="text-royal/25" />
+            {slide.image ? (
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Icon size={96} strokeWidth={1} className="text-royal/25" />
+            )}
             {/* Corner tag */}
-            <span className="absolute top-4 left-4 font-mono text-[9px] tracking-widest text-royal/50 uppercase">
+            <span className="absolute top-4 left-4 font-mono text-[9px] tracking-widest text-royal/50 uppercase bg-white/80 px-1.5 py-0.5">
               {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
             </span>
           </div>
