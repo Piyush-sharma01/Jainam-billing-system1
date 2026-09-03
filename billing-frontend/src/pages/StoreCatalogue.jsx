@@ -87,12 +87,12 @@ export default function StoreCatalogue() {
   }, [drawerOpen]);
 
   return (
-    <div className="bg-white min-h-screen text-navy">
+    <div className="bg-white min-h-screen text-royal">
 
       {/* ══════════════════════════════════════
           CATALOGUE HEADER
       ══════════════════════════════════════ */}
-      <header className="bg-navy relative overflow-hidden">
+      <header className="bg-royal relative overflow-hidden">
         {/* Fine grid */}
         <div
           className="absolute inset-0 opacity-[0.04] pointer-events-none"
@@ -103,22 +103,22 @@ export default function StoreCatalogue() {
           }}
         />
         {/* Coral structural block, bottom-right — asymmetric accent */}
-        <div className="hidden sm:block absolute -right-10 -bottom-16 w-64 h-64 bg-coral/90 rotate-12" />
+        <div className="hidden sm:block absolute -right-10 -bottom-16 w-64 h-64 bg-habanero/90 rotate-12" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-8 pt-12 pb-10 sm:pt-16 sm:pb-14">
           {/* Breadcrumb */}
           <p className="font-mono text-[10px] tracking-[0.2em] text-white/50 uppercase mb-6 flex items-center gap-2">
             <span>Jainam</span>
             <span className="opacity-30">/</span>
-            <span className="text-coral">Products</span>
+            <span className="text-habanero">Products</span>
           </p>
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
               {/* Eyebrow */}
               <div className="flex items-center gap-3 mb-4">
-                <span className="w-6 h-px bg-coral" />
-                <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
+                <span className="w-6 h-px bg-habanero" />
+                <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
                   Full Range
                 </span>
               </div>
@@ -133,7 +133,7 @@ export default function StoreCatalogue() {
 
             {/* Live count */}
             {!loading && (
-              <div className="relative shrink-0 border border-white/20 bg-navy px-5 py-3 text-right">
+              <div className="relative shrink-0 border border-white/20 bg-royal px-5 py-3 text-right">
                 <p className="font-mono font-600 text-2xl text-white">
                   {filteredProducts.length}
                 </p>
@@ -164,12 +164,12 @@ export default function StoreCatalogue() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search products…"
-                className="w-full bg-transparent pl-10 pr-4 py-4 text-sm text-navy placeholder:text-gray-500 focus:outline-none"
+                className="w-full bg-transparent pl-10 pr-4 py-4 text-sm text-royal placeholder:text-gray-500 focus:outline-none"
               />
               {search && (
                 <button
                   onClick={() => { setSearch(""); searchRef.current?.focus(); }}
-                  className="absolute right-3 text-gray-500 hover:text-navy transition-colors"
+                  className="absolute right-3 text-gray-500 hover:text-royal transition-colors"
                 >
                   <X size={14} />
                 </button>
@@ -200,7 +200,7 @@ export default function StoreCatalogue() {
             {hasActiveFilter && (
               <button
                 onClick={() => setSearchParams({})}
-                className="px-5 text-xs font-mono tracking-widest text-gray-500 hover:text-coral transition-colors uppercase flex items-center gap-2 shrink-0"
+                className="px-5 text-xs font-mono tracking-widest text-gray-500 hover:text-habanero transition-colors uppercase flex items-center gap-2 shrink-0"
               >
                 <X size={12} /> Clear
               </button>
@@ -217,7 +217,7 @@ export default function StoreCatalogue() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search…"
-                className="w-full bg-transparent pl-9 pr-3 py-3.5 text-sm text-navy placeholder:text-gray-500 focus:outline-none"
+                className="w-full bg-transparent pl-9 pr-3 py-3.5 text-sm text-royal placeholder:text-gray-500 focus:outline-none"
               />
               {search && (
                 <button
@@ -237,7 +237,7 @@ export default function StoreCatalogue() {
               <SlidersHorizontal size={14} />
               Filters
               {activeFilterCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-coral text-white text-[9px] font-mono flex items-center justify-center leading-none">
+                <span className="w-4 h-4 rounded-full bg-habanero text-white text-[9px] font-mono flex items-center justify-center leading-none">
                   {activeFilterCount}
                 </span>
               )}
@@ -297,12 +297,12 @@ export default function StoreCatalogue() {
           <div className="fixed bottom-0 inset-x-0 z-50 bg-gray-50 border-t border-gray-200 rounded-t-lg max-h-[80vh] flex flex-col nav-drawer-enter">
             {/* Handle */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 shrink-0">
-              <span className="font-mono text-[11px] tracking-widest text-navy uppercase">
+              <span className="font-mono text-[11px] tracking-widest text-royal uppercase">
                 Filters
               </span>
               <button
                 onClick={() => setDrawerOpen(false)}
-                className="p-2 text-gray-500 hover:text-navy transition-colors"
+                className="p-2 text-gray-500 hover:text-royal transition-colors"
               >
                 <X size={18} />
               </button>
@@ -334,13 +334,13 @@ export default function StoreCatalogue() {
             <div className="px-5 py-4 border-t border-gray-200 flex gap-3 shrink-0">
               <button
                 onClick={() => { setSearchParams({}); setDrawerOpen(false); }}
-                className="flex-1 py-3 border border-gray-200 text-gray-500 text-sm font-display font-medium hover:text-navy transition-colors"
+                className="flex-1 py-3 border border-gray-200 text-gray-500 text-sm font-display font-medium hover:text-royal transition-colors"
               >
                 Clear all
               </button>
               <button
                 onClick={() => setDrawerOpen(false)}
-                className="flex-1 py-3 bg-coral text-white text-sm font-display font-medium hover:opacity-90 transition-colors"
+                className="flex-1 py-3 bg-habanero text-white text-sm font-display font-medium hover:opacity-90 transition-colors"
               >
                 Show {filteredProducts.length} results
               </button>
@@ -370,7 +370,7 @@ function FilterDropdown({ label, value, options, onChange }) {
       <button
         onClick={() => setOpen((v) => !v)}
         className={`flex items-center gap-2 px-5 py-4 text-xs font-mono tracking-widest uppercase transition-colors h-full ${
-          value ? "text-coral" : "text-gray-500 hover:text-navy"
+          value ? "text-habanero" : "text-gray-500 hover:text-royal"
         }`}
       >
         {value || label}
@@ -382,7 +382,7 @@ function FilterDropdown({ label, value, options, onChange }) {
           <button
             onClick={() => { onChange(""); setOpen(false); }}
             className={`w-full text-left px-4 py-2.5 text-xs font-mono tracking-widest uppercase transition-colors ${
-              !value ? "text-coral" : "text-gray-500 hover:text-navy"
+              !value ? "text-habanero" : "text-gray-500 hover:text-royal"
             }`}
           >
             All {label}s
@@ -392,7 +392,7 @@ function FilterDropdown({ label, value, options, onChange }) {
               key={opt}
               onClick={() => { onChange(opt); setOpen(false); }}
               className={`w-full text-left px-4 py-2.5 text-xs font-mono tracking-widest uppercase transition-colors border-t border-gray-200 ${
-                value === opt ? "text-coral bg-white" : "text-gray-500 hover:text-navy"
+                value === opt ? "text-habanero bg-white" : "text-gray-500 hover:text-royal"
               }`}
             >
               {opt}
@@ -418,12 +418,12 @@ function FilterGroup({ label, options, active, onSelect }) {
           onClick={() => onSelect("")}
           className={`w-full text-left flex items-center justify-between px-4 py-3 text-sm font-display font-medium transition-colors min-h-[44px] ${
             !active
-              ? "bg-white text-navy border border-coral"
-              : "border border-gray-200 text-gray-500 hover:text-navy"
+              ? "bg-white text-royal border border-habanero"
+              : "border border-gray-200 text-gray-500 hover:text-royal"
           }`}
         >
           All {label}s
-          {!active && <Check size={13} className="text-coral" />}
+          {!active && <Check size={13} className="text-habanero" />}
         </button>
         {options.map((opt) => (
           <button
@@ -431,12 +431,12 @@ function FilterGroup({ label, options, active, onSelect }) {
             onClick={() => onSelect(active === opt ? "" : opt)}
             className={`w-full text-left flex items-center justify-between px-4 py-3 text-sm font-display font-medium transition-colors min-h-[44px] ${
               active === opt
-                ? "bg-white text-navy border border-coral"
-                : "border border-gray-200 text-gray-500 hover:text-navy"
+                ? "bg-white text-royal border border-habanero"
+                : "border border-gray-200 text-gray-500 hover:text-royal"
             }`}
           >
             {opt}
-            {active === opt && <Check size={13} className="text-coral" />}
+            {active === opt && <Check size={13} className="text-habanero" />}
           </button>
         ))}
       </div>
@@ -475,7 +475,7 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
 
         {/* Out of stock overlay */}
         {outOfStock && (
-          <div className="absolute inset-0 bg-navy/70 flex items-center justify-center">
+          <div className="absolute inset-0 bg-royal/70 flex items-center justify-center">
             <span className="font-mono text-[9px] tracking-[0.2em] text-white uppercase">
               Out of Stock
             </span>
@@ -492,7 +492,7 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
               ? "opacity-0 cursor-not-allowed"
               : added
               ? "bg-green-700 border-green-700 text-white opacity-100"
-              : "bg-white border-gray-200 text-gray-500 hover:border-coral hover:text-coral opacity-0 group-hover:opacity-100"
+              : "bg-white border-gray-200 text-gray-500 hover:border-habanero hover:text-habanero opacity-0 group-hover:opacity-100"
           }`}
         >
           {added ? <Check size={12} /> : <ShoppingCart size={12} />}
@@ -510,11 +510,11 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
           )}
           <Link
             to={`/store/product/${product.id}`}
-            className="font-display font-medium text-xs sm:text-sm text-navy leading-snug line-clamp-2 hover:text-coral transition-colors"
+            className="font-display font-medium text-xs sm:text-sm text-royal leading-snug line-clamp-2 hover:text-habanero transition-colors"
           >
             {product.name}
           </Link>
-          <p className="font-mono font-600 text-sm sm:text-base text-coral mt-1.5">
+          <p className="font-mono font-600 text-sm sm:text-base text-habanero mt-1.5">
             ₹{Number(product.price).toFixed(2)}
           </p>
         </div>
@@ -529,7 +529,7 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
               ? "border-gray-200 text-gray-500 cursor-not-allowed opacity-40"
               : added
               ? "bg-green-700 border-green-700 text-white"
-              : "border-gray-200 text-gray-500 hover:border-coral hover:text-coral"
+              : "border-gray-200 text-gray-500 hover:border-habanero hover:text-habanero"
           }`}
         >
           {added ? <Check size={13} /> : <ShoppingCart size={13} />}
@@ -569,7 +569,7 @@ function EmptyState({ search, hasFilter, onClear }) {
         <Package size={24} className="text-gray-500" strokeWidth={1} />
       </div>
       <div>
-        <p className="font-display font-600 text-base text-navy mb-1">
+        <p className="font-display font-600 text-base text-royal mb-1">
           {search ? `No results for "${search}"` : "No products found"}
         </p>
         <p className="font-mono text-[11px] tracking-widest text-gray-500 uppercase">
@@ -579,7 +579,7 @@ function EmptyState({ search, hasFilter, onClear }) {
       {(search || hasFilter) && (
         <button
           onClick={onClear}
-          className="px-5 py-2.5 border border-gray-200 text-gray-500 text-xs font-mono tracking-widest uppercase hover:text-navy hover:border-navy transition-colors"
+          className="px-5 py-2.5 border border-gray-200 text-gray-500 text-xs font-mono tracking-widest uppercase hover:text-royal hover:border-navy transition-colors"
         >
           Clear filters
         </button>
