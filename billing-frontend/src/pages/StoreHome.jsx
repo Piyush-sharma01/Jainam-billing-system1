@@ -80,7 +80,7 @@ export default function StoreHome() {
       {/* ═══════════════════════════════════════
           01 — HERO SLIDER
       ═══════════════════════════════════════ */}
-      {!loading && <HeroSlider products={products} stats={stats} />}
+      {!loading && <HeroSlider stats={stats} />}
       {loading && (
         <div className="h-[560px] sm:h-[620px] bg-royal animate-pulse" />
       )}
@@ -137,26 +137,41 @@ export default function StoreHome() {
 function BrandStrip({ brands }) {
   const items = [...brands, ...brands];
   return (
-    <div className="border-b border-tan bg-white overflow-hidden py-5">
-      <div className="flex w-max animate-ticker gap-0">
-        {items.map((brand, i) => (
-          <div key={`${brand.id}-${i}`} className="flex items-center gap-6 px-8 shrink-0">
-            {brand.logoUrl ? (
-              <img
-                src={brand.logoUrl}
-                alt={brand.name}
-                className="h-6 w-auto object-contain opacity-50 hover:opacity-100 transition-opacity grayscale"
-              />
-            ) : (
-              <span className="font-mono text-[11px] tracking-[0.15em] text-ink-soft uppercase whitespace-nowrap">
-                {brand.name}
-              </span>
-            )}
-            <span className="w-px h-4 bg-tan shrink-0" />
-          </div>
-        ))}
+    <section className="bg-paper border-y border-tan py-10 sm:py-12 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 mb-6 flex items-center gap-3">
+        <span className="w-6 h-px bg-habanero shrink-0" />
+        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
+          Brands We Carry
+        </span>
       </div>
-    </div>
+
+      <div className="relative">
+        {/* Edge fade masks so the loop reads as continuous, not clipped */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-paper to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-paper to-transparent z-10" />
+
+        <div className="flex w-max animate-ticker">
+          {items.map((brand, i) => (
+            <div
+              key={`${brand.id}-${i}`}
+              className="flex items-center justify-center h-16 sm:h-20 px-8 sm:px-12 shrink-0 border-r border-tan/70 group"
+            >
+              {brand.logoUrl ? (
+                <img
+                  src={brand.logoUrl}
+                  alt={brand.name}
+                  className="h-7 sm:h-9 w-auto object-contain grayscale opacity-55 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300"
+                />
+              ) : (
+                <span className="font-display font-600 text-sm sm:text-base text-royal/60 group-hover:text-royal tracking-wide uppercase whitespace-nowrap transition-colors duration-300">
+                  {brand.name}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
