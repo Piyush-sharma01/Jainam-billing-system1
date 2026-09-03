@@ -413,7 +413,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                             <div className="flex items-start justify-between gap-2">
                               <p className="font-display font-medium text-sm text-navy leading-snug line-clamp-2 flex-1">
                                 {product.name}
-                              </p>
+                              </p> 
                               <button
                                 onClick={() => removeItem(product.id)}
                                 className="shrink-0 flex items-center justify-center w-7 h-7 text-gray-500 hover:text-red-400 transition-colors mt-0.5"
