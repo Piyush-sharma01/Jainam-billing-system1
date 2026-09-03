@@ -75,14 +75,14 @@ export default function StoreHome() {
   };
 
   return (
-    <div className="bg-white text-navy">
+    <div className="bg-white bg-habanero">
 
       {/* ═══════════════════════════════════════
           01 — HERO SLIDER
       ═══════════════════════════════════════ */}
       {!loading && <HeroSlider products={products} stats={stats} />}
       {loading && (
-        <div className="h-[560px] sm:h-[620px] bg-navy animate-pulse" />
+        <div className="h-[560px] sm:h-[620px] bg-royal animate-pulse" />
       )}
 
       {/* ═══════════════════════════════════════
@@ -137,7 +137,7 @@ export default function StoreHome() {
 function BrandStrip({ brands }) {
   const items = [...brands, ...brands];
   return (
-    <div className="border-b border-line bg-white overflow-hidden py-5">
+    <div className="border-b border-tan bg-white overflow-hidden py-5">
       <div className="flex w-max animate-ticker gap-0">
         {items.map((brand, i) => (
           <div key={`${brand.id}-${i}`} className="flex items-center gap-6 px-8 shrink-0">
@@ -152,7 +152,7 @@ function BrandStrip({ brands }) {
                 {brand.name}
               </span>
             )}
-            <span className="w-px h-4 bg-line shrink-0" />
+            <span className="w-px h-4 bg-tan shrink-0" />
           </div>
         ))}
       </div>
@@ -170,20 +170,20 @@ function CategoryExplorer({ categories, loading }) {
     : categories;
 
   return (
-    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-line">
+    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-tan">
       <div className="max-w-7xl mx-auto px-6 sm:px-10">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12 sm:mb-16">
           <div>
-            <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
+            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
               02 / Product Range
             </span>
-            <h2 className="font-display font-600 text-display-lg text-navy mt-2">
+            <h2 className="font-display font-600 text-display-lg bg-habanero mt-2">
               Explore our<br />products
             </h2>
           </div>
           <Link
             to="/store/catalogue"
-            className="inline-flex items-center gap-2 text-sm font-display font-medium text-ink-soft hover:text-navy transition-colors group"
+            className="inline-flex items-center gap-2 text-sm font-display font-medium text-ink-soft hover:bg-habanero transition-colors group"
           >
             View full catalogue
             <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
@@ -191,9 +191,9 @@ function CategoryExplorer({ categories, loading }) {
         </div>
 
         {/* Bento grid: large navy "PRODUCTS" panel + category tiles */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-line border border-line">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-tan border border-tan">
           {/* Large lead panel */}
-          <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 bg-navy relative overflow-hidden p-8 sm:p-10 flex flex-col justify-between min-h-[220px] sm:min-h-[320px]">
+          <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 bg-royal relative overflow-hidden p-8 sm:p-10 flex flex-col justify-between min-h-[220px] sm:min-h-[320px]">
             <div
               className="absolute inset-0 opacity-[0.06] pointer-events-none"
               style={{
@@ -201,7 +201,7 @@ function CategoryExplorer({ categories, loading }) {
                 backgroundSize: "48px 48px",
               }}
             />
-            <div className="relative z-10 w-10 h-10 bg-coral flex items-center justify-center">
+            <div className="relative z-10 w-10 h-10 bg-habanero flex items-center justify-center">
               <Package size={18} className="text-white" />
             </div>
             <div className="relative z-10">
@@ -235,7 +235,7 @@ function CategoryTile({ cat, idx, visible, skeleton }) {
     <Link
       to={`/store/catalogue?category=${encodeURIComponent(cat.name)}`}
       className={`group relative flex flex-col justify-between p-6 min-h-[130px] transition-colors duration-300 ${
-        isCoral ? "bg-coral hover:bg-navy" : "bg-white hover:bg-navy"
+        isCoral ? "bg-habanero hover:bg-royal" : "bg-white hover:bg-royal"
       }`}
       style={{
         opacity: visible ? 1 : 0,
@@ -247,12 +247,12 @@ function CategoryTile({ cat, idx, visible, skeleton }) {
         {String(idx + 1).padStart(2, "0")}
       </span>
       <div className="flex items-center justify-between gap-2">
-        <span className={`font-display font-600 text-base sm:text-lg leading-tight ${isCoral ? "text-white" : "text-navy"} group-hover:text-white transition-colors`}>
+        <span className={`font-display font-600 text-base sm:text-lg leading-tight ${isCoral ? "text-white" : "bg-habanero"} group-hover:text-white transition-colors`}>
           {cat.name}
         </span>
         <ChevronRight
           size={16}
-          className={`shrink-0 ${isCoral ? "text-white" : "text-navy"} group-hover:text-coral group-hover:translate-x-1 transition-all`}
+          className={`shrink-0 ${isCoral ? "text-white" : "bg-habanero"} group-hover:text-habanero group-hover:translate-x-1 transition-all`}
         />
       </div>
     </Link>
@@ -268,7 +268,7 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
     : [];
 
   return (
-    <section className="bg-navy py-20 sm:py-28 relative overflow-hidden">
+    <section className="bg-royal py-20 sm:py-28 relative overflow-hidden">
       <div
         className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{
@@ -280,7 +280,7 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] gap-10 lg:gap-6 mb-16">
 
           {/* Search panel */}
-          <div className="bg-coral p-8 sm:p-10 flex flex-col justify-between">
+          <div className="bg-habanero p-8 sm:p-10 flex flex-col justify-between">
             <div>
               <span className="font-mono text-[11px] tracking-[0.2em] text-white/70 uppercase">
                 03 / Product Discovery
@@ -293,18 +293,18 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
               onSubmit={(e) => e.preventDefault()}
               className="relative"
             >
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-navy/50" />
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 bg-habanero/50" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search products…"
-                className="w-full bg-white pl-11 pr-4 py-3.5 text-sm text-navy placeholder:text-navy/40 focus:outline-none"
+                className="w-full bg-white pl-11 pr-4 py-3.5 text-sm bg-habanero placeholder:bg-habanero/40 focus:outline-none"
               />
             </form>
             <Link
               to="/store/catalogue"
-              className="inline-flex items-center gap-2 mt-5 font-mono text-[11px] tracking-widest uppercase text-white hover:text-navy transition-colors group"
+              className="inline-flex items-center gap-2 mt-5 font-mono text-[11px] tracking-widest uppercase text-white hover:bg-habanero transition-colors group"
             >
               Full search &amp; filters
               <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
@@ -317,10 +317,10 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
                   <Link
                     key={p.id}
                     to={`/store/product/${p.id}`}
-                    className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-line/50 transition-colors"
+                    className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-tan/50 transition-colors"
                   >
-                    <span className="text-sm text-navy truncate">{p.name}</span>
-                    <span className="font-mono text-xs text-coral shrink-0">₹{Number(p.price).toFixed(0)}</span>
+                    <span className="text-sm bg-habanero truncate">{p.name}</span>
+                    <span className="font-mono text-xs text-habanero shrink-0">₹{Number(p.price).toFixed(0)}</span>
                   </Link>
                 ))}
               </div>
@@ -329,7 +329,7 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
 
           {/* Featured heading */}
           <div className="flex flex-col justify-center">
-            <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase mb-3">
+            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase mb-3">
               Featured Products
             </span>
             <h3 className="font-display font-600 text-display-md text-white leading-tight mb-4">
@@ -374,7 +374,7 @@ function FeaturedCard({ product, added, onAdd }) {
     <div className="w-[70%] xs:w-[55%] sm:w-[240px] shrink-0 snap-start bg-white group flex flex-col">
       <Link
         to={`/store/product/${product.id}`}
-        className="relative block aspect-square bg-line/40 overflow-hidden"
+        className="relative block aspect-square bg-tan/40 overflow-hidden"
       >
         {product.imageUrl ? (
           <img
@@ -384,7 +384,7 @@ function FeaturedCard({ product, added, onAdd }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Package size={32} strokeWidth={1} className="text-navy/20" />
+            <Package size={32} strokeWidth={1} className="bg-habanero/20" />
           </div>
         )}
         <button
@@ -396,13 +396,13 @@ function FeaturedCard({ product, added, onAdd }) {
               ? "opacity-0"
               : added
               ? "bg-green-700 text-white"
-              : "bg-navy text-white hover:bg-coral"
+              : "bg-royal text-white hover:bg-habanero"
           }`}
         >
           {added ? <Check size={14} /> : <ShoppingCart size={14} />}
         </button>
       </Link>
-      <div className="p-4 border-t border-line">
+      <div className="p-4 border-t border-tan">
         {(product.brand || product.category) && (
           <p className="font-mono text-[9px] tracking-widest text-ink-soft uppercase mb-1 truncate">
             {product.brand || product.category}
@@ -410,11 +410,11 @@ function FeaturedCard({ product, added, onAdd }) {
         )}
         <Link
           to={`/store/product/${product.id}`}
-          className="font-display font-medium text-sm text-navy leading-snug line-clamp-2 hover:text-coral transition-colors block min-h-[2.5em]"
+          className="font-display font-medium text-sm bg-habanero leading-snug line-clamp-2 hover:text-habanero transition-colors block min-h-[2.5em]"
         >
           {product.name}
         </Link>
-        <p className="font-mono font-600 text-base text-coral mt-2">
+        <p className="font-mono font-600 text-base text-habanero mt-2">
           ₹{Number(product.price).toFixed(2)}
         </p>
       </div>
@@ -428,20 +428,20 @@ function FeaturedCard({ product, added, onAdd }) {
 function ProductSpotlight({ product }) {
   const [ref, visible] = useReveal(0.15);
   return (
-    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-line overflow-hidden">
+    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-tan overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 sm:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-0 items-stretch">
 
           {/* LEFT — huge image on navy, overlapping coral shape */}
           <div
-            className="relative bg-navy min-h-[340px] sm:min-h-[440px] flex items-center justify-center clip-spotlight-block"
+            className="relative bg-royal min-h-[340px] sm:min-h-[440px] flex items-center justify-center clip-spotlight-block"
             style={{
               opacity: visible ? 1 : 0,
               transform: visible ? "none" : "translateX(-20px)",
               transition: "opacity 0.7s ease, transform 0.7s ease",
             }}
           >
-            <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-coral rotate-12" />
+            <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-habanero rotate-12" />
             {product.imageUrl ? (
               <img
                 src={product.imageUrl}
@@ -455,17 +455,17 @@ function ProductSpotlight({ product }) {
 
           {/* RIGHT — copy */}
           <div
-            className="bg-navy lg:bg-white flex flex-col justify-center px-8 sm:px-12 py-12 lg:py-0"
+            className="bg-royal lg:bg-white flex flex-col justify-center px-8 sm:px-12 py-12 lg:py-0"
             style={{
               opacity: visible ? 1 : 0,
               transform: visible ? "none" : "translateX(20px)",
               transition: "opacity 0.7s 0.1s ease, transform 0.7s 0.1s ease",
             }}
           >
-            <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase mb-4">
+            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase mb-4">
               04 / Product Spotlight
             </span>
-            <h2 className="font-display font-600 text-display-lg text-navy leading-none mb-5">
+            <h2 className="font-display font-600 text-display-lg bg-habanero leading-none mb-5">
               {product.name}
             </h2>
             {product.description && (
@@ -477,23 +477,23 @@ function ProductSpotlight({ product }) {
               {product.brand && (
                 <div>
                   <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Brand</p>
-                  <p className="font-display font-600 text-sm text-navy mt-1">{product.brand}</p>
+                  <p className="font-display font-600 text-sm bg-habanero mt-1">{product.brand}</p>
                 </div>
               )}
               {product.category && (
                 <div>
                   <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Category</p>
-                  <p className="font-display font-600 text-sm text-navy mt-1">{product.category}</p>
+                  <p className="font-display font-600 text-sm bg-habanero mt-1">{product.category}</p>
                 </div>
               )}
               <div>
                 <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Price</p>
-                <p className="font-mono font-600 text-lg text-coral mt-1">₹{Number(product.price).toFixed(2)}</p>
+                <p className="font-mono font-600 text-lg text-habanero mt-1">₹{Number(product.price).toFixed(2)}</p>
               </div>
             </div>
             <Link
               to={`/store/product/${product.id}`}
-              className="inline-flex items-center gap-2 bg-navy text-white font-display font-medium text-sm px-6 py-3.5 hover:bg-coral transition-colors w-fit"
+              className="inline-flex items-center gap-2 bg-royal text-white font-display font-medium text-sm px-6 py-3.5 hover:bg-habanero transition-colors w-fit"
             >
               View Product
               <ArrowRight size={15} />
@@ -518,12 +518,12 @@ function ProcessFlow() {
     { n: "05", label: "Delivery", body: "Order is fulfilled and shipped to your site." },
   ];
   return (
-    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-line">
+    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-tan">
       <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
+        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
           05 / How It Works
         </span>
-        <h2 className="font-display font-600 text-display-lg text-navy mt-2 mb-14">
+        <h2 className="font-display font-600 text-display-lg bg-habanero mt-2 mb-14">
           From enquiry to delivery
         </h2>
 
@@ -539,13 +539,13 @@ function ProcessFlow() {
               }}
             >
               <div className="flex items-center gap-3 mb-4">
-                <span className="font-display font-600 text-3xl text-navy/15">{step.n}</span>
-                <span className="flex-1 h-px bg-line hidden sm:block" />
+                <span className="font-display font-600 text-3xl bg-habanero/15">{step.n}</span>
+                <span className="flex-1 h-px bg-tan hidden sm:block" />
                 {i < steps.length - 1 && (
-                  <ArrowRight size={14} className="text-coral hidden sm:block" />
+                  <ArrowRight size={14} className="text-habanero hidden sm:block" />
                 )}
               </div>
-              <h3 className="font-display font-600 text-sm text-navy uppercase tracking-wide mb-2">
+              <h3 className="font-display font-600 text-sm bg-habanero uppercase tracking-wide mb-2">
                 {step.label}
               </h3>
               <p className="text-ink-soft text-sm leading-relaxed">{step.body}</p>
@@ -587,9 +587,9 @@ function WhySection({ stats, loading }) {
   ];
 
   return (
-    <section ref={ref} className="bg-navy py-20 sm:py-28">
+    <section ref={ref} className="bg-royal py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
+        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
           06 / Why Jainam
         </span>
         <h2 className="font-display font-600 text-display-lg text-white mt-2 mb-14">
@@ -598,7 +598,7 @@ function WhySection({ stats, loading }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-white/10 border border-white/10">
           {/* Large stat tile */}
-          <div className="lg:row-span-2 bg-coral p-8 sm:p-10 flex flex-col justify-between min-h-[220px]">
+          <div className="lg:row-span-2 bg-habanero p-8 sm:p-10 flex flex-col justify-between min-h-[220px]">
             <span className="font-mono text-[10px] tracking-widest text-white/70 uppercase">Live catalogue</span>
             <div>
               <p className="font-display font-600 text-5xl sm:text-6xl text-white leading-none">
@@ -614,7 +614,7 @@ function WhySection({ stats, loading }) {
           {pillars.map(({ icon: Icon, title, body }, i) => (
             <div
               key={title}
-              className="bg-navy p-6 sm:p-8 flex flex-col gap-4"
+              className="bg-royal p-6 sm:p-8 flex flex-col gap-4"
               style={{
                 opacity: visible ? 1 : 0,
                 transform: visible ? "none" : "translateY(14px)",
@@ -622,7 +622,7 @@ function WhySection({ stats, loading }) {
               }}
             >
               <div className="w-9 h-9 border border-white/20 flex items-center justify-center shrink-0">
-                <Icon size={16} className="text-coral" strokeWidth={1.5} />
+                <Icon size={16} className="text-habanero" strokeWidth={1.5} />
               </div>
               <h3 className="font-display font-600 text-sm text-white">{title}</h3>
               <p className="font-sans text-sm text-white/55 leading-relaxed">{body}</p>
@@ -646,7 +646,7 @@ function FinalCTA() {
         className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
         aria-hidden="true"
       >
-        <span className="font-display font-600 text-[20vw] leading-none text-line whitespace-nowrap">
+        <span className="font-display font-600 text-[20vw] leading-none text-tan whitespace-nowrap">
           JAINAM
         </span>
       </div>
@@ -659,10 +659,10 @@ function FinalCTA() {
           transition: "opacity 0.7s ease, transform 0.7s ease",
         }}
       >
-        <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
+        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
           07 / Get Started
         </span>
-        <h2 className="font-display font-600 text-display-xl text-navy mt-4 mb-6 leading-none">
+        <h2 className="font-display font-600 text-display-xl bg-habanero mt-4 mb-6 leading-none">
           Have a requirement?<br />Let's find the right product.
         </h2>
         <p className="text-ink-soft text-base sm:text-lg max-w-lg mx-auto mb-10 leading-relaxed">
@@ -672,14 +672,14 @@ function FinalCTA() {
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Link
             to="/store/contact"
-            className="inline-flex items-center gap-2 bg-coral text-white font-display font-medium text-sm px-8 py-4 hover:bg-navy transition-colors"
+            className="inline-flex items-center gap-2 bg-habanero text-white font-display font-medium text-sm px-8 py-4 hover:bg-royal transition-colors"
           >
             Send Enquiry
             <ArrowRight size={15} />
           </Link>
           <Link
             to="/store/catalogue"
-            className="inline-flex items-center gap-2 border border-line text-navy font-display font-medium text-sm px-8 py-4 hover:border-navy transition-colors"
+            className="inline-flex items-center gap-2 border border-tan bg-habanero font-display font-medium text-sm px-8 py-4 hover:border-navy transition-colors"
           >
             Explore Catalogue
           </Link>
