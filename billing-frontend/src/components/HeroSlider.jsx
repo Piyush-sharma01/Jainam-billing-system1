@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, ArrowLeft, Package, ShieldCheck, Workflow, Headphones,
+  ArrowRight, ArrowLeft, Package, Factory, Workflow, HardHat,
 } from "lucide-react";
 
 /**
@@ -28,7 +28,7 @@ export default function HeroSlider({ stats = {} }) {
         primaryLabel: "Explore Catalogue",
       },
       {
-        icon: Pipes,
+        icon: Factory,
         image: "https://png.pngtree.com/thumb_back/fh260/background/20241015/pngtree-steel-pipes-stacked-in-a-factory-closeup-blurred-background-image_16395356.jpg",
         eyebrow: "Quality You Can Trust",
         title: "Sourced from established manufacturers.",
@@ -38,7 +38,7 @@ export default function HeroSlider({ stats = {} }) {
       },
       {
         icon: Workflow,
-        image:"https://mediaassets.cbre.com/-/media/project/cbre/shared-site/insights/articles/2023-article-media-folder/now-is-the-time-media-folder/now-is-the-time-hero.jpg",
+        image: "https://mediaassets.cbre.com/-/media/project/cbre/shared-site/insights/articles/2023-article-media-folder/now-is-the-time-media-folder/now-is-the-time-hero.jpg",
         eyebrow: "How It Works",
         title: "From enquiry to delivery, simplified.",
         body: "Browse the catalogue, send your requirement, and let a dedicated account manager take it from confirmation to shipment.",
@@ -46,8 +46,8 @@ export default function HeroSlider({ stats = {} }) {
         primaryLabel: "Start Browsing",
       },
       {
-        icon: Person-working,
-        image:"https://media.istockphoto.com/id/2142837149/photo/engineer-male-work-checking-water-pipe-inspecting-valve-testing-water-pump.jpg?s=612x612&w=0&k=20&c=sXnfOffJSA-aQ5PoL6SFD3C0zzh-5tXZKg4-Npobtt0=",
+        icon: HardHat,
+        image: "https://media.istockphoto.com/id/2142837149/photo/engineer-male-work-checking-water-pipe-inspecting-valve-testing-water-pump.jpg?s=612x612&w=0&k=20&c=sXnfOffJSA-aQ5PoL6SFD3C0zzh-5tXZKg4-Npobtt0=",
         eyebrow: "Get In Touch",
         title: "Have a requirement? Let's talk.",
         body: "Send your enquiry directly — our team responds with pricing and availability, fast.",
