@@ -3,9 +3,37 @@ import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { authAPI } from '../services/api'
 
-// Drop your background image at billing-frontend/public/login-bg.jpg
-// (or change the path below) — it will show behind the left panel copy.
-const LOGIN_BG_IMAGE = 'https://img.magnific.com/free-vector/geometric-gradient-futuristic-background_23-2149116406.jpg?semt=ais_hybrid&w=740&q=80'
+{/* ══════════════════════════════════════
+    LEFT — image / brand panel
+══════════════════════════════════════ */}
+<div
+  className="relative hidden lg:flex flex-col justify-between p-12 overflow-hidden"
+  style={{
+    backgroundImage: `linear-gradient(160deg, rgba(30,58,138,0.88), rgba(15,27,61,0.75) 55%, rgba(255,90,95,0.35)), url(${LOGIN_BG_IMAGE})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundColor: '#1E3A8A',
+  }}
+>
+  {/* Coral geometric accent — echoes the image's own geometric style */}
+  <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-coral/80 rotate-12 pointer-events-none" />
+
+  <div className="relative z-10">
+    <span className="font-display font-600 text-xl text-white tracking-tight">Jainam</span>
+  </div>
+
+  <div className="relative z-10 max-w-sm">
+    <span className="font-mono text-[11px] tracking-[0.2em] text-coral uppercase">
+      Billing Management
+    </span>
+    <h1 className="font-display font-600 text-display-md text-white leading-[1.05] mt-4 mb-4">
+      Welcome back.
+    </h1>
+    <p className="text-white/60 text-sm leading-relaxed">
+      Sign in to manage orders, invoices and your product catalogue.
+    </p>
+  </div>
+</div>
 
 export default function Login({ onLogin }) {
   const [username,     setUsername]     = useState('')
