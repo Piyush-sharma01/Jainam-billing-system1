@@ -258,3 +258,18 @@ export default function Login({ onLogin }) {
                 ) : (
                   <>
                     Sign in
+                    <ArrowRight size={15} />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <p className="text-center font-mono text-[10px] text-[#DAD1C8] mt-10">
+              © {new Date().getFullYear()} Jainam
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
