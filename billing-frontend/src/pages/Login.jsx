@@ -5,7 +5,7 @@ import { authAPI } from '../services/api'
 
 // Drop your background image at billing-frontend/public/login-bg.jpg
 // (or change the path below) — it will show behind the left panel copy.
-const LOGIN_BG_IMAGE = '/login-bg.jpg'
+const LOGIN_BG_IMAGE = 'https://img.magnific.com/free-vector/geometric-gradient-futuristic-background_23-2149116406.jpg?semt=ais_hybrid&w=740&q=80'
 
 export default function Login({ onLogin }) {
   const [username,     setUsername]     = useState('')
