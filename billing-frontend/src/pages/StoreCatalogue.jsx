@@ -102,44 +102,52 @@ export default function StoreCatalogue() {
             backgroundSize: "60px 60px",
           }}
         />
-        {/* Coral structural block, bottom-right — asymmetric accent */}
-        <div className="hidden sm:block absolute -right-10 -bottom-16 w-64 h-64 bg-habanero/90 rotate-12" />
+        {/* Bold diagonal coral band sweeping across the header — poster-style */}
+        <div
+          className="absolute inset-y-0 right-0 w-[55%] bg-habanero/95"
+          style={{ clipPath: "polygon(35% 0, 100% 0, 100% 100%, 0% 100%)" }}
+        />
+        <div
+          className="hidden sm:block absolute -right-6 top-8 w-40 h-40 border-4 border-white/10 rotate-45"
+        />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-8 pt-12 pb-10 sm:pt-16 sm:pb-14">
           {/* Breadcrumb */}
           <p className="font-mono text-[10px] tracking-[0.2em] text-white/50 uppercase mb-6 flex items-center gap-2">
             <span>Jainam</span>
             <span className="opacity-30">/</span>
-            <span className="text-habanero">Products</span>
+            <span className="text-white">Products</span>
           </p>
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
               {/* Eyebrow */}
               <div className="flex items-center gap-3 mb-4">
-                <span className="w-6 h-px bg-habanero" />
-                <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
+                <span className="w-6 h-px bg-white" />
+                <span className="font-mono text-[11px] tracking-[0.2em] text-white uppercase">
                   Full Range
                 </span>
               </div>
               <h1 className="font-display font-600 text-display-lg text-white leading-none">
                 Catalogue
               </h1>
-              <p className="text-white/60 text-sm sm:text-base mt-3 max-w-lg leading-relaxed">
+              <p className="text-white/70 text-sm sm:text-base mt-3 max-w-lg leading-relaxed">
                 Pipes, valves, fittings and industrial hardware — sourced from trusted brands,
                 stocked for consistent availability.
               </p>
             </div>
 
-            {/* Live count */}
+            {/* Live count — pill badge, poster-style */}
             {!loading && (
-              <div className="relative shrink-0 border border-white/20 bg-royal px-5 py-3 text-right">
-                <p className="font-mono font-600 text-2xl text-white">
-                  {filteredProducts.length}
-                </p>
-                <p className="font-mono text-[10px] tracking-widest text-white/50 uppercase">
-                  {hasActiveFilter ? "Filtered" : "Products"}
-                </p>
+              <div className="relative shrink-0 self-start lg:self-auto">
+                <div className="bg-royal border-4 border-white/90 rounded-full w-28 h-28 flex flex-col items-center justify-center text-center shadow-lg">
+                  <p className="font-display font-600 text-3xl text-white leading-none">
+                    {filteredProducts.length}
+                  </p>
+                  <p className="font-mono text-[8px] tracking-widest text-white/70 uppercase mt-1 px-2">
+                    {hasActiveFilter ? "Filtered" : "In Stock"}
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -271,7 +279,7 @@ export default function StoreCatalogue() {
         ) : filteredProducts.length === 0 ? (
           <EmptyState search={search} hasFilter={hasActiveFilter} onClear={() => { setSearch(""); setSearchParams({}); }} />
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-gray-200 border border-gray-200">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {filteredProducts.map((product, idx) => (
               <CatalogueCard
                 key={product.id}
@@ -284,6 +292,27 @@ export default function StoreCatalogue() {
           </div>
         )}
       </main>
+
+      {/* ══════════════════════════════════════
+          BOTTOM CTA BAND — poster-style order bar
+      ══════════════════════════════════════ */}
+      <div className="bg-royal relative overflow-hidden">
+        <div
+          className="absolute inset-y-0 right-0 w-1/3 bg-habanero/90"
+          style={{ clipPath: "polygon(30% 0, 100% 0, 100% 100%, 0% 100%)" }}
+        />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <Link
+            to="/store/contact"
+            className="bg-white text-royal font-display font-600 text-sm uppercase tracking-wide px-6 py-3 hover:bg-habanero hover:text-white transition-colors shrink-0"
+          >
+            Contact Us
+          </Link>
+          <p className="text-white/70 text-xs sm:text-sm text-center sm:text-right">
+            Can't find what you need? Send your requirement directly — our team will help you source it.
+          </p>
+        </div>
+      </div>
 
       {/* ══════════════════════════════════════
           MOBILE FILTER DRAWER
@@ -452,11 +481,25 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
   const outOfStock = product.stock === 0;
 
   return (
-    <div className="bg-white group flex flex-col">
+    <div className="relative bg-white group flex flex-col border border-tan/60">
+      {/* Diagonal-cut name bar — poster-style */}
+      <div className="relative">
+        <div
+          className="bg-royal px-3 sm:px-4 py-2 sm:py-2.5 pr-8"
+          style={{ clipPath: "polygon(0 0, 100% 0, 88% 100%, 0% 100%)" }}
+        >
+          <p className="font-mono text-[8px] sm:text-[9px] tracking-widest text-white/50 uppercase truncate">
+            {product.brand || product.category || "Jainam"}
+          </p>
+        </div>
+        {/* small coral corner flag */}
+        <div className="absolute top-0 right-0 w-4 h-full bg-habanero" style={{ clipPath: "polygon(100% 0, 100% 100%, 0 100%)" }} />
+      </div>
+
       {/* Image area — links to product detail */}
       <Link
         to={`/store/product/${product.id}`}
-        className="relative overflow-hidden aspect-square bg-gray-50 flex items-center justify-center block"
+        className="relative overflow-hidden aspect-square bg-tan/20 flex items-center justify-center block"
         tabIndex={-1}
         aria-label={`View ${product.name}`}
       >
@@ -468,7 +511,7 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
             loading={idx < 8 ? "eager" : "lazy"}
           />
         ) : (
-          <div className="flex flex-col items-center gap-2 text-gray-200">
+          <div className="flex flex-col items-center gap-2 text-tan">
             <Package size={32} strokeWidth={1} />
           </div>
         )}
@@ -482,35 +525,30 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
           </div>
         )}
 
-        {/* Quick-add: icon button pinned to bottom-right, appears on hover */}
+        {/* Desktop hover: full-width add-to-cart bar sliding up over the image */}
         <button
           onClick={(e) => { e.preventDefault(); if (!outOfStock) onAdd(product); }}
           disabled={outOfStock}
           aria-label={`Add ${product.name} to cart`}
-          className={`absolute bottom-3 right-3 w-8 h-8 flex items-center justify-center border transition-all duration-200 ${
+          className={`hidden sm:flex absolute bottom-0 inset-x-0 items-center justify-center gap-2 py-2.5 text-xs font-display font-medium uppercase tracking-wide transition-all duration-300 translate-y-full group-hover:translate-y-0 ${
             outOfStock
-              ? "opacity-0 cursor-not-allowed"
+              ? "hidden"
               : added
-              ? "bg-green-700 border-green-700 text-white opacity-100"
-              : "bg-white border-gray-200 text-gray-500 hover:border-habanero hover:text-habanero opacity-0 group-hover:opacity-100"
+              ? "bg-green-700 text-white"
+              : "bg-habanero text-white"
           }`}
         >
-          {added ? <Check size={12} /> : <ShoppingCart size={12} />}
+          {added ? <Check size={13} /> : <ShoppingCart size={13} />}
+          {added ? "Added" : "Add to Cart"}
         </button>
       </Link>
 
       {/* Info strip */}
-      <div className="border-t border-gray-200 flex items-end justify-between gap-3 px-3 sm:px-4 py-3 sm:py-4">
+      <div className="border-t border-tan/60 flex items-end justify-between gap-3 px-3 sm:px-4 py-3 sm:py-4">
         <div className="min-w-0 flex-1">
-          {/* Brand / category metadata */}
-          {(product.brand || product.category) && (
-            <p className="font-mono text-[9px] sm:text-[10px] tracking-widest text-gray-500 uppercase mb-1 truncate">
-              {product.brand || product.category}
-            </p>
-          )}
           <Link
             to={`/store/product/${product.id}`}
-            className="font-display font-medium text-xs sm:text-sm text-royal leading-snug line-clamp-2 hover:text-habanero transition-colors"
+            className="font-display font-600 text-xs sm:text-sm text-royal leading-snug line-clamp-2 hover:text-habanero transition-colors uppercase"
           >
             {product.name}
           </Link>
@@ -519,17 +557,17 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
           </p>
         </div>
 
-        {/* Add to cart — full button on mobile (hover-reveal too small for touch) */}
+        {/* Add to cart — full button on mobile (no hover on touch devices) */}
         <button
           onClick={() => !outOfStock && onAdd(product)}
           disabled={outOfStock}
           aria-label={`Add ${product.name} to cart`}
           className={`sm:hidden shrink-0 w-9 h-9 flex items-center justify-center border transition-colors ${
             outOfStock
-              ? "border-gray-200 text-gray-500 cursor-not-allowed opacity-40"
+              ? "border-tan text-tan cursor-not-allowed opacity-40"
               : added
               ? "bg-green-700 border-green-700 text-white"
-              : "border-gray-200 text-gray-500 hover:border-habanero hover:text-habanero"
+              : "border-tan text-royal/50 hover:border-habanero hover:text-habanero"
           }`}
         >
           {added ? <Check size={13} /> : <ShoppingCart size={13} />}
@@ -544,14 +582,14 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
 ───────────────────────────────────────────── */
 function SkeletonGrid() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-gray-200 border border-gray-200">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
       {Array.from({ length: 12 }).map((_, i) => (
-        <div key={i} className="bg-white flex flex-col">
-          <div className="aspect-square bg-gray-50 animate-pulse" />
-          <div className="border-t border-gray-200 px-4 py-4 space-y-2">
-            <div className="h-2.5 bg-gray-50 rounded animate-pulse w-1/3" />
-            <div className="h-3.5 bg-gray-50 rounded animate-pulse w-2/3" />
-            <div className="h-4 bg-gray-50 rounded animate-pulse w-1/2 mt-1" />
+        <div key={i} className="bg-white border border-tan/60 flex flex-col">
+          <div className="h-8 bg-tan/30 animate-pulse" />
+          <div className="aspect-square bg-tan/20 animate-pulse" />
+          <div className="border-t border-tan/60 px-4 py-4 space-y-2">
+            <div className="h-3.5 bg-tan/30 rounded animate-pulse w-2/3" />
+            <div className="h-4 bg-tan/30 rounded animate-pulse w-1/2 mt-1" />
           </div>
         </div>
       ))}
