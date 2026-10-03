@@ -9,6 +9,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
+        manifest: {
+  id: '/',
+  orientation: 'portrait',
+  name: 'Jainam Billing System',
+  // ... baaki jaisa hai waisa
         name: 'Jainam Billing System',
         short_name: 'Jainam Billing',
         description: 'Billing and catalogue management for Jainam',
