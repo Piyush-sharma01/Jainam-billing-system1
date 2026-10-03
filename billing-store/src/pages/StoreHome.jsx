@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ShoppingCart, Check, ArrowRight, ChevronRight, Search,
+  ArrowRight, ChevronRight, Search,
   Package, Truck, Headphones, ShieldCheck,
 } from "lucide-react";
 import { brandAPI, categoryAPI, productAPI } from "../services/api";
-import { useCart } from "../services/cartContext";
 import HeroSlider from "../components/HeroSlider";
 
 /* ─────────────────────────────────────────────
@@ -36,8 +35,6 @@ export default function StoreHome() {
   const [categories, setCategories] = useState([]);
   const [products,   setProducts]   = useState([]);
   const [loading,    setLoading]    = useState(true);
-  const [addedId,    setAddedId]    = useState(null);
-  const { addItem } = useCart();
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -59,13 +56,7 @@ export default function StoreHome() {
     })();
   }, []);
 
-  const handleAdd = (product) => {
-    addItem(product, 1);
-    setAddedId(product.id);
-    setTimeout(() => setAddedId(null), 1500);
-  };
-
-  const featured  = products.slice(0, 8);
+  const featured  = products.slice(0, 10);
   const spotlight = products[Math.min(3, products.length - 1)] || products[0] || null;
 
   const stats = {
@@ -102,8 +93,6 @@ export default function StoreHome() {
         products={products}
         featured={featured}
         loading={loading}
-        addedId={addedId}
-        onAdd={handleAdd}
         search={search}
         setSearch={setSearch}
       />
@@ -277,7 +266,7 @@ function CategoryTile({ cat, idx, visible, skeleton }) {
 /* ─────────────────────────────────────────────
    03 PRODUCT DISCOVERY + FEATURED SLIDER
 ───────────────────────────────────────────── */
-function ProductDiscovery({ products, featured, loading, addedId, onAdd, search, setSearch }) {
+function ProductDiscovery({ products, featured, loading, search, setSearch }) {
   const results = search.trim()
     ? products.filter((p) => p.name?.toLowerCase().includes(search.toLowerCase())).slice(0, 6)
     : [];
@@ -367,15 +356,16 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
         ) : featured.length === 0 ? (
           <p className="text-white/50 text-sm">No products available yet.</p>
         ) : (
-          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-1 px-1">
+          <div
+            className="flex gap-5 overflow-x-auto pt-4 pb-10 px-2 -mx-2 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          >
             {featured.map((product) => (
               <FeaturedCard
                 key={product.id}
                 product={product}
-                added={addedId === product.id}
-                onAdd={() => onAdd(product)}
               />
             ))}
+            <ViewAllCard />
           </div>
         )}
       </div>
@@ -383,56 +373,66 @@ function ProductDiscovery({ products, featured, loading, addedId, onAdd, search,
   );
 }
 
-function FeaturedCard({ product, added, onAdd }) {
-  const outOfStock = product.stock === 0;
+function FeaturedCard({ product }) {
   return (
-    <div className="w-[70%] xs:w-[55%] sm:w-[240px] shrink-0 snap-start bg-white group flex flex-col">
-      <Link
-        to={`/store/product/${product.id}`}
-        className="relative block aspect-square bg-tan/40 overflow-hidden"
+    <div className="w-[70%] xs:w-[55%] sm:w-[240px] shrink-0 snap-start [perspective:1000px]">
+      <div
+        className="group h-full flex flex-col bg-white rounded-xl overflow-hidden [transform-style:preserve-3d] transition-all duration-300 ease-out shadow-[0_22px_38px_-14px_rgba(0,0,0,0.65),0_6px_12px_rgba(0,0,0,0.25)] hover:shadow-[0_34px_50px_-14px_rgba(0,0,0,0.75),0_10px_18px_rgba(0,0,0,0.3)] hover:[transform:rotateX(5deg)_rotateY(-9deg)_translateY(-10px)]"
       >
-        {product.imageUrl ? (
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Package size={32} strokeWidth={1} className="text-royal/20" />
-          </div>
-        )}
-        <button
-          onClick={(e) => { e.preventDefault(); if (!outOfStock) onAdd(); }}
-          disabled={outOfStock}
-          aria-label={`Add ${product.name} to cart`}
-          className={`absolute bottom-3 right-3 w-9 h-9 flex items-center justify-center transition-colors ${
-            outOfStock
-              ? "opacity-0"
-              : added
-              ? "bg-green-700 text-white"
-              : "bg-royal text-white hover:bg-habanero"
-          }`}
-        >
-          {added ? <Check size={14} /> : <ShoppingCart size={14} />}
-        </button>
-      </Link>
-      <div className="p-4 border-t border-tan">
-        {(product.brand || product.category) && (
-          <p className="font-mono text-[9px] tracking-widest text-ink-soft uppercase mb-1 truncate">
-            {product.brand || product.category}
-          </p>
-        )}
         <Link
           to={`/store/product/${product.id}`}
-          className="font-display font-medium text-sm text-royal leading-snug line-clamp-2 hover:text-habanero transition-colors block min-h-[2.5em]"
+          className="relative block aspect-square bg-gradient-to-br from-white via-paper to-tan/60 overflow-hidden [transform-style:preserve-3d]"
         >
-          {product.name}
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className="w-full h-full object-contain p-6 drop-shadow-[0_14px_12px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:[transform:translateZ(36px)_scale(1.06)]"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Package size={32} strokeWidth={1} className="text-royal/20" />
+            </div>
+          )}
         </Link>
-        <p className="font-mono font-600 text-base text-habanero mt-2">
-          ₹{Number(product.price).toFixed(2)}
-        </p>
+        <div className="p-4 border-t border-tan bg-white">
+          {(product.brand || product.category) && (
+            <p className="font-mono text-[9px] tracking-widest text-ink-soft uppercase mb-1 truncate">
+              {product.brand || product.category}
+            </p>
+          )}
+          <Link
+            to={`/store/product/${product.id}`}
+            className="font-display font-medium text-sm text-royal leading-snug line-clamp-2 hover:text-habanero transition-colors block min-h-[2.5em]"
+          >
+            {product.name}
+          </Link>
+          <p className="font-mono font-600 text-base text-habanero mt-2">
+            ₹{Number(product.price).toFixed(2)}
+          </p>
+        </div>
       </div>
+    </div>
+  );
+}
+
+function ViewAllCard() {
+  return (
+    <div className="w-[70%] xs:w-[55%] sm:w-[240px] shrink-0 snap-start [perspective:1000px]">
+      <Link
+        to="/store/catalogue"
+        className="group h-full min-h-[340px] flex flex-col items-center justify-center gap-5 text-center bg-habanero rounded-xl p-6 [transform-style:preserve-3d] transition-all duration-300 ease-out shadow-[0_22px_38px_-14px_rgba(0,0,0,0.65),0_6px_12px_rgba(0,0,0,0.25)] hover:shadow-[0_34px_50px_-14px_rgba(0,0,0,0.75),0_10px_18px_rgba(0,0,0,0.3)] hover:[transform:rotateX(5deg)_rotateY(-9deg)_translateY(-10px)]"
+      >
+        <span className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:[transform:translateZ(30px)]">
+          <ArrowRight size={22} className="text-habanero" />
+        </span>
+        <span className="font-display font-600 text-xl text-white leading-tight">
+          View All<br />Products
+        </span>
+        <span className="font-mono text-[10px] tracking-[0.2em] text-white/80 uppercase">
+          Full catalogue
+        </span>
+      </Link>
     </div>
   );
 }
