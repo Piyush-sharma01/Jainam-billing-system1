@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, ShoppingCart, Package, X, SlidersHorizontal, Check, ChevronDown } from "lucide-react";
+import { Search, Package, X, SlidersHorizontal, Check, ChevronDown } from "lucide-react";
 import { productAPI, brandAPI, categoryAPI } from "../services/api";
-import { useCart } from "../services/cartContext";
 
 /* ─────────────────────────────────────────────
    MAIN PAGE
@@ -14,14 +13,12 @@ export default function StoreCatalogue() {
   const [categories, setCategories] = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [search,     setSearch]     = useState("");
-  const [addedId,    setAddedId]    = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const searchRef = useRef(null);
 
   const activeBrand    = searchParams.get("brand")    || "";
   const activeCategory = searchParams.get("category") || "";
 
-  const { addItem } = useCart();
 
   /* ── Data fetch — unchanged from original ── */
   useEffect(() => {
@@ -63,13 +60,6 @@ export default function StoreCatalogue() {
       return matchesBrand && matchesCategory && matchesSearch;
     });
   }, [products, activeBrand, activeCategory, search]);
-
-  /* ── Cart — unchanged ── */
-  const handleAddToCart = (product) => {
-    addItem(product, 1);
-    setAddedId(product.id);
-    setTimeout(() => setAddedId(null), 1500);
-  };
 
   const hasActiveFilter  = activeBrand || activeCategory;
   const activeFilterCount = [activeBrand, activeCategory].filter(Boolean).length;
@@ -284,8 +274,6 @@ export default function StoreCatalogue() {
               <CatalogueCard
                 key={product.id}
                 product={product}
-                addedId={addedId}
-                onAdd={handleAddToCart}
                 idx={idx}
               />
             ))}
@@ -476,8 +464,7 @@ function FilterGroup({ label, options, active, onSelect }) {
 /* ─────────────────────────────────────────────
    PRODUCT CARD
 ───────────────────────────────────────────── */
-function CatalogueCard({ product, addedId, onAdd, idx }) {
-  const added      = addedId === product.id;
+function CatalogueCard({ product, idx }) {
   const outOfStock = product.stock === 0;
 
   return (
@@ -524,23 +511,6 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
             </span>
           </div>
         )}
-
-        {/* Desktop hover: full-width add-to-cart bar sliding up over the image */}
-        <button
-          onClick={(e) => { e.preventDefault(); if (!outOfStock) onAdd(product); }}
-          disabled={outOfStock}
-          aria-label={`Add ${product.name} to cart`}
-          className={`hidden sm:flex absolute bottom-0 inset-x-0 items-center justify-center gap-2 py-2.5 text-xs font-display font-medium uppercase tracking-wide transition-all duration-300 translate-y-full group-hover:translate-y-0 ${
-            outOfStock
-              ? "hidden"
-              : added
-              ? "bg-green-700 text-white"
-              : "bg-habanero text-white"
-          }`}
-        >
-          {added ? <Check size={13} /> : <ShoppingCart size={13} />}
-          {added ? "Added" : "Add to Cart"}
-        </button>
       </Link>
 
       {/* Info strip */}
@@ -556,22 +526,6 @@ function CatalogueCard({ product, addedId, onAdd, idx }) {
             ₹{Number(product.price).toFixed(2)}
           </p>
         </div>
-
-        {/* Add to cart — full button on mobile (no hover on touch devices) */}
-        <button
-          onClick={() => !outOfStock && onAdd(product)}
-          disabled={outOfStock}
-          aria-label={`Add ${product.name} to cart`}
-          className={`sm:hidden shrink-0 w-9 h-9 flex items-center justify-center border transition-colors ${
-            outOfStock
-              ? "border-tan text-tan cursor-not-allowed opacity-40"
-              : added
-              ? "bg-green-700 border-green-700 text-white"
-              : "border-tan text-royal/50 hover:border-habanero hover:text-habanero"
-          }`}
-        >
-          {added ? <Check size={13} /> : <ShoppingCart size={13} />}
-        </button>
       </div>
     </div>
   );
