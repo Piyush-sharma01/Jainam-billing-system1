@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
-  ShoppingCart, Menu, X, LogOut,
+  ShoppingCart, Menu, X,
   Plus, Minus, Trash2, Phone, Mail, MapPin,
   CheckCircle, Package, ArrowRight,
 } from "lucide-react";
 import { useCart } from "../services/cartContext";
 import { orderAPI } from "../services/api";
 
-export default function StorefrontLayout({ children, user, onLogout }) {
+// Public storefront shell — no login/logout here. Admin login lives in the
+// separate billing-admin app, deployed at its own URL.
+export default function StorefrontLayout({ children }) {
   /* ── All state & logic — UNCHANGED ── */
   const [menuOpen,    setMenuOpen]    = useState(false);
   const [cartOpen,    setCartOpen]    = useState(false);
@@ -89,11 +91,6 @@ export default function StorefrontLayout({ children, user, onLogout }) {
             <span className="font-display font-600 text-lg sm:text-xl text-white tracking-tight">
               Jainam
             </span>
-            {user?.company && (
-              <span className="hidden sm:inline font-mono text-[10px] tracking-widest text-white/50 uppercase border-l border-white/20 pl-3">
-                {user.company}
-              </span>
-            )}
           </Link>
 
           {/* Desktop nav */}
@@ -134,15 +131,6 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                   Cart
                 </span>
               )}
-            </button>
-
-            {/* Logout (desktop) */}
-            <button
-              onClick={onLogout}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 min-h-[44px] font-mono text-[10px] tracking-widest uppercase text-white/60 hover:text-white transition-colors"
-            >
-              <LogOut size={14} />
-              <span>Logout</span>
             </button>
 
             {/* Hamburger (mobile) */}
@@ -205,20 +193,6 @@ export default function StorefrontLayout({ children, user, onLogout }) {
               ))}
             </nav>
 
-            <div className="px-5 py-5 border-t border-gray-200 shrink-0 space-y-3">
-              {user?.name && (
-                <p className="font-mono text-[10px] tracking-widest text-gray-500 uppercase">
-                  {user.name}
-                </p>
-              )}
-              <button
-                onClick={() => { setMenuOpen(false); onLogout(); }}
-                className="w-full flex items-center gap-2.5 font-mono text-[11px] tracking-widest uppercase text-gray-500 hover:text-royal transition-colors py-2 min-h-[44px]"
-              >
-                <LogOut size={14} />
-                Logout
-              </button>
-            </div>
           </div>
         </>
       )}
@@ -233,7 +207,7 @@ export default function StorefrontLayout({ children, user, onLogout }) {
       ══════════════════════════════════════ */}
       <footer className="bg-royal text-white">
         <div className="h-[3px] bg-habanero" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-14 grid grid-cols-1 sm:grid-cols-3 gap-10">
           <div>
             <h3 className="font-display font-600 text-base text-white mb-3">Jainam</h3>
             <p className="text-sm text-white/60 leading-relaxed">
@@ -282,17 +256,6 @@ export default function StorefrontLayout({ children, user, onLogout }) {
                 </span>
               </li>
             </ul>
-          </div>
-          <div>
-            <h4 className="font-mono text-[10px] tracking-[0.2em] text-white/50 uppercase mb-5">
-              Account
-            </h4>
-            {user?.name && (
-              <p className="font-mono text-[11px] tracking-wide text-white/60">
-                Signed in as{" "}
-                <span className="text-white">{user.name}</span>
-              </p>
-            )}
           </div>
         </div>
         <div className="border-t border-white/15 py-4 text-center">
