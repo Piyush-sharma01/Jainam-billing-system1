@@ -1,162 +1,112 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, ChevronRight, Search,
-  Package, Truck, Headphones, ShieldCheck,
+  ArrowRight, BadgeCheck, ChevronLeft, ChevronRight, Factory, Gauge,
+  Package, Search, ShieldCheck, Truck, Wrench,
 } from "lucide-react";
 import { brandAPI, categoryAPI, productAPI } from "../services/api";
 import HeroSlider from "../components/HeroSlider";
 
-/* ─────────────────────────────────────────────
-   UTILITY: simple intersection-observer hook
-   for triggering entrance animations
-───────────────────────────────────────────── */
-function useReveal(threshold = 0.15) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return [ref, visible];
+const familyArtwork = {
+  hoses: "/jainam-slider-hydraulic-hoses.jpg",
+  pipes: "/jainam-slider-formed-pipes.jpg",
+  brake: "/jainam-slider-air-brake-tubes.jpg",
+};
+
+const officialFamilies = [
+  { name: "Automotive pipes", icon: Factory, image: familyArtwork.pipes },
+  { name: "Nozzle pipes", icon: Gauge, image: familyArtwork.pipes },
+  { name: "Hydraulic hoses", icon: Wrench, image: familyArtwork.hoses },
+  { name: "Nylon brake pipes", icon: Truck, image: familyArtwork.brake },
+  { name: "Power steering hoses", icon: Gauge, image: familyArtwork.hoses },
+  { name: "Teflon pipes", icon: Package, image: familyArtwork.pipes },
+];
+
+const applications = ["TATA", "Mahindra", "Eicher", "Ashok Leyland", "New Energy Vehicles"];
+
+function formatPrice(price) {
+  if (price === null || price === undefined || String(price).trim() === "") return "Request a quote";
+  const value = Number(price);
+  return Number.isFinite(value) ? `₹${value.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : "Request a quote";
 }
 
-/* ─────────────────────────────────────────────
-   MAIN PAGE
-───────────────────────────────────────────── */
+function artForCategory(name = "") {
+  const value = name.toLowerCase();
+  if (value.includes("brake") || value.includes("nylon")) return familyArtwork.brake;
+  if (value.includes("hose") || value.includes("hydraulic") || value.includes("steering")) return familyArtwork.hoses;
+  if (value.includes("pipe") || value.includes("teflon") || value.includes("nozzle")) return familyArtwork.pipes;
+  return null;
+}
+
 export default function StoreHome() {
-  const [brands,     setBrands]     = useState([]);
+  const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [products,   setProducts]   = useState([]);
-  const [loading,    setLoading]    = useState(true);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
+    let active = true;
     (async () => {
       try {
-        const [bRes, cRes, pRes] = await Promise.all([
-          brandAPI.getAll(),
-          categoryAPI.getAll(),
-          productAPI.getAll(),
+        const [brandResult, categoryResult, productResult] = await Promise.all([
+          brandAPI.getAll(), categoryAPI.getAll(), productAPI.getAll(),
         ]);
-        setBrands(bRes.data || []);
-        setCategories(cRes.data || []);
-        setProducts((pRes.data || []).filter((p) => p.active !== false));
-      } catch (err) {
-        console.error(err);
+        if (!active) return;
+        setBrands(brandResult.data || []);
+        setCategories(categoryResult.data || []);
+        setProducts((productResult.data || []).filter((product) => product.active !== false));
+      } catch (error) {
+        console.error("Unable to load Jainam storefront catalogue", error);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     })();
+    return () => { active = false; };
   }, []);
-
-  const featured  = products.slice(0, 10);
-  const spotlight = products[Math.min(3, products.length - 1)] || products[0] || null;
 
   const stats = {
     productCount: products.length,
     categoryCount: categories.length,
     brandCount: brands.length,
   };
+  const featured = products.slice(0, 10);
+  const spotlight = products.find((product) => product.imageUrl) || products[0] || null;
+  const searchResults = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return [];
+    return products.filter((product) => [product.name, product.productCode, product.category, product.description]
+      .some((field) => String(field || "").toLowerCase().includes(query))).slice(0, 5);
+  }, [products, search]);
 
   return (
-    <div className="bg-white">
-
-      {/* ═══════════════════════════════════════
-          01 — HERO SLIDER
-      ═══════════════════════════════════════ */}
-      {!loading && <HeroSlider stats={stats} />}
-      {loading && (
-        <div className="h-[560px] sm:h-[620px] bg-royal animate-pulse" />
-      )}
-
-      {/* ═══════════════════════════════════════
-          BRAND STRIP
-      ═══════════════════════════════════════ */}
-      {!loading && brands.length > 0 && <BrandStrip brands={brands} />}
-
-      {/* ═══════════════════════════════════════
-          02 — CATEGORY EXPLORER (bento)
-      ═══════════════════════════════════════ */}
-      <CategoryExplorer categories={categories} loading={loading} />
-
-      {/* ═══════════════════════════════════════
-          03 — PRODUCT DISCOVERY + FEATURED
-      ═══════════════════════════════════════ */}
-      <ProductDiscovery
-        products={products}
-        featured={featured}
-        loading={loading}
-        search={search}
-        setSearch={setSearch}
-      />
-
-      {/* ═══════════════════════════════════════
-          04 — PRODUCT SPOTLIGHT
-      ═══════════════════════════════════════ */}
+    <div className="store-home bg-white text-royal">
+      <HeroSlider stats={stats} />
+      <ApplicationBand brands={brands} />
+      <CategorySection categories={categories} products={products} loading={loading} />
+      <ProductCollection products={featured} search={search} setSearch={setSearch} results={searchResults} loading={loading} />
       {!loading && spotlight && <ProductSpotlight product={spotlight} />}
-
-      {/* ═══════════════════════════════════════
-          05 — PROCESS FLOW
-      ═══════════════════════════════════════ */}
-      <ProcessFlow />
-
-      {/* ═══════════════════════════════════════
-          06 — WHY JAINAM (bento)
-      ═══════════════════════════════════════ */}
+      <ProcessSection />
       <WhySection stats={stats} loading={loading} />
-
-      {/* ═══════════════════════════════════════
-          07 — FINAL CTA
-      ═══════════════════════════════════════ */}
       <FinalCTA />
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────
-   BRAND STRIP
-───────────────────────────────────────────── */
-function BrandStrip({ brands }) {
-  const items = [...brands, ...brands, ...brands, ...brands];
+function ApplicationBand({ brands }) {
+  const list = brands.length ? brands : applications.map((name) => ({ name }));
   return (
-    <section className="bg-paper border-y border-tan py-14 sm:py-20 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 mb-8 flex items-center gap-3">
-        <span className="w-10 h-px bg-habanero shrink-0" />
-        <span className="font-mono text-[20px] tracking-[0.2em] text-habanero uppercase">
-          Brands We Carry
-        </span>
-      </div>
-
-      <div className="relative">
-        {/* Edge fade masks so the loop reads as continuous, not clipped */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-40 bg-gradient-to-r from-paper to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-40 bg-gradient-to-l from-paper to-transparent z-10" />
-
-        <div className="flex w-max animate-ticker">
-          {items.map((brand, i) => (
-            <div
-              key={`${brand.id}-${i}`}
-              className="flex items-center justify-center h-28 sm:h-36 px-10 sm:px-16 shrink-0 border-r border-tan/70 group"
-            >
-              {brand.logoUrl ? (
-                <img
-                  src={brand.logoUrl}
-                  alt={brand.name}
-                  className="h-16 sm:h-24 w-auto object-contain grayscale opacity-55 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300"
-                />
-              ) : (
-                <span className="font-display font-600 text-xl sm:text-2xl text-royal/60 group-hover:text-royal tracking-wide uppercase whitespace-nowrap transition-colors duration-300">
-                  {brand.name}
-                </span>
-              )}
-            </div>
+    <section className="border-b border-slate-100 bg-white">
+      <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-7 sm:px-8 md:flex-row md:items-center md:gap-8 lg:px-10">
+        <div className="shrink-0">
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-habanero">Vehicle applications</p>
+          <p className="mt-1 text-xs text-ink-soft">Listed by Jainam Auto Industries</p>
+        </div>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-7 gap-y-3 md:justify-between">
+          {list.map((item, index) => item.logoUrl ? (
+            <img key={`${item.id || item.name}-${index}`} src={item.logoUrl} alt={item.name} className="h-8 max-w-28 object-contain opacity-75 grayscale transition hover:opacity-100 hover:grayscale-0" loading="lazy" />
+          ) : (
+            <span key={`${item.id || item.name}-${index}`} className="font-display text-sm font-bold tracking-wide text-slate-400 transition-colors hover:text-royal sm:text-base">{item.name}</span>
           ))}
         </div>
       </div>
@@ -164,210 +114,50 @@ function BrandStrip({ brands }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   02 CATEGORY EXPLORER — bento composition
-───────────────────────────────────────────── */
-function CategoryExplorer({ categories, loading }) {
-  const [ref, visible] = useReveal();
-  const display = loading
-    ? Array.from({ length: 5 }, (_, i) => ({ id: i, name: "", _skeleton: true }))
-    : categories;
-
+function SectionHeading({ kicker, title, copy, link, linkLabel }) {
   return (
-    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-tan">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12 sm:mb-16">
-          <div>
-            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
-              02 / Product Range
-            </span>
-            <h2 className="font-display font-600 text-display-lg text-royal mt-2">
-              Explore our<br />products
-            </h2>
-          </div>
-          <Link
-            to="/store/catalogue"
-            className="inline-flex items-center gap-2 text-sm font-display font-medium text-ink-soft hover:text-royal transition-colors group"
-          >
-            View full catalogue
-            <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
-
-        {/* Bento grid: large navy "PRODUCTS" panel + category tiles */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-tan border border-tan">
-          {/* Large lead panel */}
-          <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 bg-royal relative overflow-hidden p-8 sm:p-10 flex flex-col justify-between min-h-[220px] sm:min-h-[320px]">
-            <div
-              className="absolute inset-0 opacity-[0.06] pointer-events-none"
-              style={{
-                backgroundImage: "linear-gradient(#FFFFFF 1px,transparent 1px),linear-gradient(90deg,#FFFFFF 1px,transparent 1px)",
-                backgroundSize: "48px 48px",
-              }}
-            />
-            <div className="relative z-10 w-10 h-10 bg-habanero flex items-center justify-center">
-              <Package size={18} className="text-white" />
-            </div>
-            <div className="relative z-10">
-              <h3 className="font-display font-600 text-display-md text-white leading-none mb-3">
-                Products
-              </h3>
-              <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-sm">
-                {loading
-                  ? "Loading the current catalogue…"
-                  : `${categories.length} product categories are listed in the live catalogue. Contact Jainam to confirm current availability.`}
-              </p>
-            </div>
-          </div>
-
-          {/* Category tiles */}
-          {display.map((cat, idx) => (
-            <CategoryTile key={cat.id} cat={cat} idx={idx} visible={visible} skeleton={cat._skeleton} />
-          ))}
-        </div>
+    <div className="mb-8 flex flex-col justify-between gap-5 sm:mb-10 sm:flex-row sm:items-end">
+      <div className="max-w-2xl">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-habanero">{kicker}</p>
+        <h2 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-[-0.035em] text-royal sm:text-4xl lg:text-5xl">{title}</h2>
+        {copy && <p className="mt-3 max-w-xl text-sm leading-6 text-ink-soft sm:text-base">{copy}</p>}
       </div>
-    </section>
+      {link && <Link to={link} className="group inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-slate-200 px-5 text-xs font-semibold text-royal transition hover:border-royal hover:bg-royal hover:text-white sm:self-auto">{linkLabel || "View catalogue"}<ArrowRight size={14} className="transition-transform group-hover:translate-x-1" /></Link>}
+    </div>
   );
 }
 
-function CategoryTile({ cat, idx, visible, skeleton }) {
-  if (skeleton) {
-    return <div className="bg-white p-6 min-h-[130px] animate-pulse" />;
-  }
-  const isCoral = idx % 3 === 1;
+function CategorySection({ categories, products, loading }) {
+  const list = categories.length ? categories.slice(0, 6).map((category) => ({ ...category, live: true })) : officialFamilies;
   return (
-    <Link
-      to={`/store/catalogue?category=${encodeURIComponent(cat.name)}`}
-      className={`group relative flex flex-col justify-between p-6 min-h-[130px] transition-colors duration-300 ${
-        isCoral ? "bg-habanero hover:bg-deadly" : "bg-white hover:bg-deadly"
-      }`}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "none" : "translateY(10px)",
-        transition: `opacity 0.5s ${idx * 70}ms, transform 0.5s ${idx * 70}ms`,
-      }}
-    >
-      <span className={`font-mono text-[10px] tracking-widest ${isCoral ? "text-white/70" : "text-ink-soft"} group-hover:text-white/60`}>
-        {String(idx + 1).padStart(2, "0")}
-      </span>
-      <div className="flex items-center justify-between gap-2">
-        <span className={`font-display font-600 text-base sm:text-lg leading-tight ${isCoral ? "text-white" : "text-royal"} group-hover:text-white transition-colors`}>
-          {cat.name}
-        </span>
-        <ChevronRight
-          size={16}
-          className={`shrink-0 ${isCoral ? "text-white" : "text-royal"} group-hover:text-habanero group-hover:translate-x-1 transition-all`}
-        />
-      </div>
-    </Link>
-  );
-}
+    <section className="relative overflow-hidden bg-[#f5f7fb] py-16 sm:py-20 lg:py-24">
+      <div className="pointer-events-none absolute -right-28 top-20 h-72 w-72 rounded-full bg-blue-100/60 blur-3xl" />
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <SectionHeading kicker="01 / Product families" title={<>A clear view of<br className="hidden sm:block" /> the range.</>} copy="Browse Jainam's automotive pipe, hose and fluid-system product families." link="/store/catalogue" linkLabel="Explore full range" />
 
-/* ─────────────────────────────────────────────
-   03 PRODUCT DISCOVERY + FEATURED SLIDER
-───────────────────────────────────────────── */
-function ProductDiscovery({ products, featured, loading, search, setSearch }) {
-  const results = search.trim()
-    ? products.filter((p) => p.name?.toLowerCase().includes(search.toLowerCase())).slice(0, 6)
-    : [];
-
-  return (
-    <section className="bg-royal py-20 sm:py-28 relative overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage: "linear-gradient(#FFFFFF 1px,transparent 1px),linear-gradient(90deg,#FFFFFF 1px,transparent 1px)",
-          backgroundSize: "64px 64px",
-        }}
-      />
-      <div className="relative max-w-7xl mx-auto px-6 sm:px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] gap-10 lg:gap-6 mb-16">
-
-          {/* Search panel */}
-          <div className="bg-habanero p-8 sm:p-10 flex flex-col justify-between">
-            <div>
-              <span className="font-mono text-[11px] tracking-[0.2em] text-white/70 uppercase">
-                03 / Product Discovery
-              </span>
-              <h2 className="font-display font-600 text-2xl sm:text-3xl text-white mt-3 mb-6 leading-tight">
-                Find your product
-              </h2>
-            </div>
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="relative"
-            >
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-royal/50" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search products…"
-                className="w-full bg-white pl-11 pr-4 py-3.5 text-sm text-royal placeholder:text-royal/40 focus:outline-none"
-              />
-            </form>
-            <Link
-              to="/store/catalogue"
-              className="inline-flex items-center gap-2 mt-5 font-mono text-[11px] tracking-widest uppercase text-white hover:text-royal transition-colors group"
-            >
-              Full search &amp; filters
-              <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-
-            {/* Live search results */}
-            {results.length > 0 && (
-              <div className="mt-6 bg-white divide-y divide-line">
-                {results.map((p) => (
-                  <Link
-                    key={p.id}
-                    to={`/store/product/${p.id}`}
-                    className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-tan/50 transition-colors"
-                  >
-                    <span className="text-sm text-royal truncate">{p.name}</span>
-                    <span className="font-mono text-xs text-habanero shrink-0">
-                      {p.price !== null && p.price !== undefined && String(p.price).trim() !== "" ? `₹${Number(p.price).toLocaleString("en-IN", { maximumFractionDigits: 2 })}` : "Request a quote"}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Featured heading */}
-          <div className="flex flex-col justify-center">
-            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase mb-3">
-              Featured Products
-            </span>
-            <h3 className="font-display font-600 text-display-md text-white leading-tight mb-4">
-              A current sample of<br />the catalogue
-            </h3>
-            <p className="text-white/60 text-sm sm:text-base max-w-md leading-relaxed">
-              Listings are pulled from the live catalogue. Pricing and availability can be confirmed
-              with the Jainam team.
-            </p>
-          </div>
-        </div>
-
-        {/* Horizontal product slider */}
-        {loading ? (
-          <div className="flex gap-4 overflow-hidden">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="w-[45%] sm:w-[220px] shrink-0 aspect-square bg-white/10 animate-pulse" />
-            ))}
-          </div>
-        ) : featured.length === 0 ? (
-          <p className="text-white/50 text-sm">No products available yet.</p>
-        ) : (
-          <div
-            className="flex gap-5 overflow-x-auto pt-4 pb-10 px-2 -mx-2 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {featured.map((product) => (
-              <FeaturedCard
-                key={product.id}
-                product={product}
-              />
-            ))}
-            <ViewAllCard />
+        {loading ? <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="aspect-[1.35/1] animate-pulse rounded-2xl bg-slate-200" />)}</div> : (
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+            {list.map((category, index) => {
+              const exactProduct = category.live && products.find((product) => product.category === category.name && product.imageUrl);
+              const image = exactProduct?.imageUrl || category.image || artForCategory(category.name);
+              const destination = category.live ? `/store/catalogue?category=${encodeURIComponent(category.name)}` : "/store/catalogue";
+              return (
+                <Link key={category.id || category.name} to={destination} className={`store-category-card group relative isolate min-h-[180px] overflow-hidden rounded-2xl bg-royal shadow-sm sm:min-h-[235px] ${index === 0 ? "col-span-2 lg:col-span-1" : ""}`}>
+                  {image ? <img src={image} alt={exactProduct ? exactProduct.name : `Illustrative range image for ${category.name}`} loading="lazy" className="absolute inset-0 z-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" /> : <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#11234f] via-[#1b3472] to-[#07142f]" />}
+                  <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#07142f]/95 via-[#07142f]/30 to-[#07142f]/5" />
+                  <div className="relative z-20 flex h-full min-h-[180px] flex-col justify-between p-4 sm:min-h-[235px] sm:p-6">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="rounded-full border border-white/20 bg-[#07142f]/45 px-3 py-1.5 font-mono text-[8px] font-semibold uppercase tracking-[0.16em] text-white/80 backdrop-blur">{exactProduct ? "Catalogue photo" : "Range illustration"}</span>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition group-hover:border-habanero group-hover:bg-habanero"><ArrowRight size={15} /></span>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-white/60">{String(index + 1).padStart(2, "0")} · Jainam Auto</p>
+                      <h3 className="mt-1 font-display text-lg font-semibold leading-tight text-white sm:text-2xl">{category.name}</h3>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
@@ -375,334 +165,144 @@ function ProductDiscovery({ products, featured, loading, search, setSearch }) {
   );
 }
 
-function FeaturedCard({ product }) {
+function ProductCollection({ products, search, setSearch, results, loading }) {
+  const railRef = useRef(null);
+  const scrollRail = (direction) => railRef.current?.scrollBy({ left: direction * 330, behavior: "smooth" });
   return (
-    <div className="w-[70%] xs:w-[55%] sm:w-[240px] shrink-0 snap-start [perspective:1000px]">
-      <div
-        className="group h-full flex flex-col bg-white rounded-xl overflow-hidden [transform-style:preserve-3d] transition-all duration-300 ease-out shadow-[0_22px_38px_-14px_rgba(0,0,0,0.65),0_6px_12px_rgba(0,0,0,0.25)] hover:shadow-[0_34px_50px_-14px_rgba(0,0,0,0.75),0_10px_18px_rgba(0,0,0,0.3)] hover:[transform:rotateX(5deg)_rotateY(-9deg)_translateY(-10px)]"
-      >
-        <Link
-          to={`/store/product/${product.id}`}
-          className="relative block aspect-square bg-gradient-to-br from-white via-paper to-tan/60 overflow-hidden [transform-style:preserve-3d]"
-        >
-          {product.imageUrl ? (
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="w-full h-full object-contain p-6 drop-shadow-[0_14px_12px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:[transform:translateZ(36px)_scale(1.06)]"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Package size={32} strokeWidth={1} className="text-royal/20" />
-            </div>
-          )}
-        </Link>
-        <div className="p-4 border-t border-tan bg-white">
-          {(product.brand || product.category) && (
-            <p className="font-mono text-[9px] tracking-widest text-ink-soft uppercase mb-1 truncate">
-              {product.brand || product.category}
-            </p>
-          )}
-          <Link
-            to={`/store/product/${product.id}`}
-            className="font-display font-medium text-sm text-royal leading-snug line-clamp-2 hover:text-habanero transition-colors block min-h-[2.5em]"
-          >
-            {product.name}
-          </Link>
-          <p className="font-mono font-600 text-base text-habanero mt-2">
-            {product.price !== null && product.price !== undefined && String(product.price).trim() !== "" ? `₹${Number(product.price).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Request a quote"}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ViewAllCard() {
-  return (
-    <div className="w-[70%] xs:w-[55%] sm:w-[240px] shrink-0 snap-start [perspective:1000px]">
-      <Link
-        to="/store/catalogue"
-        className="group h-full min-h-[340px] flex flex-col items-center justify-center gap-5 text-center bg-habanero rounded-xl p-6 [transform-style:preserve-3d] transition-all duration-300 ease-out shadow-[0_22px_38px_-14px_rgba(0,0,0,0.65),0_6px_12px_rgba(0,0,0,0.25)] hover:shadow-[0_34px_50px_-14px_rgba(0,0,0,0.75),0_10px_18px_rgba(0,0,0,0.3)] hover:[transform:rotateX(5deg)_rotateY(-9deg)_translateY(-10px)]"
-      >
-        <span className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:[transform:translateZ(30px)]">
-          <ArrowRight size={22} className="text-habanero" />
-        </span>
-        <span className="font-display font-600 text-xl text-white leading-tight">
-          View All<br />Products
-        </span>
-        <span className="font-mono text-[10px] tracking-[0.2em] text-white/80 uppercase">
-          Full catalogue
-        </span>
-      </Link>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   04 PRODUCT SPOTLIGHT — editorial, dramatic
-───────────────────────────────────────────── */
-function ProductSpotlight({ product }) {
-  const [ref, visible] = useReveal(0.15);
-  return (
-    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-tan overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-0 items-stretch">
-
-          {/* LEFT — huge image on navy, overlapping coral shape */}
-          <div
-            className="relative bg-royal min-h-[340px] sm:min-h-[440px] flex items-center justify-center clip-spotlight-block"
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "none" : "translateX(-20px)",
-              transition: "opacity 0.7s ease, transform 0.7s ease",
-            }}
-          >
-            <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-habanero rotate-12" />
-            {product.imageUrl ? (
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="relative z-10 w-full h-full object-contain p-12 sm:p-16"
-              />
-            ) : (
-              <Package size={80} strokeWidth={1} className="relative z-10 text-white/20" />
-            )}
+    <section className="bg-white py-16 sm:py-20 lg:py-24">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <div className="mb-8 flex flex-col gap-6 lg:mb-10 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-xl">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-habanero">02 / Catalogue picks</p>
+            <h2 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-[-0.035em] text-royal sm:text-4xl lg:text-5xl">Featured products</h2>
+            <p className="mt-3 text-sm leading-6 text-ink-soft">Product images and details are shown from the live catalogue. Confirm pricing and availability with Jainam.</p>
           </div>
+          <div className="relative w-full max-w-md">
+            <Search size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-royal/50" />
+            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, code or category" className="h-12 w-full rounded-full border border-slate-200 bg-[#f7f8fb] pl-11 pr-4 text-sm text-royal outline-none transition focus:border-royal focus:bg-white focus:ring-4 focus:ring-royal/10" aria-label="Search catalogue products" />
+            {results.length > 0 && <div className="absolute inset-x-0 top-[calc(100%+8px)] z-30 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl">{results.map((product) => <Link key={product.id} to={`/store/product/${product.id}`} className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 last:border-0 hover:bg-slate-50"><span className="min-w-0 truncate text-sm font-medium text-royal">{product.name}</span><span className="shrink-0 text-xs font-semibold text-habanero">{formatPrice(product.price)}</span></Link>)}</div>}
+          </div>
+        </div>
 
-          {/* RIGHT — copy */}
-          <div
-            className="bg-white flex flex-col justify-center px-8 sm:px-12 py-12 lg:py-0"
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "none" : "translateX(20px)",
-              transition: "opacity 0.7s 0.1s ease, transform 0.7s 0.1s ease",
-            }}
-          >
-            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase mb-4">
-              04 / Product Spotlight
-            </span>
-            <h2 className="font-display font-600 text-display-lg text-royal leading-none mb-5">
-              {product.name}
-            </h2>
-            {product.description && (
-              <p className="text-ink-soft text-base leading-relaxed mb-6 max-w-md line-clamp-4">
-                {product.description}
-              </p>
-            )}
-            <div className="flex flex-wrap items-center gap-6 mb-8">
-              {product.brand && (
-                <div>
-                  <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Brand</p>
-                  <p className="font-display font-600 text-sm text-royal mt-1">{product.brand}</p>
-                </div>
-              )}
-              {product.category && (
-                <div>
-                  <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Category</p>
-                  <p className="font-display font-600 text-sm text-royal mt-1">{product.category}</p>
-                </div>
-              )}
-              <div>
-                <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Price</p>
-                <p className="font-mono font-600 text-lg text-habanero mt-1">
-                  {product.price !== null && product.price !== undefined && String(product.price).trim() !== "" ? `₹${Number(product.price).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Request a quote"}
-                </p>
-              </div>
-            </div>
-            <Link
-              to={`/store/product/${product.id}`}
-              className="inline-flex items-center gap-2 bg-royal text-white font-display font-medium text-sm px-6 py-3.5 hover:bg-habanero transition-colors w-fit"
-            >
-              View Product
-              <ArrowRight size={15} />
+        <div className="mb-4 flex items-center justify-between border-t border-slate-100 pt-4">
+          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink-soft/70">{loading ? "Loading catalogue" : `${products.length} featured ${products.length === 1 ? "item" : "items"}`}</p>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => scrollRail(-1)} aria-label="Scroll featured products left" className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-royal transition hover:border-royal hover:bg-royal hover:text-white"><ChevronLeft size={18} /></button>
+            <button type="button" onClick={() => scrollRail(1)} aria-label="Scroll featured products right" className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-royal transition hover:border-royal hover:bg-royal hover:text-white"><ChevronRight size={18} /></button>
+          </div>
+        </div>
+
+        {loading ? <div className="flex gap-4 overflow-hidden">{Array.from({ length: 4 }).map((_, index) => <div key={index} className="w-[74%] shrink-0 animate-pulse rounded-2xl bg-slate-100 sm:w-[32%] lg:w-[24%]"><div className="aspect-[4/3] rounded-t-2xl bg-slate-200" /><div className="space-y-3 p-5"><div className="h-3 w-1/3 rounded bg-slate-200" /><div className="h-5 w-2/3 rounded bg-slate-200" /></div></div>)}</div> : products.length ? (
+          <div ref={railRef} className="store-product-rail flex snap-x snap-mandatory gap-4 overflow-x-auto pb-5 pt-1" aria-label="Featured catalogue products">
+            {products.map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}
+            <Link to="/store/catalogue" className="group flex min-h-[390px] w-[78%] shrink-0 snap-start flex-col justify-between overflow-hidden rounded-2xl bg-[#0a1735] p-6 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl sm:w-[42%] lg:w-[27%]">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-habanero text-white transition group-hover:rotate-45"><ArrowRight size={20} /></span>
+              <span><span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/55">Browse by range</span><span className="mt-2 block font-display text-3xl font-semibold leading-tight">See the<br />full catalogue.</span><span className="mt-5 inline-flex items-center gap-2 text-xs font-semibold text-habanero">View products <ArrowRight size={14} /></span></span>
             </Link>
           </div>
+        ) : <div className="rounded-2xl border border-dashed border-slate-200 bg-[#f7f8fb] px-6 py-10 text-center"><Package size={25} className="mx-auto text-royal/30" /><p className="mt-3 font-display text-lg font-semibold text-royal">Catalogue items will appear here</p><p className="mx-auto mt-1 max-w-md text-sm leading-6 text-ink-soft">For product availability or a specific vehicle application, send your requirement to Jainam.</p><Link to="/store/contact" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-habanero">Contact Jainam <ArrowRight size={14} /></Link></div>}
+      </div>
+    </section>
+  );
+}
+
+function ProductCard({ product, index }) {
+  const hasImage = Boolean(product.imageUrl);
+  return (
+    <article className="store-product-card group w-[78%] shrink-0 snap-start overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_10px_34px_-26px_rgba(8,24,59,0.45)] transition duration-300 hover:-translate-y-1 hover:border-slate-200 hover:shadow-[0_22px_44px_-24px_rgba(8,24,59,0.35)] sm:w-[42%] lg:w-[27%]">
+      <Link to={`/store/product/${product.id}`} className="block">
+        <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-[#f3f5fa] via-white to-[#e9edf7]">
+          {hasImage ? <img src={product.imageUrl} alt={product.name} className="h-full w-full object-contain p-6 transition duration-500 group-hover:scale-[1.06] sm:p-8" loading={index < 3 ? "eager" : "lazy"} /> : <div className="flex h-full flex-col items-center justify-center bg-[radial-gradient(circle_at_70%_30%,rgba(249,133,19,.11),transparent_38%),linear-gradient(135deg,#f5f7fb,#e8edf8)] text-royal/30"><Package size={44} strokeWidth={1.1} /><span className="mt-3 font-mono text-[8px] uppercase tracking-[0.18em]">Image unavailable</span></div>}
+          <span className="absolute left-4 top-4 max-w-[70%] truncate rounded-full border border-white/70 bg-white/90 px-3 py-1.5 font-mono text-[8px] font-semibold uppercase tracking-[0.13em] text-royal shadow-sm">{product.category || product.brand || "Jainam Auto"}</span>
+          {Number(product.stock) === 0 && <span className="absolute right-4 top-4 rounded-full bg-slate-900/75 px-3 py-1.5 text-[8px] font-semibold uppercase tracking-wider text-white">Check availability</span>}
+          <span className="absolute bottom-4 right-4 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full bg-habanero text-white opacity-0 shadow-lg transition duration-300 group-hover:translate-y-0 group-hover:opacity-100"><ArrowRight size={16} /></span>
+        </div>
+        <div className="p-4 sm:p-5">
+          <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-ink-soft/70">{product.brand || "Jainam Auto Industries"}</p>
+          <h3 className="mt-1.5 line-clamp-2 min-h-[2.8rem] font-display text-base font-semibold leading-snug text-royal transition-colors group-hover:text-habanero">{product.name}</h3>
+          {(product.productCode || product.size) && <p className="mt-2 flex flex-wrap gap-2">{product.productCode && <span className="rounded-md bg-slate-50 px-2 py-1 font-mono text-[9px] text-ink-soft">{product.productCode}</span>}{product.size && <span className="rounded-md bg-slate-50 px-2 py-1 text-[9px] text-ink-soft">{product.size}</span>}</p>}
+          <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3"><span className={`text-sm font-bold ${product.price === null || product.price === undefined || String(product.price).trim() === "" ? "text-habanero" : "text-royal"}`}>{formatPrice(product.price)}</span><span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">View item</span></div>
+        </div>
+      </Link>
+    </article>
+  );
+}
+
+function ProductSpotlight({ product }) {
+  return (
+    <section className="bg-[#07142f] py-14 text-white sm:py-18 lg:py-20">
+      <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-14 lg:px-10">
+        <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#111f42]">
+          {product.imageUrl ? <img src={product.imageUrl} alt={product.name} className="aspect-[4/3] w-full object-contain p-8 sm:p-12" loading="lazy" /> : <div className="flex aspect-[4/3] items-center justify-center bg-[radial-gradient(circle_at_50%_50%,rgba(249,133,19,.16),transparent_55%)]"><Package size={72} strokeWidth={1} className="text-white/30" /></div>}
+          <span className="absolute left-5 top-5 rounded-full border border-white/15 bg-black/20 px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.16em] text-white/70">Featured catalogue item</span>
+        </div>
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-habanero">03 / Product spotlight</p>
+          <h2 className="mt-4 font-display text-3xl font-semibold leading-tight tracking-[-0.03em] sm:text-4xl">{product.name}</h2>
+          {product.description && <p className="mt-4 line-clamp-4 text-sm leading-7 text-white/60">{product.description}</p>}
+          <div className="mt-6 flex flex-wrap gap-2">{product.brand && <span className="rounded-full border border-white/15 px-3 py-1.5 text-xs text-white/75">{product.brand}</span>}{product.category && <span className="rounded-full border border-white/15 px-3 py-1.5 text-xs text-white/75">{product.category}</span>}{product.size && <span className="rounded-full border border-white/15 px-3 py-1.5 text-xs text-white/75">Size: {product.size}</span>}</div>
+          <p className="mt-7 text-xl font-bold text-habanero">{formatPrice(product.price)}</p>
+          <Link to={`/store/product/${product.id}`} className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-royal transition hover:bg-habanero hover:text-white">View product details <ArrowRight size={15} /></Link>
         </div>
       </div>
     </section>
   );
 }
 
-/* ─────────────────────────────────────────────
-   05 PROCESS FLOW
-───────────────────────────────────────────── */
-function ProcessFlow() {
-  const [ref, visible] = useReveal(0.1);
+function ProcessSection() {
   const steps = [
-    { n: "01", label: "Share requirements", body: "Tell Jainam the component, vehicle model, size and quantity you need." },
-    { n: "02", label: "Browse range", body: "Explore the catalogue by product line or commercial-vehicle application." },
-    { n: "03", label: "Send enquiry", body: "Contact Jainam by email, WhatsApp or the enquiry form on this site." },
-    { n: "04", label: "Discuss the quote", body: "The company site invites customers to request pricing and availability." },
-    { n: "05", label: "Connect across India", body: "Jainam supplies OEM and replacement-market parts through its dealer network." },
+    ["01", "Tell us what you need", "Share the component, vehicle model, size and quantity."],
+    ["02", "Explore the range", "Browse product families and catalogue listings."],
+    ["03", "Send an enquiry", "Reach Jainam by email, WhatsApp or the enquiry form."],
+    ["04", "Discuss your quote", "Confirm current pricing and availability with the team."],
   ];
   return (
-    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-tan">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
-          05 / How It Works
-        </span>
-        <h2 className="font-display font-600 text-display-lg text-royal mt-2 mb-14">
-          From catalogue to enquiry
-        </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-5 gap-8 sm:gap-4">
-          {steps.map((step, i) => (
-            <div
-              key={step.n}
-              className="relative"
-              style={{
-                opacity: visible ? 1 : 0,
-                transform: visible ? "none" : "translateY(14px)",
-                transition: `opacity 0.5s ${i * 90}ms, transform 0.5s ${i * 90}ms`,
-              }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <span className="font-display font-600 text-3xl text-royal/15">{step.n}</span>
-                <span className="flex-1 h-px bg-tan hidden sm:block" />
-                {i < steps.length - 1 && (
-                  <ArrowRight size={14} className="text-habanero hidden sm:block" />
-                )}
-              </div>
-              <h3 className="font-display font-600 text-sm text-royal uppercase tracking-wide mb-2">
-                {step.label}
-              </h3>
-              <p className="text-ink-soft text-sm leading-relaxed">{step.body}</p>
-            </div>
-          ))}
+    <section className="bg-[#f5f7fb] py-16 sm:py-20 lg:py-24">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <SectionHeading kicker="04 / Simple enquiry" title="From requirement to conversation." copy="A clear way to find a product and ask the Jainam team about it." />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map(([number, title, copy]) => <article key={number} className="group rounded-2xl border border-slate-100 bg-white p-5 transition hover:-translate-y-1 hover:border-slate-200 hover:shadow-lg sm:p-6"><span className="font-mono text-xs font-bold text-habanero">{number}</span><div className="my-4 h-px bg-gradient-to-r from-habanero/60 to-slate-100" /><h3 className="font-display text-lg font-semibold text-royal">{title}</h3><p className="mt-2 text-sm leading-6 text-ink-soft">{copy}</p></article>)}
         </div>
       </div>
     </section>
   );
 }
 
-/* ─────────────────────────────────────────────
-   06 WHY JAINAM — bento
-───────────────────────────────────────────── */
 function WhySection({ stats, loading }) {
-  const [ref, visible] = useReveal(0.1);
-
-  const pillars = [
-    {
-      icon: ShieldCheck,
-      title: "Consistent quality",
-      body: "The company lists an ISO 9001:2015 quality management system for manufacturing automotive pipes and hoses.",
-    },
-    {
-      icon: Truck,
-      title: "Pan-India distribution",
-      body: "OEM and replacement-market parts are supplied across India through authorized distributors and dealers.",
-    },
-    {
-      icon: Headphones,
-      title: "Pune-based manufacturing",
-      body: "Jainam Auto Industries is based in Sanaswadi, Pune, Maharashtra, and has operated since 2002.",
-    },
-    {
-      icon: Package,
-      title: "Vehicle applications",
-      body: "The official site lists TATA, Mahindra, Eicher, Ashok Leyland and New Energy Vehicle applications.",
-    },
+  const reasons = [
+    [ShieldCheck, "Quality system", "ISO 9001:2015 quality management system listed by Jainam Auto Industries."],
+    [Factory, "Pune-based", "Manufacturing and company base in Sanaswadi, Pune, Maharashtra."],
+    [Truck, "Across India", "OEM and replacement-market supply through the company's dealer network."],
   ];
-
   return (
-    <section ref={ref} className="bg-royal py-20 sm:py-28">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
-          06 / Why Jainam
-        </span>
-        <h2 className="font-display font-600 text-display-lg text-white mt-2 mb-14">
-          What sets us apart
-        </h2>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-white/10 border border-white/10">
-          {/* Large stat tile */}
-          <div className="lg:row-span-2 bg-habanero p-8 sm:p-10 flex flex-col justify-between min-h-[220px]">
-            <span className="font-mono text-[10px] tracking-widest text-white/70 uppercase">Live catalogue</span>
-            <div>
-              <p className="font-display font-600 text-5xl sm:text-6xl text-white leading-none">
-                {loading ? "—" : stats.productCount}
-              </p>
-              <p className="font-mono text-[11px] tracking-widest text-white/80 uppercase mt-3">
-                Active products across {loading ? "—" : stats.categoryCount} categories
-                {stats.brandCount ? ` · ${stats.brandCount} brands` : ""}
-              </p>
+    <section className="bg-white py-16 sm:py-20 lg:py-24">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-stretch">
+          <div className="relative flex min-h-[260px] flex-col justify-between overflow-hidden rounded-[1.75rem] bg-habanero p-7 text-white sm:p-9">
+            <div className="pointer-events-none absolute -right-14 -top-16 h-48 w-48 rounded-full border border-white/20" />
+            <div className="relative"><p className="font-mono text-[9px] font-bold uppercase tracking-[0.19em] text-white/65">Live product catalogue</p><p className="mt-4 font-display text-6xl font-semibold leading-none">{loading ? "—" : stats.productCount}</p><p className="mt-2 text-sm text-white/75">active catalogue products</p></div>
+            <div className="relative flex items-center gap-2 border-t border-white/20 pt-4 text-xs text-white/80"><BadgeCheck size={15} /> Product listings are maintained by Jainam.</div>
+          </div>
+          <div>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-habanero">05 / Jainam Auto Industries</p>
+            <h2 className="mt-3 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-[-0.035em] text-royal sm:text-4xl">Built around reliable fluid transmission.</h2>
+            <div className="mt-7 grid gap-3 sm:grid-cols-3">
+              {reasons.map(([Icon, title, copy]) => <article key={title} className="rounded-2xl border border-slate-100 bg-[#f8f9fc] p-5 transition hover:bg-white hover:shadow-md"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-habanero shadow-sm"><Icon size={18} /></span><h3 className="mt-4 font-display text-base font-semibold text-royal">{title}</h3><p className="mt-2 text-xs leading-5 text-ink-soft">{copy}</p></article>)}
             </div>
           </div>
-
-          {pillars.map(({ icon: Icon, title, body }, i) => (
-            <div
-              key={title}
-              className="bg-royal p-6 sm:p-8 flex flex-col gap-4"
-              style={{
-                opacity: visible ? 1 : 0,
-                transform: visible ? "none" : "translateY(14px)",
-                transition: `opacity 0.5s ${i * 80}ms, transform 0.5s ${i * 80}ms`,
-              }}
-            >
-              <div className="w-9 h-9 border border-white/20 flex items-center justify-center shrink-0">
-                <Icon size={16} className="text-habanero" strokeWidth={1.5} />
-              </div>
-              <h3 className="font-display font-600 text-sm text-white">{title}</h3>
-              <p className="font-sans text-sm text-white/55 leading-relaxed">{body}</p>
-            </div>
-          ))}
         </div>
       </div>
     </section>
   );
 }
 
-/* ─────────────────────────────────────────────
-   07 FINAL CTA
-───────────────────────────────────────────── */
 function FinalCTA() {
-  const [ref, visible] = useReveal(0.2);
-
   return (
-    <section ref={ref} className="bg-white py-24 sm:py-36 relative overflow-hidden">
-      <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
-        aria-hidden="true"
-      >
-        <span className="font-display font-600 text-[20vw] leading-none text-tan whitespace-nowrap">
-          JAINAM
-        </span>
-      </div>
-
-      <div
-        className="relative z-10 max-w-4xl mx-auto px-6 sm:px-10 text-center"
-        style={{
-          opacity: visible ? 1 : 0,
-          transform: visible ? "none" : "translateY(20px)",
-          transition: "opacity 0.7s ease, transform 0.7s ease",
-        }}
-      >
-        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
-          07 / Get Started
-        </span>
-        <h2 className="font-display font-600 text-display-xl text-royal mt-4 mb-6 leading-none">
-          Have a requirement?<br />Let's find the right product.
-        </h2>
-        <p className="text-ink-soft text-base sm:text-lg max-w-lg mx-auto mb-10 leading-relaxed">
-          Browse the catalogue by brand, category or specification — or send your requirement
-          directly to the Jainam team.
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <Link
-            to="/store/contact"
-            className="inline-flex items-center gap-2 bg-habanero text-white font-display font-medium text-sm px-8 py-4 hover:bg-deadly transition-colors"
-          >
-            Send Enquiry
-            <ArrowRight size={15} />
-          </Link>
-          <Link
-            to="/store/catalogue"
-            className="inline-flex items-center gap-2 border border-tan text-royal font-display font-medium text-sm px-8 py-4 hover:border-royal transition-colors"
-          >
-            Explore Catalogue
-          </Link>
-        </div>
+    <section className="relative isolate overflow-hidden bg-[#07142f] py-16 text-white sm:py-20 lg:py-24">
+      <div className="absolute inset-0 jainam-hero-atmosphere opacity-70" />
+      <div className="relative mx-auto flex max-w-7xl flex-col gap-8 px-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-10">
+        <div className="max-w-3xl"><p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-habanero">06 / Talk to Jainam</p><h2 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-[-0.035em] sm:text-4xl lg:text-5xl">Looking for a specific pipe or hose?</h2><p className="mt-4 max-w-2xl text-sm leading-6 text-white/60 sm:text-base">Share your vehicle application or product code and contact the Jainam team about the right catalogue item.</p></div>
+        <div className="flex shrink-0 flex-wrap gap-3"><Link to="/store/contact" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-habanero px-6 text-sm font-semibold text-white transition hover:bg-white hover:text-royal">Send an enquiry <ArrowRight size={15} /></Link><Link to="/store/catalogue" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/20 px-6 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10">Browse catalogue <ArrowRight size={15} /></Link></div>
       </div>
     </section>
   );
