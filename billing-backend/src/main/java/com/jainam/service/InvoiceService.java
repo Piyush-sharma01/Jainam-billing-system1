@@ -187,12 +187,44 @@ public class InvoiceService {
             .orElseThrow(() -> new RuntimeException("Invoice not found"));
 
         try {
-            String textBody = "Dear " + invoice.getClient().getContactPerson() + ",\n\n" +
-                "Please find below your invoice " + invoice.getInvoiceNumber() + ".\n\n" +
-                "Amount Due: Rs " + invoice.getGrandTotal() + "\n" +
-                "Due Date: " + invoice.getDueDate() + "\n\n" +
-                "Thank you for your business!\n\n" +
-                "Jainam Billing System";
+            BigDecimal total = invoice.getGrandTotal();
+            BigDecimal paid = invoice.getStatus() == InvoiceStatus.PAID
+                ? total
+                : (invoice.getPaidAmount() != null ? invoice.getPaidAmount() : BigDecimal.ZERO);
+            BigDecimal balance = total.subtract(paid).max(BigDecimal.ZERO);
+            boolean cancelled = invoice.getStatus() == InvoiceStatus.CANCELLED;
+            boolean fullyPaid = !cancelled && (invoice.getStatus() == InvoiceStatus.PAID || balance.signum() == 0);
+            boolean partial = !cancelled && !fullyPaid && paid.signum() > 0;
+
+            String statusLabel = cancelled ? "CANCELLED"
+                : fullyPaid ? "PAID"
+                : partial ? "PARTIALLY PAID"
+                : invoice.getStatus() == InvoiceStatus.OVERDUE ? "OVERDUE" : "PENDING";
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("Dear ").append(invoice.getClient().getContactPerson()).append(",\n\n");
+            if (fullyPaid) {
+                sb.append("Thank you! We have received full payment for invoice ")
+                  .append(invoice.getInvoiceNumber()).append(".\n\n");
+            } else if (cancelled) {
+                sb.append("Invoice ").append(invoice.getInvoiceNumber()).append(" has been cancelled.\n\n");
+            } else if (partial) {
+                sb.append("Thank you for your part payment. Here is the current status of invoice ")
+                  .append(invoice.getInvoiceNumber()).append(".\n\n");
+            } else {
+                sb.append("Please find below your invoice ").append(invoice.getInvoiceNumber()).append(".\n\n");
+            }
+            sb.append("Status: ").append(statusLabel).append("\n");
+            sb.append("Invoice Total: Rs ").append(total).append("\n");
+            if (!cancelled) {
+                sb.append("Amount Paid: Rs ").append(paid).append("\n");
+                sb.append("Balance Due: Rs ").append(balance).append("\n");
+            }
+            if (!fullyPaid && !cancelled) {
+                sb.append("Due Date: ").append(invoice.getDueDate()).append("\n");
+            }
+            sb.append("\nThank you for your business!\n\nJainam Billing System");
+            String textBody = sb.toString();
 
             String htmlBody = textBody.replace("\n", "<br/>");
 
@@ -206,7 +238,7 @@ public class InvoiceService {
             Map<String, Object> body = new HashMap<>();
             body.put("sender", sender);
             body.put("to", List.of(recipient));
-            body.put("subject", "Invoice " + invoice.getInvoiceNumber());
+            body.put("subject", "Invoice " + invoice.getInvoiceNumber() + " - " + statusLabel);
             body.put("htmlContent", htmlBody);
             body.put("textContent", textBody);
 
@@ -245,7 +277,10 @@ public class InvoiceService {
         dto.setTaxAmount(invoice.getTaxAmount());
         dto.setGrandTotal(invoice.getGrandTotal());
         dto.setStatus(invoice.getStatus());
-        dto.setPaidAmount(invoice.getPaidAmount() != null ? invoice.getPaidAmount() : BigDecimal.ZERO);
+        // invoices marked PAID before part-payments existed have no paid_amount: treat them as fully paid
+        dto.setPaidAmount(invoice.getStatus() == InvoiceStatus.PAID
+            ? invoice.getGrandTotal()
+            : (invoice.getPaidAmount() != null ? invoice.getPaidAmount() : BigDecimal.ZERO));
         dto.setNotes(invoice.getNotes());
         dto.setCreatedBy(invoice.getCreatedBy());
 
