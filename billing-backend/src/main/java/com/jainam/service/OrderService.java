@@ -84,7 +84,7 @@ public class OrderService {
                     .orElseThrow(() -> new RuntimeException("Product not found: " + itemDTO.getProductId()));
 
             int qty = itemDTO.getQuantity() == null ? 1 : itemDTO.getQuantity();
-            BigDecimal unitPrice = product.getPrice();
+            BigDecimal unitPrice = product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
             BigDecimal lineSubtotal = unitPrice.multiply(BigDecimal.valueOf(qty)).setScale(2, RoundingMode.HALF_UP);
             BigDecimal gstPct = product.getGst() == null ? BigDecimal.ZERO : product.getGst();
             BigDecimal lineTax = lineSubtotal.multiply(gstPct).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
