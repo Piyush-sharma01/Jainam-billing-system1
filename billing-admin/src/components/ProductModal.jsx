@@ -6,6 +6,7 @@ import CategoryModal from './CategoryModal'
 import { brandAPI, categoryAPI, productAPI } from '../services/api'
 
 const ADD_NEW = '__add_new__'
+const DEFAULT_JAINAM = '__default_jainam__'
 
 export default function ProductModal({ product, onSave, onImported, onClose, initialMode = 'single' }) {
   // 'single' = normal form, 'catalogue' = import from PDF (only when adding)
@@ -19,7 +20,7 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
     name: '',
     description: '',
     category: '',
-    brand: '',
+    brand: 'Jainam',
     size: '',
     price: '',
     gst: '',
@@ -59,6 +60,13 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
           setBrandLogoUrl(match.logoUrl || '')
           setBrandLocked(true)
         }
+      } else {
+        const defaultBrand = res.data.find((b) => b.name?.toLowerCase() === 'jainam')
+        if (defaultBrand) {
+          setSelectedBrandId(String(defaultBrand.id))
+          setBrandLogoUrl(defaultBrand.logoUrl || '')
+          setBrandLocked(true)
+        }
       }
     }).catch((err) => console.error('Failed to load brands', err))
   }, [])
@@ -93,6 +101,14 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
 
     if (value === ADD_NEW) {
       setShowBrandModal(true)
+      return
+    }
+
+    if (value === DEFAULT_JAINAM) {
+      setSelectedBrandId('')
+      setBrandLogoUrl('')
+      setBrandLocked(false)
+      setFormData((prev) => ({ ...prev, brand: 'Jainam' }))
       return
     }
 
@@ -211,7 +227,14 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
     setImportError('')
     try {
       const res = await productAPI.importPreview(pdfFile)
-      setImportRows((res.data || []).map((p, i) => ({ ...p, _id: i, _selected: false, _imageSourceId: p.extractedImageData ? i : '' })))
+      setImportRows((res.data || []).map((p, i) => ({
+        ...p,
+        brand: p.brand || 'Jainam',
+        category: p.category || '',
+        _id: i,
+        _selected: false,
+        _imageSourceId: p.extractedImageData ? i : '',
+      })))
     } catch (err) {
       const d = err.response?.data
       setImportRows([])
@@ -492,11 +515,12 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
           <div>
             <label className="block text-gray-700 font-medium mb-1">Brand</label>
             <select
-              value={selectedBrandId}
+              value={selectedBrandId || (formData.brand === 'Jainam' && !brands.some((b) => b.name?.toLowerCase() === 'jainam') ? DEFAULT_JAINAM : '')}
               onChange={handleBrandSelect}
               className="input-field"
             >
               <option value="">Select a brand...</option>
+              {!brands.some((b) => b.name?.toLowerCase() === 'jainam') && <option value={DEFAULT_JAINAM}>Jainam</option>}
               {brands.map((b) => (
                 <option key={b.id} value={b.id}>{b.name}</option>
               ))}
