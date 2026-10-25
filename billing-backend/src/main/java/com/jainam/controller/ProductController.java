@@ -55,10 +55,10 @@ public class ProductController {
         }
     }
 
-    // Step 2: save the (reviewed) products from the preview
+    // Step 2: save the (reviewed) products from the catalogue preview
     @PostMapping("/import/bulk")
     public ResponseEntity<Map<String, Integer>> importProducts(@RequestBody List<ProductDTO> products) {
-        return ResponseEntity.ok(Map.of("saved", productService.importProducts(products)));
+        return ResponseEntity.ok(productService.importProducts(products));
     }
 
     @PutMapping("/{id}")
