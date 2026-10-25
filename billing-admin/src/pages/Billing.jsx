@@ -100,9 +100,9 @@ const location = useLocation()
           productId: product.id,
           name: product.name,
           category: product.category,
-          price: product.price,
-          gst: product.gst,
-          stock: product.stock,
+          price: product.price ?? 0,
+          gst: product.gst ?? 0,
+          stock: product.stock,   // null = stock not tracked
           imageUrl: product.imageUrl,
           quantity: 1,
           discountPercent: 0,
@@ -317,28 +317,30 @@ const location = useLocation()
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-gray-800 truncate">
-                              {product.name}
+                              {product.name || 'Unnamed product'}
                             </p>
                             <p className="text-xs text-gray-400">
-                              {product.category} · GST {product.gst}%
+                              {[product.category, product.gst != null ? `GST ${product.gst}%` : null].filter(Boolean).join(' · ')}
                             </p>
                           </div>
                         </div>
                         <div className="text-right shrink-0">
                           <p className="text-sm font-semibold text-gray-800">
-                            ₹{Number(product.price).toFixed(2)}
+                            ₹{Number(product.price ?? 0).toFixed(2)}
                           </p>
-                          <p
-                            className={`text-xs ${
-                              product.stock > 20
-                                ? 'text-green-600'
-                                : product.stock > 0
-                                ? 'text-yellow-600'
-                                : 'text-red-600'
-                            }`}
-                          >
-                            {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-                          </p>
+                          {product.stock != null && (
+                            <p
+                              className={`text-xs ${
+                                product.stock > 20
+                                  ? 'text-green-600'
+                                  : product.stock > 0
+                                  ? 'text-yellow-600'
+                                  : 'text-red-600'
+                              }`}
+                            >
+                              {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                            </p>
+                          )}
                         </div>
                       </button>
                     ))
@@ -372,7 +374,7 @@ const location = useLocation()
               <div className="divide-y divide-gray-100">
                 {cart.map((item) => {
                   const { total: lineTotal } = calculateLineTotals(item)
-                  const overStock = item.quantity > item.stock
+                  const overStock = item.stock != null && item.quantity > item.stock
                   return (
                     <div
                       key={item.productId}
