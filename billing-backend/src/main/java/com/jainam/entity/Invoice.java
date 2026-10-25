@@ -51,6 +51,10 @@ public class Invoice {
     @Enumerated(EnumType.STRING)
     private InvoiceStatus status;
 
+    // Amount received so far (for part payments). null is treated as 0.
+    @Column(name = "paid_amount")
+    private BigDecimal paidAmount;
+
     @Column(columnDefinition = "TEXT")
     private String notes;
 
