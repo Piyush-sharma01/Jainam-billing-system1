@@ -223,6 +223,7 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
 
   const updateRow = (id, field, value) =>
     setImportRows((rows) => rows.map((r) => (r._id === id ? { ...r, [field]: value } : r)))
+  const approveAllRows = () => setImportRows((rows) => rows.map((r) => ({ ...r, _selected: true })))
   const updateRowImage = (id, file) => {
     if (!file) return
     setImportRows((rows) => rows.map((r) => (r._id === id ? { ...r, _replacementFile: file, _replacementPreview: URL.createObjectURL(file) } : r)))
@@ -353,6 +354,9 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
               <>
                 <div className="flex items-center justify-between text-sm text-gray-600">
                   <span>{selectedRows.length} of {importRows.length} products explicitly approved</span>
+                  <button type="button" onClick={approveAllRows} className="btn-secondary !py-1.5 !px-3 text-sm">
+                    Approve All
+                  </button>
                 </div>
 
                 <div className="overflow-x-auto border border-gray-200 rounded-lg max-h-[45vh] overflow-y-auto">
