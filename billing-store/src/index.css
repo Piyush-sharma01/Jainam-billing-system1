@@ -250,3 +250,41 @@ body {
     animation: none !important;
   }
 }
+
+
+/* Image-led storefront refresh: calm transitions, deep navy atmosphere and tidy product rail. */
+.jainam-hero-atmosphere {
+  background-image:
+    radial-gradient(ellipse at 78% 48%, rgba(39, 91, 178, 0.28), transparent 46%),
+    radial-gradient(ellipse at 15% 15%, rgba(249, 133, 19, 0.10), transparent 34%),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: auto, auto, 56px 56px, 56px 56px;
+}
+.jainam-carousel-photo {
+  animation: jainamPhotoIn 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.jainam-slide-copy {
+  animation: jainamCopyIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes jainamPhotoIn {
+  from { opacity: 0.45; transform: scale(1.035); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes jainamCopyIn {
+  from { opacity: 0; transform: translateY(9px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.store-product-rail {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.store-product-rail::-webkit-scrollbar {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jainam-carousel-photo,
+  .jainam-slide-copy {
+    animation: none !important;
+  }
+}
