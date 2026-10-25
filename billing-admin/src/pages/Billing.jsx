@@ -126,6 +126,15 @@ const location = useLocation()
     )
   }
 
+  // Lets the user type/override the price for this invoice only
+  const updatePrice = (productId, value) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        item.productId === productId ? { ...item, price: value } : item
+      )
+    )
+  }
+
   const updateDiscount = (productId, discountPercent) => {
     const clamped = Math.max(0, Math.min(100, isNaN(discountPercent) ? 0 : discountPercent))
     setCart((prev) =>
@@ -153,7 +162,7 @@ const location = useLocation()
 
   // Discount is applied before tax, matching the backend calculation
   const calculateLineTotals = (item) => {
-    const lineBase = item.price * item.quantity
+    const lineBase = (Number(item.price) || 0) * item.quantity
     const discountAmount = lineBase * (item.discountPercent / 100)
     const taxable = lineBase - discountAmount
     const tax = taxable * (item.gst / 100)
@@ -191,6 +200,7 @@ const location = useLocation()
         lineItems: cart.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
+          unitPrice: item.price === '' || item.price == null ? null : Number(item.price),
           discountPercentage: item.discountPercent,
         })),
         notes,
@@ -398,7 +408,7 @@ const location = useLocation()
                           {item.name}
                         </p>
                         <p className="text-xs text-gray-400">
-                          ₹{item.price.toFixed(2)} · GST {item.gst}%
+                          GST {item.gst ?? 0}%
                         </p>
                         {overStock && (
                           <p className="text-xs text-red-600 flex items-center gap-1 mt-0.5">
@@ -442,6 +452,19 @@ const location = useLocation()
                           >
                             <Plus size={14} />
                           </button>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <label className="text-xs text-gray-400">Price ₹</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            value={item.price}
+                            onChange={(e) => updatePrice(item.productId, e.target.value)}
+                            className="w-24 text-center text-sm border border-gray-200 rounded-lg py-1.5 focus:outline-none focus:ring-1 focus:ring-secondary"
+                          />
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
