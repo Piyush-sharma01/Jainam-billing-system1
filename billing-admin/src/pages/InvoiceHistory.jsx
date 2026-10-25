@@ -36,6 +36,41 @@ export default function InvoiceHistory() {
 
   const [selectedInvoice, setSelectedInvoice] = useState(null)
 
+  const STATUS_OPTIONS = ['PENDING', 'PAID', 'OVERDUE', 'CANCELLED']
+
+  const statusClass = (status) =>
+    status === 'PAID' ? 'bg-green-100 text-green-800' :
+    status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+    status === 'OVERDUE' ? 'bg-red-100 text-red-800' :
+    'bg-gray-100 text-gray-800'
+
+  // Manually change payment status (e.g. mark PAID once payment is received)
+  const handleStatusChange = async (invoice, newStatus) => {
+    if (newStatus === invoice.status) return
+    const previous = invoices
+    const updated = invoices.map((i) => (i.id === invoice.id ? { ...i, status: newStatus } : i))
+    setInvoices(updated) // update screen immediately
+    setStats({
+      total: updated.length,
+      paid: updated.filter((i) => i.status === 'PAID').length,
+      pending: updated.filter((i) => i.status === 'PENDING').length,
+      overdue: updated.filter((i) => i.status === 'OVERDUE').length,
+    })
+    try {
+      await invoiceAPI.updateStatus(invoice.id, newStatus)
+    } catch (err) {
+      // roll back if the server rejected it
+      setInvoices(previous)
+      setStats({
+        total: previous.length,
+        paid: previous.filter((i) => i.status === 'PAID').length,
+        pending: previous.filter((i) => i.status === 'PENDING').length,
+        overdue: previous.filter((i) => i.status === 'OVERDUE').length,
+      })
+      alert('Failed to update status: ' + (err.response?.data?.message || err.message))
+    }
+  }
+
   const handleViewInvoice = (invoice) => {
     setSelectedInvoice(invoice)
   }
@@ -193,14 +228,15 @@ export default function InvoiceHistory() {
                       ₹{invoice.grandTotal?.toFixed(2) || '0.00'}
                     </td>
                     <td className="px-4 sm:px-6 py-4 text-sm">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        invoice.status === 'PAID' ? 'bg-green-100 text-green-800' :
-                        invoice.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                        invoice.status === 'OVERDUE' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {invoice.status}
-                      </span>
+                      <select
+                        value={invoice.status}
+                        onChange={(e) => handleStatusChange(invoice, e.target.value)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-secondary ${statusClass(invoice.status)}`}
+                      >
+                        {STATUS_OPTIONS.map((st) => (
+                          <option key={st} value={st}>{st}</option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-4 sm:px-6 py-4 text-sm flex gap-2">
                       <button
