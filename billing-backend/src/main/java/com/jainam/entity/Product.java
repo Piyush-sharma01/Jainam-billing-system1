@@ -32,6 +32,9 @@ public class Product {
     private String brand;
 
     @Column
+    private String size;
+
+    @Column
     private BigDecimal price;
 
     @Column
