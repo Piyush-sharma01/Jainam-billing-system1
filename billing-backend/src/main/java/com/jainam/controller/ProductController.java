@@ -5,7 +5,10 @@ import com.jainam.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/products")
@@ -32,6 +35,30 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
         return ResponseEntity.ok(productService.createProduct(productDTO));
+    }
+
+    // Step 1: upload catalogue PDF -> returns detected products for preview (nothing saved)
+    @PostMapping(value = "/import/preview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> previewCatalogue(@RequestParam("file") MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().body("Please choose a PDF file");
+        }
+        try {
+            List<ProductDTO> found = productService.previewCatalogue(file.getBytes());
+            if (found.isEmpty()) {
+                return ResponseEntity.badRequest().body(
+                    "No products found. If this PDF is a scanned image, text cannot be read from it.");
+            }
+            return ResponseEntity.ok(found);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Could not read PDF: " + e.getMessage());
+        }
+    }
+
+    // Step 2: save the (reviewed) products from the preview
+    @PostMapping("/import/bulk")
+    public ResponseEntity<Map<String, Integer>> importProducts(@RequestBody List<ProductDTO> products) {
+        return ResponseEntity.ok(Map.of("saved", productService.importProducts(products)));
     }
 
     @PutMapping("/{id}")
