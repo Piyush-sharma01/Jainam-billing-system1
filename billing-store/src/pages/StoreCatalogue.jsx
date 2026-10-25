@@ -523,7 +523,7 @@ function CatalogueCard({ product, idx }) {
             {product.name}
           </Link>
           <p className="font-mono font-600 text-sm sm:text-base text-habanero mt-1.5">
-            ₹{Number(product.price).toFixed(2)}
+            {product.price !== null && product.price !== undefined && String(product.price).trim() !== "" ? `₹${Number(product.price).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Request a quote"}
           </p>
         </div>
       </div>
