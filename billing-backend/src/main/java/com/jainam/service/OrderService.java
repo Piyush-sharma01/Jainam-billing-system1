@@ -154,11 +154,12 @@ public class OrderService {
     }
 
     private OrderItemDTO convertItemToDTO(OrderItem item) {
+        Product product = item.getProduct();
         OrderItemDTO dto = new OrderItemDTO();
         dto.setId(item.getId());
-        dto.setProductId(item.getProduct().getId());
-        dto.setProductName(item.getProduct().getName());
-        dto.setProductImageUrl(item.getProduct().getImageUrl());
+        dto.setProductId(product == null ? null : product.getId());
+        dto.setProductName(product == null ? "Deleted product" : product.getName());
+        dto.setProductImageUrl(product == null ? null : product.getImageUrl());
         dto.setQuantity(item.getQuantity());
         dto.setUnitPrice(item.getUnitPrice());
         dto.setGstPercentage(item.getGstPercentage());
