@@ -145,7 +145,7 @@ export default function Catalogue() {
         return {
           productId: product.id,
           name: product.name,
-          price: product.price,
+          price: product.price ?? "",
           gst: product.gst,
           stock: product.stock,
           imageUrl: product.imageUrl,
@@ -291,7 +291,7 @@ export default function Catalogue() {
         {
           productId: product.id,
           name: product.name,
-          price: product.price,
+          price: product.price ?? "",
           gst: product.gst,
           stock: product.stock,
           imageUrl: product.imageUrl,
@@ -337,6 +337,15 @@ export default function Catalogue() {
       prev.filter(
         (item) =>
           item.productId !== productId
+      )
+    );
+  };
+
+  // Lets the user type/override the price for this invoice only
+  const updateCartPrice = (productId, value) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        item.productId === productId ? { ...item, price: value } : item
       )
     );
   };
@@ -459,6 +468,7 @@ const handleProceedClick = () => {
         lineItems: cart.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
+          unitPrice: item.price === "" || item.price == null ? null : Number(item.price),
           discountPercentage: item.discountPercent,
         })),
         notes: invoiceNotes,
@@ -1347,7 +1357,7 @@ const handleProceedClick = () => {
                             {item.name}
                           </p>
                           <p className="text-xs text-gray-400">
-                            ₹{Number(item.price).toFixed(2)} · GST {item.gst}%
+                            GST {item.gst ?? 0}%
                           </p>
                           {overStock && (
                             <p className="text-xs text-red-600 flex items-center gap-1 mt-0.5">
@@ -1377,6 +1387,21 @@ const handleProceedClick = () => {
                           >
                             <Plus size={12} />
                           </button>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <label className="text-xs text-gray-400">Price ₹</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            value={item.price}
+                            onChange={(e) =>
+                              updateCartPrice(item.productId, e.target.value)
+                            }
+                            className="w-20 text-center text-sm border border-gray-200 rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-secondary"
+                          />
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
