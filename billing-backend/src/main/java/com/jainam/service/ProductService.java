@@ -2,7 +2,10 @@ package com.jainam.service;
 
 import com.jainam.dto.ProductDTO;
 import com.jainam.entity.Product;
+import com.jainam.entity.Category;
+import com.jainam.repository.CategoryRepository;
 import com.jainam.repository.ProductRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -12,6 +15,40 @@ import java.util.stream.Collectors;
 public class ProductService {
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ProductCatalogParser catalogParser;
+
+    /** Reads a catalogue PDF and returns the products found (NOT saved yet, used for preview). */
+    public List<ProductDTO> previewCatalogue(byte[] pdfBytes) throws java.io.IOException {
+        return catalogParser.parse(pdfBytes);
+    }
+
+    /** Saves all reviewed products from the catalogue preview in one go. */
+    @Transactional
+    public int importProducts(List<ProductDTO> products) {
+        int saved = 0;
+        for (ProductDTO dto : products) {
+            boolean empty = isBlank(dto.getName()) && isBlank(dto.getCategory())
+                    && dto.getPrice() == null && dto.getGst() == null && dto.getStock() == null;
+            if (empty) continue;
+
+            String category = dto.getCategory() == null ? null : dto.getCategory().trim();
+            if (category != null && !category.isEmpty() && !categoryRepository.existsByName(category)) {
+                categoryRepository.save(Category.builder().name(category).build());
+            }
+            productRepository.save(convertToEntity(dto));
+            saved++;
+        }
+        return saved;
+    }
+
+    private boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
 
   public List<ProductDTO> getAllProducts() {
     return productRepository.findAll().stream()
