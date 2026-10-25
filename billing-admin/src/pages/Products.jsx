@@ -169,7 +169,7 @@ export default function Products() {
                 {product.imageUrl ? (
                   <img
                     src={product.imageUrl}
-                    alt={product.name}
+                    alt={product.name || 'Product'}
                     className="w-full h-auto max-h-[150px] object-contain"
                     onError={(e) => {
                       e.target.style.display = 'none'
@@ -188,17 +188,21 @@ export default function Products() {
 
               <div className="p-4 flex-1 flex flex-col">
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <h3 className="font-semibold text-gray-800 leading-snug">{product.name}</h3>
-                  <span
-                    className={`shrink-0 px-2 py-0.5 rounded text-xs font-medium ${stockBadge(product.stock)}`}
-                  >
-                    {product.stock > 0 ? `${product.stock} left` : 'Out of stock'}
-                  </span>
+                  <h3 className="font-semibold text-gray-800 leading-snug">{product.name || 'Unnamed product'}</h3>
+                  {product.stock != null && (
+                    <span
+                      className={`shrink-0 px-2 py-0.5 rounded text-xs font-medium ${stockBadge(product.stock)}`}
+                    >
+                      {product.stock > 0 ? `${product.stock} left` : 'Out of stock'}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-1 mb-2">
-                  <span className="inline-block w-fit px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
-                    {product.category}
-                  </span>
+                  {product.category && (
+                    <span className="inline-block w-fit px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
+                      {product.category}
+                    </span>
+                  )}
                   {product.brand && (
                     <span className="inline-block w-fit px-2 py-0.5 bg-purple-100 text-purple-800 rounded text-xs">
                       {product.brand}
@@ -212,9 +216,11 @@ export default function Products() {
                 <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
                   <div>
                     <p className="text-lg font-bold text-gray-800">
-                      ₹{Number(product.price).toFixed(2)}
+                      {product.price != null ? `₹${Number(product.price).toFixed(2)}` : 'Price not set'}
                     </p>
-                    <p className="text-xs text-gray-400">GST {product.gst}%</p>
+                    {product.gst != null && (
+                      <p className="text-xs text-gray-400">GST {product.gst}%</p>
+                    )}
                   </div>
                   <div className="flex gap-1">
                     <button
@@ -244,6 +250,7 @@ export default function Products() {
           product={editingProduct}
           existingBrands={existingBrands}
           onSave={handleSaveProduct}
+          onImported={() => { setShowModal(false); setEditingProduct(null); loadProducts() }}
           onClose={() => { setShowModal(false); setEditingProduct(null) }}
         />
       )}
