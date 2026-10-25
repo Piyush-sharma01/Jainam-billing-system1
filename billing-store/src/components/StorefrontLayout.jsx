@@ -1,29 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Menu, X, Phone, Mail, MapPin } from "lucide-react";
+import { ArrowUpRight, Clock3, Mail, MapPin, Menu, X } from "lucide-react";
 
-// Public storefront shell — no login/logout here. Admin login lives in the
-// separate billing-admin app, deployed at its own URL.
+const navLinks = [
+  { to: "/store", label: "Home", end: true },
+  { to: "/store/catalogue", label: "Catalogue" },
+  { to: "/store/about", label: "About Jainam" },
+  { to: "/store/contact", label: "Contact" },
+];
+
+const email = "jainamautoindustries@gmail.com";
+const whatsappHref = "https://wa.me/919422308740?text=Hello%20Jainam%20Auto%20Industries%2C%20I%20need%20a%20product%20quote.";
+const factoryAddress = "Plot No. 29, B. U. Bhandari Ind. Estate, Gat No. 156/1544, Behind Mazak Company, Next to Sericol Company, Pune Nagar Road, Sanaswadi, Taluka - Shirur, Dist. - Pune - 412208, Maharashtra, India";
+
 export default function StorefrontLayout({ children }) {
-  const [menuOpen,    setMenuOpen]    = useState(false);
-  const [scrolled,    setScrolled]    = useState(false);
-
-  const navLinks = [
-    { to: "/store",           label: "Home",       end: true },
-    { to: "/store/catalogue", label: "Catalogue" },
-    { to: "/store/about",     label: "About" },
-    { to: "/store/contact",   label: "Contact Us" },
-  ];
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 4);
+    const onScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") { setMenuOpen(false); }
+    const onKey = (event) => {
+      if (event.key === "Escape") setMenuOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -34,174 +36,123 @@ export default function StorefrontLayout({ children }) {
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
+  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col text-ink">
+      <div className="hidden sm:block bg-royal text-white/80">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 h-9 flex items-center justify-between gap-4 text-[10px] tracking-wide">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-habanero animate-pulse" />
+            <span>ISO 9001:2015 certified</span>
+            <span className="text-white/30">·</span>
+            <span>Pune, Maharashtra · Since 2002</span>
+          </div>
+          <div className="flex items-center gap-5">
+            <span className="inline-flex items-center gap-1.5"><Clock3 size={12} /> Mon–Sat, 9:00–19:00</span>
+            <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 hover:text-white transition-colors">
+              <Mail size={12} /> {email}
+            </a>
+          </div>
+        </div>
+      </div>
 
-      {/* HEADER */}
-      <header
-        className={`sticky top-0 z-40 bg-royal transition-all duration-200 ${
-          scrolled ? "shadow-lg shadow-navy/20" : ""
-        }`}
-      >
-        <div className="h-[3px] bg-habanero" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
-
-          {/* Logo */}
-          <Link
-            to="/store"
-            className="flex items-center gap-3 shrink-0"
-            onClick={() => setMenuOpen(false)}
-          >
-            <span className="font-display font-600 text-lg sm:text-xl text-white tracking-tight">
-              Jainam
-            </span>
+      <header className={`sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-line transition-shadow duration-300 ${scrolled ? "shadow-lg shadow-royal/10" : ""}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 h-[68px] sm:h-[76px] flex items-center justify-between gap-5">
+          <Link to="/store" className="flex items-center shrink-0" onClick={closeMenu} aria-label="Jainam Auto Industries home">
+            <img src="/jainam-logo-light.png" alt="Jainam Auto Industries" className="w-[112px] sm:w-[138px] h-auto object-contain" />
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center">
+          <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.end}
-                className={({ isActive }) =>
-                  `px-4 py-2 font-mono text-[11px] tracking-[0.12em] uppercase transition-colors border-b-2 ${
-                    isActive
-                      ? "text-habanero border-habanero"
-                      : "text-white/60 hover:text-white border-transparent"
-                  }`
-                }
+                className={({ isActive }) => `relative px-4 py-2.5 text-[13px] font-medium transition-colors after:absolute after:left-4 after:right-4 after:bottom-1 after:h-[2px] after:bg-habanero after:origin-left after:transition-transform ${isActive ? "text-royal after:scale-x-100" : "text-ink-soft hover:text-royal after:scale-x-0 hover:after:scale-x-100"}`}
               >
                 {link.label}
               </NavLink>
             ))}
           </nav>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-1">
-            {/* Hamburger (mobile) */}
-            <button
-              className="md:hidden flex items-center justify-center p-2.5 min-w-[44px] min-h-[44px] text-white/70 hover:text-white transition-colors"
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-            >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+          <div className="hidden md:flex items-center gap-3">
+            <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-habanero px-5 py-3 text-xs font-semibold text-white shadow-md shadow-habanero/20 transition-all hover:-translate-y-0.5 hover:bg-deadly">
+              Talk to Jainam <ArrowUpRight size={14} />
+            </a>
           </div>
+
+          <button
+            className="md:hidden flex h-11 w-11 items-center justify-center rounded-xl text-royal hover:bg-paper"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? <X size={21} /> : <Menu size={21} />}
+          </button>
         </div>
       </header>
 
-      {/* MOBILE NAV DRAWER */}
       {menuOpen && (
         <>
-          <div
-            className="fixed inset-0 z-40 bg-black/50 md:hidden"
-            onClick={() => setMenuOpen(false)}
-            aria-hidden="true"
-          />
-          <div className="fixed top-0 left-0 z-50 h-full w-[85vw] max-w-xs bg-gray-50 border-r border-gray-200 flex flex-col nav-drawer-enter md:hidden">
-            <div className="flex items-center justify-between px-5 h-14 border-b border-gray-200 shrink-0">
-              <span className="font-display font-600 text-royal text-base">Jainam</span>
-              <button
-                onClick={() => setMenuOpen(false)}
-                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-royal transition-colors"
-                aria-label="Close menu"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <nav className="flex-1 overflow-y-auto px-0 py-2">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  end={link.end}
-                  onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between px-6 py-4 font-mono text-[11px] tracking-[0.15em] uppercase transition-colors min-h-[52px] border-b border-gray-200 ${
-                      isActive
-                        ? "text-habanero"
-                        : "text-gray-500 hover:text-royal"
-                    }`
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      {link.label}
-                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-habanero" />}
-                    </>
-                  )}
-                </NavLink>
-              ))}
-            </nav>
-
-          </div>
+          <button className="fixed inset-0 z-40 bg-royal/40 backdrop-blur-[2px] md:hidden" onClick={closeMenu} aria-label="Close navigation" />
+          <nav className="fixed left-0 right-0 top-[68px] z-50 rounded-b-3xl border-b border-line bg-white p-4 shadow-2xl md:hidden" aria-label="Mobile navigation">
+            {navLinks.map((link) => (
+              <NavLink key={link.to} to={link.to} end={link.end} onClick={closeMenu} className={({ isActive }) => `flex min-h-12 items-center justify-between rounded-xl px-4 text-sm font-medium ${isActive ? "bg-paper text-royal" : "text-ink-soft hover:bg-paper hover:text-royal"}`}>
+                {link.label}<ArrowUpRight size={15} className="opacity-40" />
+              </NavLink>
+            ))}
+            <a href={whatsappHref} target="_blank" rel="noreferrer" onClick={closeMenu} className="mt-3 flex min-h-12 items-center justify-center gap-2 rounded-xl bg-habanero px-4 text-sm font-semibold text-white">
+              WhatsApp Enquiry <ArrowUpRight size={15} />
+            </a>
+            <a href={`mailto:${email}`} className="mt-3 flex items-center justify-center gap-2 py-3 text-xs text-ink-soft"><Mail size={14} />{email}</a>
+          </nav>
         </>
       )}
 
-      {/* PAGE CONTENT */}
       <main className="flex-1">{children}</main>
 
-      {/* FOOTER */}
-      <footer className="bg-royal text-white">
-        <div className="h-[3px] bg-habanero" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-14 grid grid-cols-1 sm:grid-cols-3 gap-10">
+      <footer className="relative overflow-hidden bg-royal text-white">
+        <div className="h-1 bg-gradient-to-r from-habanero via-orange-300 to-habanero" />
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-white/10" />
+        <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full border border-white/10" />
+        <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-5 py-12 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.25fr_0.8fr_1fr_1.4fr] lg:gap-12 lg:px-10 lg:py-16">
           <div>
-            <h3 className="font-display font-600 text-base text-white mb-3">Jainam</h3>
-            <p className="text-sm text-white/60 leading-relaxed">
-              Trusted supplier of quality pipes, valves and fittings — built on decades of
-              relationships with our clients.
-            </p>
+            <Link to="/store" className="inline-flex rounded-xl bg-white p-2.5" aria-label="Jainam Auto Industries home">
+              <img src="/jainam-logo-light.png" alt="Jainam Auto Industries" className="w-32 h-auto" />
+            </Link>
+            <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/65">Precision fluid-transmission components for commercial vehicles, OEMs and replacement markets.</p>
+            <p className="mt-4 text-xs font-semibold tracking-wide text-white/85">Pune, Maharashtra · Since 2002</p>
           </div>
+
           <div>
-            <h4 className="font-mono text-[10px] tracking-[0.2em] text-white/50 uppercase mb-5">
-              Quick Links
-            </h4>
-            <ul className="space-y-2.5">
-              {navLinks.map((l) => (
-                <li key={l.to}>
-                  <Link
-                    to={l.to}
-                    className="font-mono text-[11px] tracking-widest uppercase text-white/60 hover:text-habanero transition-colors"
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
+            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-white/45">Explore</h2>
+            <ul className="mt-5 space-y-3 text-sm text-white/75">
+              {navLinks.map((link) => <li key={link.to}><Link to={link.to} className="transition-colors hover:text-habanero">{link.label}</Link></li>)}
             </ul>
           </div>
+
           <div>
-            <h4 className="font-mono text-[10px] tracking-[0.2em] text-white/50 uppercase mb-5">
-              Contact
-            </h4>
-            <ul className="space-y-3 text-white/60">
-              <li className="flex items-center gap-2.5">
-                <Phone size={12} className="shrink-0 text-habanero" />
-                <a href="tel:+910000000000" className="font-mono text-[11px] tracking-wide hover:text-habanero transition-colors">
-                  +91 00000 00000
-                </a>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Mail size={12} className="shrink-0 text-habanero" />
-                <a href="mailto:sales@jainam.example" className="font-mono text-[11px] tracking-wide hover:text-habanero transition-colors">
-                  sales@jainam.example
-                </a>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <MapPin size={12} className="shrink-0 text-habanero mt-0.5" />
-                <span className="font-mono text-[11px] tracking-wide">
-                  Mumbai, Maharashtra, India
-                </span>
-              </li>
+            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-white/45">Product lines</h2>
+            <ul className="mt-5 grid grid-cols-1 gap-2.5 text-sm text-white/75">
+              {["Automobile pipes", "Nozzle pipes", "Hydraulic hoses", "Brake pipes", "Nylon brake pipes", "Power steering hoses", "Teflon pipes"].map((item) => <li key={item}>{item}</li>)}
             </ul>
+          </div>
+
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-white/45">Contact & factory</h2>
+            <a href={`mailto:${email}`} className="mt-5 flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-habanero"><Mail size={15} className="text-habanero" />{email}</a>
+            <a href={whatsappHref} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-habanero">WhatsApp <ArrowUpRight size={14} className="text-habanero" /></a>
+            <p className="mt-4 flex items-start gap-2 text-sm leading-relaxed text-white/65"><MapPin size={15} className="mt-0.5 shrink-0 text-habanero" /><span>{factoryAddress}</span></p>
+            <p className="mt-3 flex items-center gap-2 text-xs text-white/50"><Clock3 size={13} />Mon–Sat · 9:00–19:00</p>
           </div>
         </div>
-        <div className="border-t border-white/15 py-4 text-center">
-          <span className="font-mono text-[10px] tracking-[0.2em] text-white/50 uppercase">
-            © {new Date().getFullYear()} Jainam · All rights reserved
-          </span>
+
+        <div className="relative border-t border-white/10">
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-4 text-[11px] text-white/45 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-10">
+            <span>© {new Date().getFullYear()} Jainam Auto Industries. All rights reserved.</span>
+            <span>GSTIN/UIN: 27ABXPD9091J1ZV</span>
+          </div>
         </div>
       </footer>
     </div>
