@@ -44,6 +44,52 @@ export default function InvoiceHistory() {
     status === 'OVERDUE' ? 'bg-red-100 text-red-800' :
     'bg-gray-100 text-gray-800'
 
+  const applyInvoices = (list) => {
+    setInvoices(list)
+    setStats({
+      total: list.length,
+      paid: list.filter((i) => i.status === 'PAID').length,
+      pending: list.filter((i) => i.status === 'PENDING').length,
+      overdue: list.filter((i) => i.status === 'OVERDUE').length,
+    })
+  }
+
+  // ---- Part payment ----
+  const [paymentInvoice, setPaymentInvoice] = useState(null)
+  const [paymentInput, setPaymentInput] = useState('')
+  const [paymentSaving, setPaymentSaving] = useState(false)
+
+  const paidOf = (inv) => Number(inv.paidAmount || 0)
+  const dueOf = (inv) => Math.max(0, Number(inv.grandTotal || 0) - paidOf(inv))
+
+  const openPayment = (inv) => {
+    setPaymentInvoice(inv)
+    setPaymentInput(paidOf(inv) ? String(paidOf(inv)) : '')
+  }
+
+  const savePayment = async () => {
+    const amount = paymentInput === '' ? 0 : parseFloat(paymentInput)
+    if (Number.isNaN(amount) || amount < 0) {
+      alert('Enter a valid amount')
+      return
+    }
+    if (amount > Number(paymentInvoice.grandTotal || 0)) {
+      alert('Paid amount cannot be more than the invoice total')
+      return
+    }
+    setPaymentSaving(true)
+    try {
+      const res = await invoiceAPI.recordPayment(paymentInvoice.id, amount)
+      applyInvoices(invoices.map((i) => (i.id === paymentInvoice.id ? res.data : i)))
+      setPaymentInvoice(null)
+    } catch (err) {
+      const d = err.response?.data
+      alert('Failed to save payment: ' + (typeof d === 'string' ? d : d?.message || err.message))
+    } finally {
+      setPaymentSaving(false)
+    }
+  }
+
   // Manually change payment status (e.g. mark PAID once payment is received)
   const handleStatusChange = async (invoice, newStatus) => {
     if (newStatus === invoice.status) return
@@ -57,7 +103,8 @@ export default function InvoiceHistory() {
       overdue: updated.filter((i) => i.status === 'OVERDUE').length,
     })
     try {
-      await invoiceAPI.updateStatus(invoice.id, newStatus)
+      const res = await invoiceAPI.updateStatus(invoice.id, newStatus)
+      if (res?.data) applyInvoices(updated.map((i) => (i.id === invoice.id ? res.data : i)))
     } catch (err) {
       // roll back if the server rejected it
       setInvoices(previous)
@@ -226,6 +273,25 @@ export default function InvoiceHistory() {
                     </td>
                     <td className="px-4 sm:px-6 py-4 text-sm font-medium text-gray-800">
                       ₹{invoice.grandTotal?.toFixed(2) || '0.00'}
+                      {invoice.status !== 'CANCELLED' && (
+                        <div className="mt-1 flex items-center gap-2 text-xs font-normal">
+                          {paidOf(invoice) > 0 && dueOf(invoice) > 0 ? (
+                            <span className="text-orange-600">
+                              Paid ₹{paidOf(invoice).toFixed(2)} · Due ₹{dueOf(invoice).toFixed(2)}
+                            </span>
+                          ) : dueOf(invoice) === 0 ? (
+                            <span className="text-green-600">Fully paid</span>
+                          ) : (
+                            <span className="text-gray-400">Due ₹{dueOf(invoice).toFixed(2)}</span>
+                          )}
+                          <button
+                            onClick={() => openPayment(invoice)}
+                            className="text-blue-600 hover:text-blue-800 underline"
+                          >
+                            Update payment
+                          </button>
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 sm:px-6 py-4 text-sm">
                       <select
@@ -275,6 +341,56 @@ export default function InvoiceHistory() {
           </div>
         )}
       </div>
+
+      {paymentInvoice && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-5">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-lg font-bold text-gray-800">Update payment</h2>
+              <button onClick={() => setPaymentInvoice(null)} className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            <p className="text-sm text-gray-600">{paymentInvoice.invoiceNumber} · {paymentInvoice.client?.company || 'N/A'}</p>
+            <p className="text-sm text-gray-600 mb-4">
+              Invoice total: <span className="font-semibold">₹{Number(paymentInvoice.grandTotal || 0).toFixed(2)}</span>
+            </p>
+
+            <label className="block text-sm text-gray-700 font-medium mb-1">Total amount received so far (₹)</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              autoFocus
+              value={paymentInput}
+              onChange={(e) => setPaymentInput(e.target.value)}
+              placeholder="0.00"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
+            />
+            <div className="flex items-center justify-between mt-2 text-sm">
+              <button
+                type="button"
+                className="text-blue-600 underline"
+                onClick={() => setPaymentInput(String(Number(paymentInvoice.grandTotal || 0)))}
+              >
+                Mark fully paid
+              </button>
+              <span className="text-gray-500">
+                Balance due: ₹{Math.max(0, Number(paymentInvoice.grandTotal || 0) - (parseFloat(paymentInput) || 0)).toFixed(2)}
+              </span>
+            </div>
+
+            <div className="flex gap-3 mt-5">
+              <button onClick={() => setPaymentInvoice(null)} className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded">Cancel</button>
+              <button
+                onClick={savePayment}
+                disabled={paymentSaving}
+                className="flex-1 bg-secondary text-white px-4 py-2 rounded disabled:opacity-50"
+              >
+                {paymentSaving ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {selectedInvoice && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
