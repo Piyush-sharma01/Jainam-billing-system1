@@ -23,6 +23,7 @@ public class InvoiceDTO {
     private BigDecimal taxAmount;
     private BigDecimal grandTotal;
     private InvoiceStatus status;
+    private BigDecimal paidAmount;
     private String notes;
     private String createdBy;
 }
