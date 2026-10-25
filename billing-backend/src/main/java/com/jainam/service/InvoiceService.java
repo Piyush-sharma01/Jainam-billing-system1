@@ -105,7 +105,10 @@ public class InvoiceService {
                 ? lineItemDTO.getDiscountPercentage()
                 : BigDecimal.ZERO;
 
-            BigDecimal unitPrice = product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
+            // Price typed by the user while billing wins; otherwise use the product price (or 0 if none)
+            BigDecimal unitPrice = (lineItemDTO.getUnitPrice() != null && lineItemDTO.getUnitPrice().signum() >= 0)
+                ? lineItemDTO.getUnitPrice()
+                : (product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO);
             BigDecimal gstPct = product.getGst() != null ? product.getGst() : BigDecimal.ZERO;
             BigDecimal itemSubtotal = unitPrice.multiply(quantity);
             BigDecimal discountAmount = itemSubtotal.multiply(discountPct)
