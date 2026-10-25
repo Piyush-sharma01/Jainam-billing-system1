@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, Package, X, SlidersHorizontal, Check, ChevronDown } from "lucide-react";
+import { Search, Package, X, SlidersHorizontal, Check, ChevronDown, ArrowRight } from "lucide-react";
 import { productAPI, brandAPI, categoryAPI } from "../services/api";
 
 /* ─────────────────────────────────────────────
@@ -82,64 +82,23 @@ export default function StoreCatalogue() {
       {/* ══════════════════════════════════════
           CATALOGUE HEADER
       ══════════════════════════════════════ */}
-      <header className="bg-royal relative overflow-hidden">
-        {/* Fine grid */}
-        <div
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(#FFFFFF 1px,transparent 1px),linear-gradient(90deg,#FFFFFF 1px,transparent 1px)",
-            backgroundSize: "60px 60px",
-          }}
-        />
-        {/* Bold diagonal coral band sweeping across the header — poster-style */}
-        <div
-          className="absolute inset-y-0 right-0 w-[55%] bg-habanero/95"
-          style={{ clipPath: "polygon(35% 0, 100% 0, 100% 100%, 0% 100%)" }}
-        />
-        <div
-          className="hidden sm:block absolute -right-6 top-8 w-40 h-40 border-4 border-white/10 rotate-45"
-        />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-8 pt-12 pb-10 sm:pt-16 sm:pb-14">
-          {/* Breadcrumb */}
-          <p className="font-mono text-[10px] tracking-[0.2em] text-white/50 uppercase mb-6 flex items-center gap-2">
-            <span>Jainam</span>
-            <span className="opacity-30">/</span>
-            <span className="text-white">Products</span>
-          </p>
-
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div>
-              {/* Eyebrow */}
-              <div className="flex items-center gap-3 mb-4">
-                <span className="w-6 h-px bg-white" />
-                <span className="font-mono text-[11px] tracking-[0.2em] text-white uppercase">
-                  Full Range
-                </span>
-              </div>
-              <h1 className="font-display font-600 text-display-lg text-white leading-none">
-                Catalogue
-              </h1>
-              <p className="text-white/70 text-sm sm:text-base mt-3 max-w-lg leading-relaxed">
-                Pipes, valves, fittings and industrial hardware — sourced from trusted brands,
-                stocked for consistent availability.
-              </p>
+      <header className="relative isolate overflow-hidden bg-[#07142f] text-white">
+        <div className="absolute inset-0 jainam-hero-atmosphere opacity-80" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-5 py-10 sm:px-8 sm:py-14 lg:grid-cols-[1fr_0.82fr] lg:gap-12 lg:px-10 lg:py-16">
+          <div>
+            <p className="mb-6 flex items-center gap-2 font-mono text-[9px] font-semibold uppercase tracking-[0.19em] text-white/55"><span>Jainam Auto Industries</span><span className="text-habanero">/</span><span className="text-white/80">Catalogue</span></p>
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-2 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-white/75"><span className="h-1.5 w-1.5 rounded-full bg-habanero" /> Automotive fluid systems</p>
+            <h1 className="mt-5 max-w-2xl font-display text-[clamp(2.6rem,6vw,5rem)] font-semibold leading-[0.98] tracking-[-0.045em]">The Jainam<br /><span className="text-habanero">product range.</span></h1>
+            <p className="mt-5 max-w-xl text-sm leading-7 text-white/65 sm:text-base">Explore automotive pipes, hoses and fluid-transmission components by product name, category or vehicle application.</p>
+            {!loading && <div className="mt-7 inline-flex items-baseline gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-3"><span className="font-display text-3xl font-semibold text-white">{filteredProducts.length}</span><span className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/55">{hasActiveFilter ? "matching products" : "catalogue products"}</span></div>}
+          </div>
+          <div className="relative mx-auto w-full max-w-xl">
+            <div className="absolute -right-3 -top-3 h-24 w-24 rounded-full border border-habanero/40 sm:-right-5 sm:-top-5 sm:h-32 sm:w-32" />
+            <div className="relative overflow-hidden rounded-[1.6rem] border border-white/15 bg-white/5 shadow-2xl sm:rounded-[2rem]">
+              <img src="/jainam-slider-formed-pipes.jpg" alt="Illustrative formed automotive pipe assemblies" className="aspect-[4/3] w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#07142f]/75 via-transparent to-transparent" />
+              <p className="absolute bottom-4 left-4 rounded-full border border-white/20 bg-[#07142f]/55 px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.15em] text-white/80 backdrop-blur sm:bottom-5 sm:left-5">Illustrative product-family image</p>
             </div>
-
-            {/* Live count — pill badge, poster-style */}
-            {!loading && (
-              <div className="relative shrink-0 self-start lg:self-auto">
-                <div className="bg-royal border-4 border-white/90 rounded-full w-28 h-28 flex flex-col items-center justify-center text-center shadow-lg">
-                  <p className="font-display font-600 text-3xl text-white leading-none">
-                    {filteredProducts.length}
-                  </p>
-                  <p className="font-mono text-[8px] tracking-widest text-white/70 uppercase mt-1 px-2">
-                    {hasActiveFilter ? "Filtered" : "In Stock"}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </header>
@@ -147,7 +106,7 @@ export default function StoreCatalogue() {
       {/* ══════════════════════════════════════
           FILTER + SEARCH BAR
       ══════════════════════════════════════ */}
-      <div className="sticky top-14 sm:top-16 z-30 bg-white border-b border-gray-200">
+      <div className="sticky top-[76px] lg:top-[90px] z-30 bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
 
           {/* Desktop filter row */}
@@ -466,68 +425,27 @@ function FilterGroup({ label, options, active, onSelect }) {
 ───────────────────────────────────────────── */
 function CatalogueCard({ product, idx }) {
   const outOfStock = product.stock === 0;
+  const hasPrice = product.price !== null && product.price !== undefined && String(product.price).trim() !== "";
 
   return (
-    <div className="relative bg-white group flex flex-col border border-tan/60">
-      {/* Diagonal-cut name bar — poster-style */}
-      <div className="relative">
-        <div
-          className="bg-royal px-3 sm:px-4 py-2 sm:py-2.5 pr-8"
-          style={{ clipPath: "polygon(0 0, 100% 0, 88% 100%, 0% 100%)" }}
-        >
-          <p className="font-mono text-[8px] sm:text-[9px] tracking-widest text-white/50 uppercase truncate">
-            {product.brand || product.category || "Jainam"}
-          </p>
+    <article className="group h-full overflow-hidden rounded-[1.35rem] border border-slate-100 bg-white shadow-[0_10px_35px_-28px_rgba(8,24,59,.5)] transition duration-300 hover:-translate-y-1 hover:border-slate-200 hover:shadow-[0_24px_50px_-28px_rgba(8,24,59,.38)]">
+      <Link to={`/store/product/${product.id}`} className="flex h-full flex-col" aria-label={`View ${product.name}`}>
+        <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-[#f5f7fb] via-white to-[#e8edf7]">
+          {product.imageUrl ? <img src={product.imageUrl} alt={product.name} className="h-full w-full object-contain p-5 transition duration-500 group-hover:scale-[1.06] sm:p-7" loading={idx < 8 ? "eager" : "lazy"} /> : <div className="flex h-full flex-col items-center justify-center bg-[radial-gradient(circle_at_70%_30%,rgba(249,133,19,.12),transparent_38%),linear-gradient(135deg,#f5f7fb,#e8edf8)] text-royal/30"><Package size={42} strokeWidth={1.1} /><span className="mt-3 font-mono text-[8px] uppercase tracking-[0.17em]">Image unavailable</span></div>}
+          <span className="absolute left-4 top-4 max-w-[72%] truncate rounded-full border border-white/70 bg-white/90 px-3 py-1.5 font-mono text-[8px] font-semibold uppercase tracking-[0.13em] text-royal shadow-sm">{product.category || product.brand || "Jainam Auto"}</span>
+          {outOfStock && <span className="absolute right-4 top-4 rounded-full bg-slate-900/80 px-3 py-1.5 text-[8px] font-semibold uppercase tracking-wider text-white">Out of stock</span>}
         </div>
-        {/* small coral corner flag */}
-        <div className="absolute top-0 right-0 w-4 h-full bg-habanero" style={{ clipPath: "polygon(100% 0, 100% 100%, 0 100%)" }} />
-      </div>
-
-      {/* Image area — links to product detail */}
-      <Link
-        to={`/store/product/${product.id}`}
-        className="relative overflow-hidden aspect-square bg-tan/20 flex items-center justify-center block"
-        tabIndex={-1}
-        aria-label={`View ${product.name}`}
-      >
-        {product.imageUrl ? (
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full h-full object-contain p-4 sm:p-6 transition-transform duration-500 group-hover:scale-[1.04]"
-            loading={idx < 8 ? "eager" : "lazy"}
-          />
-        ) : (
-          <div className="flex flex-col items-center gap-2 text-tan">
-            <Package size={32} strokeWidth={1} />
+        <div className="flex flex-1 flex-col p-4 sm:p-5">
+          <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-ink-soft/70">{product.brand || "Jainam Auto Industries"}</p>
+          <h2 className="mt-1.5 line-clamp-2 min-h-[2.8rem] font-display text-sm font-semibold leading-snug text-royal transition-colors group-hover:text-habanero sm:text-base">{product.name}</h2>
+          {(product.productCode || product.size) && <div className="mt-2 flex flex-wrap gap-2">{product.productCode && <span className="rounded-md bg-slate-50 px-2 py-1 font-mono text-[9px] text-ink-soft">{product.productCode}</span>}{product.size && <span className="rounded-md bg-slate-50 px-2 py-1 text-[9px] text-ink-soft">Size: {product.size}</span>}</div>}
+          <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-4">
+            <span className={`text-sm font-bold ${hasPrice ? "text-royal" : "text-habanero"}`}>{hasPrice ? `₹${Number(product.price).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : "Request a quote"}</span>
+            <span className="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider text-slate-400 transition-colors group-hover:text-habanero">Details <ArrowRight size={12} /></span>
           </div>
-        )}
-
-        {/* Out of stock overlay */}
-        {outOfStock && (
-          <div className="absolute inset-0 bg-royal/70 flex items-center justify-center">
-            <span className="font-mono text-[9px] tracking-[0.2em] text-white uppercase">
-              Out of Stock
-            </span>
-          </div>
-        )}
+        </div>
       </Link>
-
-      {/* Info strip */}
-      <div className="border-t border-tan/60 flex items-end justify-between gap-3 px-3 sm:px-4 py-3 sm:py-4">
-        <div className="min-w-0 flex-1">
-          <Link
-            to={`/store/product/${product.id}`}
-            className="font-display font-600 text-xs sm:text-sm text-royal leading-snug line-clamp-2 hover:text-habanero transition-colors uppercase"
-          >
-            {product.name}
-          </Link>
-          <p className="font-mono font-600 text-sm sm:text-base text-habanero mt-1.5">
-            {product.price !== null && product.price !== undefined && String(product.price).trim() !== "" ? `₹${Number(product.price).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Request a quote"}
-          </p>
-        </div>
-      </div>
-    </div>
+    </article>
   );
 }
 
