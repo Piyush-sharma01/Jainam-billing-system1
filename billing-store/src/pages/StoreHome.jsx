@@ -215,7 +215,7 @@ function CategoryExplorer({ categories, loading }) {
               <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-sm">
                 {loading
                   ? "Loading the current catalogue…"
-                  : `${categories.length} categories of pipes, valves, fittings and hardware — all in stock and ready to order.`}
+                  : `${categories.length} product categories are listed in the live catalogue. Contact Jainam to confirm current availability.`}
               </p>
             </div>
           </div>
@@ -324,7 +324,9 @@ function ProductDiscovery({ products, featured, loading, search, setSearch }) {
                     className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-tan/50 transition-colors"
                   >
                     <span className="text-sm text-royal truncate">{p.name}</span>
-                    <span className="font-mono text-xs text-habanero shrink-0">₹{Number(p.price).toFixed(0)}</span>
+                    <span className="font-mono text-xs text-habanero shrink-0">
+                      {p.price !== null && p.price !== undefined && String(p.price).trim() !== "" ? `₹${Number(p.price).toLocaleString("en-IN", { maximumFractionDigits: 2 })}` : "Request a quote"}
+                    </span>
                   </Link>
                 ))}
               </div>
@@ -337,11 +339,11 @@ function ProductDiscovery({ products, featured, loading, search, setSearch }) {
               Featured Products
             </span>
             <h3 className="font-display font-600 text-display-md text-white leading-tight mb-4">
-              A current sample of<br />what's in stock
+              A current sample of<br />the catalogue
             </h3>
             <p className="text-white/60 text-sm sm:text-base max-w-md leading-relaxed">
-              Scroll to browse — every item shown is live from the catalogue, with real pricing
-              and availability.
+              Listings are pulled from the live catalogue. Pricing and availability can be confirmed
+              with the Jainam team.
             </p>
           </div>
         </div>
@@ -408,7 +410,7 @@ function FeaturedCard({ product }) {
             {product.name}
           </Link>
           <p className="font-mono font-600 text-base text-habanero mt-2">
-            ₹{Number(product.price).toFixed(2)}
+            {product.price !== null && product.price !== undefined && String(product.price).trim() !== "" ? `₹${Number(product.price).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Request a quote"}
           </p>
         </div>
       </div>
@@ -503,7 +505,9 @@ function ProductSpotlight({ product }) {
               )}
               <div>
                 <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Price</p>
-                <p className="font-mono font-600 text-lg text-habanero mt-1">₹{Number(product.price).toFixed(2)}</p>
+                <p className="font-mono font-600 text-lg text-habanero mt-1">
+                  {product.price !== null && product.price !== undefined && String(product.price).trim() !== "" ? `₹${Number(product.price).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Request a quote"}
+                </p>
               </div>
             </div>
             <Link
@@ -526,11 +530,11 @@ function ProductSpotlight({ product }) {
 function ProcessFlow() {
   const [ref, visible] = useReveal(0.1);
   const steps = [
-    { n: "01", label: "Requirement", body: "Tell us what you need — by phone, message, or the enquiry form." },
-    { n: "02", label: "Product Selection", body: "Browse the catalogue or get help finding the right spec." },
-    { n: "03", label: "Enquiry", body: "Send your enquiry or place an order directly from the storefront." },
-    { n: "04", label: "Confirmation", body: "Your account manager confirms pricing and generates the invoice." },
-    { n: "05", label: "Delivery", body: "Order is fulfilled and shipped to your site." },
+    { n: "01", label: "Share requirements", body: "Tell Jainam the component, vehicle model, size and quantity you need." },
+    { n: "02", label: "Browse range", body: "Explore the catalogue by product line or commercial-vehicle application." },
+    { n: "03", label: "Send enquiry", body: "Contact Jainam by email, WhatsApp or the enquiry form on this site." },
+    { n: "04", label: "Discuss the quote", body: "The company site invites customers to request pricing and availability." },
+    { n: "05", label: "Connect across India", body: "Jainam supplies OEM and replacement-market parts through its dealer network." },
   ];
   return (
     <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-tan">
@@ -539,7 +543,7 @@ function ProcessFlow() {
           05 / How It Works
         </span>
         <h2 className="font-display font-600 text-display-lg text-royal mt-2 mb-14">
-          From enquiry to delivery
+          From catalogue to enquiry
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-8 sm:gap-4">
@@ -582,22 +586,22 @@ function WhySection({ stats, loading }) {
     {
       icon: ShieldCheck,
       title: "Consistent quality",
-      body: "Products sourced from established manufacturers. What's in the catalogue is what you receive — no substitutions.",
+      body: "The company lists an ISO 9001:2015 quality management system for manufacturing automotive pipes and hoses.",
     },
     {
       icon: Truck,
-      title: "Stock you can rely on",
-      body: "Maintained inventory levels so your procurement doesn't stall. Regular restocking across active SKUs.",
+      title: "Pan-India distribution",
+      body: "OEM and replacement-market parts are supplied across India through authorized distributors and dealers.",
     },
     {
       icon: Headphones,
-      title: "Dedicated account management",
-      body: "A named account manager for every client. Direct contact for orders, pricing queries and invoice questions.",
+      title: "Pune-based manufacturing",
+      body: "Jainam Auto Industries is based in Sanaswadi, Pune, Maharashtra, and has operated since 2002.",
     },
     {
       icon: Package,
-      title: "OEM-compatible range",
-      body: "Pipes, valves and fittings compatible with leading OEM brands — catalogued and cross-referenced for your workflow.",
+      title: "Vehicle applications",
+      body: "The official site lists TATA, Mahindra, Eicher, Ashok Leyland and New Energy Vehicle applications.",
     },
   ];
 
@@ -682,7 +686,7 @@ function FinalCTA() {
         </h2>
         <p className="text-ink-soft text-base sm:text-lg max-w-lg mx-auto mb-10 leading-relaxed">
           Browse the catalogue by brand, category or specification — or send your requirement
-          straight through to your account manager.
+          directly to the Jainam team.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Link
