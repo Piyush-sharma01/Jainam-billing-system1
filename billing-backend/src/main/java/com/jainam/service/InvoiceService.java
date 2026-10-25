@@ -195,8 +195,14 @@ public class InvoiceService {
     }
 
     public String generateInvoiceNumber() {
-        long count = invoiceRepository.count() + 1;
-        return String.format("INV-%05d", count);
+        long next = invoiceRepository.findMaxInvoiceSequence() + 1;
+        String number = String.format("INV-%05d", next);
+        // extra safety: never return a number that already exists
+        while (invoiceRepository.existsByInvoiceNumber(number)) {
+            next++;
+            number = String.format("INV-%05d", next);
+        }
+        return number;
     }
 
     private InvoiceDTO convertToDTO(Invoice invoice) {
