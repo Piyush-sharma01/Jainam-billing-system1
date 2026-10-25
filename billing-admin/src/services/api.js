@@ -89,6 +89,7 @@ export const invoiceAPI = {
   getByStatus: (status) => api.get(`/invoices/status/${status}`),
   create: (data) => api.post('/invoices', data),
   updateStatus: (id, status) => api.put(`/invoices/${id}/status/${status}`),
+  recordPayment: (id, paidAmount) => api.put(`/invoices/${id}/payment?paidAmount=${paidAmount}`),
   sendEmail: (id, email) => api.post(`/invoices/${id}/send-email?email=${encodeURIComponent(email)}`),
   delete: (id) => api.delete(`/invoices/${id}`),
 };
