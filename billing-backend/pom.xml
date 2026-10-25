@@ -65,6 +65,13 @@
             <version>5.5.13.3</version>
         </dependency>
 
+        <!-- PDFBox: reads text from catalogue PDFs -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
