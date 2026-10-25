@@ -160,3 +160,93 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+
+/* Jainam signature hero: restrained motion inspired by fluid routes and formed pipework. */
+.jainam-hero-grid {
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(80, 153, 255, 0.13), transparent 36%),
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: auto, 64px 64px, 64px 64px;
+  mask-image: linear-gradient(90deg, #000 0%, #000 45%, transparent 92%);
+}
+.jainam-hero-orbit {
+  position: absolute;
+  z-index: -1;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+.jainam-hero-orbit-one {
+  width: 34rem;
+  height: 34rem;
+  left: -24rem;
+  bottom: -26rem;
+  animation: heroOrbit 28s linear infinite;
+}
+.jainam-hero-orbit-two {
+  width: 22rem;
+  height: 22rem;
+  left: -18rem;
+  bottom: -20rem;
+  border-color: rgba(249, 133, 19, 0.18);
+  animation: heroOrbit 20s linear infinite reverse;
+}
+.jainam-heading-accent {
+  color: #f98513;
+  text-shadow: 0 10px 36px rgba(249, 133, 19, 0.12);
+}
+.jainam-hero-product-image {
+  animation: heroProductDrift 18s ease-in-out infinite alternate;
+  transform-origin: 68% 54%;
+}
+.jainam-scanline {
+  background: linear-gradient(180deg, transparent 0%, rgba(249, 133, 19, 0.08) 46%, rgba(74, 160, 255, 0.08) 53%, transparent 100%);
+  opacity: 0.7;
+  animation: heroScan 8s ease-in-out infinite;
+  pointer-events: none;
+}
+.jainam-flow-svg {
+  mix-blend-mode: screen;
+  opacity: 0.72;
+  pointer-events: none;
+}
+.jainam-flow-path {
+  stroke-dasharray: 8 13;
+  animation: flowTrace 4.8s linear infinite;
+}
+.jainam-flow-path-blue {
+  animation-duration: 6.4s;
+  animation-direction: reverse;
+}
+.jainam-float-card {
+  animation: heroCardFloat 6s ease-in-out infinite;
+}
+@keyframes heroOrbit {
+  to { transform: rotate(360deg); }
+}
+@keyframes heroProductDrift {
+  from { transform: scale(1.02) translate3d(0, 0, 0); }
+  to { transform: scale(1.08) translate3d(-1.2%, -0.7%, 0); }
+}
+@keyframes heroScan {
+  0%, 100% { transform: translateY(-45%); opacity: 0.18; }
+  50% { transform: translateY(100%); opacity: 0.75; }
+}
+@keyframes flowTrace {
+  to { stroke-dashoffset: -126; }
+}
+@keyframes heroCardFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jainam-hero-orbit,
+  .jainam-hero-product-image,
+  .jainam-scanline,
+  .jainam-flow-path,
+  .jainam-float-card {
+    animation: none !important;
+  }
+}
