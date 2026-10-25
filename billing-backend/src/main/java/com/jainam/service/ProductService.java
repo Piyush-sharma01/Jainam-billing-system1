@@ -38,14 +38,15 @@ public class ProductService {
         List<Product> toSave = new ArrayList<>();
         Set<String> seen = new HashSet<>();
         for (Product existing : productRepository.findAll()) {
-            seen.add(duplicateKey(existing.getName(), existing.getSize()));
+            seen.add(duplicateKey(existing.getProductCode() == null ? existing.getName() : existing.getProductCode(), existing.getSize()));
         }
         for (ProductDTO dto : products) {
-            if (dto == null || isBlank(dto.getName())) { failed++; continue; }
-            String key = duplicateKey(dto.getName(), dto.getSize());
+            if (dto == null || isBlank(dto.getName()) || !Boolean.TRUE.equals(dto.getReviewConfirmed())) { failed++; continue; }
+            String key = duplicateKey(dto.getProductCode() == null ? dto.getName() : dto.getProductCode(), dto.getSize());
             if (!seen.add(key)) { skipped++; continue; }
 
             try {
+                dto.setPrice(null); // Catalogue preview never imports a price.
                 String category = dto.getCategory() == null ? null : dto.getCategory().trim();
                 if (category != null && !category.isEmpty() && !categoryRepository.existsByName(category)) {
                     categoryRepository.save(Category.builder().name(category).build());
@@ -56,12 +57,14 @@ public class ProductService {
             }
         }
         int saved = 0;
-        try {
-            productRepository.saveAll(toSave);
-            saved = toSave.size();
-        } catch (RuntimeException e) {
-            // Repository saveAll is one transaction: report the whole rejected batch as failed.
-            failed += toSave.size();
+        if (!toSave.isEmpty()) {
+            try {
+                productRepository.saveAll(toSave);
+                saved = toSave.size();
+            } catch (RuntimeException e) {
+                // Repository saveAll is one transaction: report the whole rejected batch as failed.
+                failed += toSave.size();
+            }
         }
         return Map.of("saved", saved, "skipped", skipped, "failed", failed);
     }
@@ -106,6 +109,7 @@ public class ProductService {
             .orElseThrow(() -> new RuntimeException("Product not found"));
 
         product.setName(productDTO.getName());
+        product.setProductCode(productDTO.getProductCode());
         product.setDescription(productDTO.getDescription());
         product.setCategory(productDTO.getCategory());
         product.setBrand(productDTO.getBrand());
@@ -130,6 +134,7 @@ public class ProductService {
         ProductDTO dto = new ProductDTO();
         dto.setId(product.getId());
         dto.setName(product.getName());
+        dto.setProductCode(product.getProductCode());
         dto.setDescription(product.getDescription());
         dto.setCategory(product.getCategory());
         dto.setBrand(product.getBrand());
@@ -145,6 +150,7 @@ public class ProductService {
     private Product convertToEntity(ProductDTO productDTO) {
         return Product.builder()
             .name(productDTO.getName())
+            .productCode(productDTO.getProductCode())
             .description(productDTO.getDescription())
             .category(productDTO.getCategory())
             .brand(productDTO.getBrand())
