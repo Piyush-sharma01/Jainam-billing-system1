@@ -1,194 +1,117 @@
 import React, { useState } from "react";
-import { Phone, Mail, MapPin, Send } from "lucide-react";
+import { Clock3, Mail, MapPin, Send, ArrowUpRight, MessageCircle, Navigation } from "lucide-react";
+
+const EMAIL = "jainamautoindustries@gmail.com";
+const ADDRESS = "Plot No. 29, B. U. Bhandari Ind. Estate, Gat No. 156/1544, Behind Mazak Company, Next to Sericol Company, Pune Nagar Road, Sanaswadi, Taluka - Shirur, Dist. - Pune - 412208, Maharashtra, India";
+const WHATSAPP = "919422308740";
+const MAP_LINK = "https://www.google.com/maps/search/?api=1&query=Plot+No.+29+BU+Bhandari+Ind+Estate+Sanaswadi+Pune+412208";
 
 export default function StoreContact() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [sent, setSent] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const validate = () => {
-    const e = {};
-    if (!form.name.trim())    e.name    = "Name is required.";
-    if (!form.message.trim()) e.message = "Message is required.";
-    return e;
-  };
-
-  const handleSubmit = (ev) => {
-    ev.preventDefault();
-    const e2 = validate();
-    if (Object.keys(e2).length) { setErrors(e2); return; }
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const nextErrors = {};
+    if (!form.name.trim()) nextErrors.name = "Please enter your name.";
+    if (!form.message.trim()) nextErrors.message = "Please add a short message.";
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) nextErrors.email = "Please enter a valid email address.";
+    if (Object.keys(nextErrors).length) { setErrors(nextErrors); return; }
     setErrors({});
 
-    const lines = [
-      form.email && `Email: ${form.email}`,
+    const subject = encodeURIComponent(form.subject.trim() || `Enquiry from ${form.name.trim()}`);
+    const body = encodeURIComponent([
+      `Name: ${form.name.trim()}`,
+      form.email ? `Email: ${form.email.trim()}` : "",
       "",
-      form.message,
-    ].filter(Boolean);
-
-    const subject = encodeURIComponent(form.subject || `Enquiry from ${form.name}`);
-    const body = encodeURIComponent(lines.join("\n"));
-    window.location.href = `mailto:sales@jainam.example?subject=${subject}&body=${body}`;
+      form.message.trim(),
+    ].filter(Boolean).join("\n"));
     setSent(true);
+    window.location.href = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
   };
 
-  const infoCards = [
-    { icon: Phone,  label: "Phone Number", value: "+91 00000 00000", href: "tel:+910000000000" },
-    { icon: Mail,   label: "Email Address", value: "sales@jainam.example", href: "mailto:sales@jainam.example" },
-    { icon: MapPin, label: "Our Location", value: "Mumbai, Maharashtra, India", href: null },
+  const cards = [
+    { icon: Mail, label: "Email", value: EMAIL, href: `mailto:${EMAIL}`, action: "Write an email" },
+    { icon: MessageCircle, label: "WhatsApp", value: "+91 94223 08740", href: `https://wa.me/${WHATSAPP}?text=Hello%20Jainam%20Auto%20Industries%2C%20I%20have%20a%20product%20enquiry.`, action: "Start a conversation" },
+    { icon: MapPin, label: "Factory", value: "Sanaswadi, Pune, Maharashtra", href: MAP_LINK, action: "Get directions" },
   ];
-
-  const mapSrc = "https://www.google.com/maps?q=Mumbai,Maharashtra,India&output=embed";
 
   return (
     <div className="page-enter">
-
-      {/* ══════════════════════════════════════
-          PHOTO HERO BANNER
-      ══════════════════════════════════════ */}
-      <section className="relative h-[260px] sm:h-[340px] flex items-center justify-center overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1636887584784-954392022b75?fm=jpg&q=70&w=1600&auto=format&fit=crop"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-royal/80" />
-        <div className="relative text-center px-4">
-          <h1 className="font-display font-600 text-4xl sm:text-6xl text-white leading-none mb-4">
-            Contact Us
-          </h1>
-          <p className="font-mono text-[11px] tracking-widest text-white/70 uppercase">
-            Home <span className="mx-2 text-habanero">/</span> Contact Us
-          </p>
+      <section className="relative overflow-hidden bg-royal text-white">
+        <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "54px 54px" }} />
+        <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full border border-white/10" />
+        <div className="relative mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-habanero">Jainam Auto Industries · Pune</p>
+          <h1 className="mt-4 max-w-3xl font-display text-[clamp(2.8rem,7vw,5.8rem)] font-semibold leading-[0.96] tracking-[-0.045em]">Let's talk about<br /><span className="text-habanero">your requirements.</span></h1>
+          <p className="mt-6 max-w-xl text-base leading-7 text-white/65 sm:text-lg">Send your vehicle model, component type, specification or quantity. The Jainam team can help you find the right catalogue item.</p>
+          <div className="mt-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-4 py-2 text-xs text-white/70"><Clock3 size={14} className="text-habanero" /> Monday–Saturday · 9:00 am–7:00 pm</div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          GET IN TOUCH — form + stacked info cards
-      ══════════════════════════════════════ */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-8 py-16 sm:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] gap-10 lg:gap-16">
-
-          {/* Left — heading + simple stacked form */}
-          <div>
-            <h2 className="font-display font-600 text-2xl sm:text-3xl text-royal mb-3">
-              Get In Touch
-            </h2>
-            <p className="text-ink-soft leading-relaxed mb-8 max-w-md">
-              Have a question about an order or need something sourced that's not in the
-              catalogue? Send us a message and our team will get back to you.
-            </p>
-
-            {sent && (
-              <div className="bg-green-50 border border-green-200 text-green-700 text-sm p-3 mb-5">
-                Opening your mail client…
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} noValidate className="space-y-5">
-              <div>
-                <label className="block font-display font-medium text-sm text-royal mb-2">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Your Name..."
-                  className={`w-full px-4 py-3 bg-white border text-sm text-royal placeholder:text-ink-soft/60 focus:outline-none focus:border-royal/40 transition-colors min-h-[46px] ${
-                    errors.name ? "border-red-400" : "border-tan"
-                  }`}
-                />
-                {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}
-              </div>
-
-              <div>
-                <label className="block font-display font-medium text-sm text-royal mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="example@youremail.com"
-                  className="w-full px-4 py-3 bg-white border border-tan text-sm text-royal placeholder:text-ink-soft/60 focus:outline-none focus:border-royal/40 transition-colors min-h-[46px]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-display font-medium text-sm text-royal mb-2">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  value={form.subject}
-                  onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  placeholder="Title..."
-                  className="w-full px-4 py-3 bg-white border border-tan text-sm text-royal placeholder:text-ink-soft/60 focus:outline-none focus:border-royal/40 transition-colors min-h-[46px]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-display font-medium text-sm text-royal mb-2">
-                  Message
-                </label>
-                <textarea
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  rows={5}
-                  placeholder="Type Here..."
-                  className={`w-full px-4 py-3 bg-white border text-sm text-royal placeholder:text-ink-soft/60 focus:outline-none focus:border-royal/40 transition-colors resize-none ${
-                    errors.message ? "border-red-400" : "border-tan"
-                  }`}
-                />
-                {errors.message && <p className="text-xs text-red-600 mt-1">{errors.message}</p>}
-              </div>
-
-              <button
-                type="submit"
-                className="w-full flex items-center justify-center gap-2 bg-habanero text-white font-display font-medium text-sm py-3.5 hover:bg-royal transition-colors min-h-[48px]"
-              >
-                Send Now <Send size={15} />
-              </button>
-            </form>
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-7 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:px-10 lg:py-20">
+        <div className="rounded-[1.75rem] border border-line bg-white p-6 shadow-[0_20px_70px_-50px_rgba(22,34,78,0.55)] sm:p-9">
+          <div className="mb-8">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-habanero">Send an enquiry</p>
+            <h2 className="mt-2 font-display text-2xl font-semibold text-royal sm:text-3xl">How can we help?</h2>
+            <p className="mt-2 text-sm leading-6 text-ink-soft">Submitting opens your email app with the message addressed to Jainam Auto Industries.</p>
           </div>
 
-          {/* Right — stacked info cards */}
-          <div className="space-y-5">
-            {infoCards.map(({ icon: Icon, label, value, href }) => (
-              <div key={label} className="bg-tan/30 p-8 text-center">
-                <div className="w-12 h-12 bg-habanero rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon size={20} className="text-white" />
-                </div>
-                <p className="font-display font-600 text-base text-royal mb-2">
-                  {label}
-                </p>
-                {href ? (
-                  <a href={href} className="text-ink-soft text-sm hover:text-habanero transition-colors">
-                    {value}
-                  </a>
-                ) : (
-                  <p className="text-ink-soft text-sm">{value}</p>
-                )}
-              </div>
-            ))}
+          {sent && <div role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">Your email app should open with the enquiry ready to send.</div>}
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <Field label="Your name" error={errors.name}>
+                <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Name" className={inputClass(errors.name)} autoComplete="name" />
+              </Field>
+              <Field label="Email address" error={errors.email}>
+                <input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="you@company.com" className={inputClass(errors.email)} autoComplete="email" />
+              </Field>
+            </div>
+            <Field label="Subject">
+              <input value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} placeholder="Product or vehicle model" className={inputClass()} />
+            </Field>
+            <Field label="Requirement" error={errors.message}>
+              <textarea value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} rows={5} placeholder="Tell us the component, size or vehicle details you need…" className={`${inputClass(errors.message)} min-h-[135px] resize-y`} />
+            </Field>
+            <button type="submit" className="group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-habanero px-6 text-sm font-semibold text-white transition-all hover:bg-royal sm:w-auto">
+              Prepare email <Send size={15} className="transition-transform group-hover:translate-x-1" />
+            </button>
+          </form>
+        </div>
+
+        <div className="space-y-4">
+          {cards.map(({ icon: Icon, label, value, href, action }) => <a key={label} href={href} target={label === "WhatsApp" || label === "Factory" ? "_blank" : undefined} rel={label === "WhatsApp" || label === "Factory" ? "noreferrer" : undefined} className="group flex gap-4 rounded-2xl border border-line bg-paper/50 p-5 transition-all hover:-translate-y-0.5 hover:border-royal/20 hover:bg-white hover:shadow-lg hover:shadow-royal/5 sm:p-6">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-royal text-white transition-colors group-hover:bg-habanero"><Icon size={19} /></span>
+            <span className="min-w-0 flex-1"><span className="block font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-ink-soft/60">{label}</span><span className="mt-1 block break-words text-sm font-semibold text-royal sm:text-base">{value}</span><span className="mt-1 block text-xs text-ink-soft">{action}</span></span>
+            <ArrowUpRight size={16} className="mt-1 shrink-0 text-ink-soft/45 transition-colors group-hover:text-habanero" />
+          </a>)}
+
+          <div className="rounded-2xl bg-deadly p-5 text-white sm:p-6">
+            <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-habanero">Factory address</p>
+            <p className="mt-3 flex items-start gap-3 text-sm leading-6 text-white/75"><MapPin size={17} className="mt-0.5 shrink-0 text-habanero" />{ADDRESS}</p>
+            <a href={MAP_LINK} target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white transition-colors hover:text-habanero">Open directions <Navigation size={15} /></a>
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          MAP
-      ══════════════════════════════════════ */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-8 pb-16 sm:pb-24">
-        <div className="aspect-[16/7] w-full border border-tan overflow-hidden">
-          <iframe
-            title="Jainam location map"
-            src={mapSrc}
-            className="w-full h-full border-0"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
+      <section className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 sm:pb-20 lg:px-10">
+        <div className="overflow-hidden rounded-[1.75rem] border border-line bg-paper">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line bg-white px-5 py-4 sm:px-7">
+            <div><p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-habanero">Find our factory</p><p className="mt-1 font-display text-lg font-semibold text-royal">Sanaswadi, Pune</p></div>
+            <a href={MAP_LINK} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-xs font-semibold text-royal transition-colors hover:border-habanero hover:text-habanero">Open in Maps <ArrowUpRight size={13} /></a>
+          </div>
+          <iframe title="Jainam Auto Industries factory location in Sanaswadi, Pune" src={`https://www.google.com/maps?q=${encodeURIComponent(ADDRESS)}&output=embed`} className="h-[300px] w-full border-0 sm:h-[380px]" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
         </div>
       </section>
     </div>
   );
+}
+
+function Field({ label, error, children }) {
+  return <label className="block"><span className="mb-2 block text-xs font-semibold text-royal">{label}</span>{children}{error && <span className="mt-1 block text-xs text-red-600">{error}</span>}</label>;
+}
+
+function inputClass(hasError = false) {
+  return `w-full rounded-xl border bg-white px-4 py-3 text-sm text-royal outline-none transition focus:border-royal focus:ring-4 focus:ring-royal/10 placeholder:text-ink-soft/40 ${hasError ? "border-red-400" : "border-line"}`;
 }
