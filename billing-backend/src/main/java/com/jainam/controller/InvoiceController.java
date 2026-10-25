@@ -6,6 +6,7 @@ import com.jainam.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -46,6 +47,15 @@ public class InvoiceController {
     @PutMapping("/{id}/status/{status}")
     public ResponseEntity<InvoiceDTO> updateInvoiceStatus(@PathVariable Long id, @PathVariable InvoiceStatus status) {
         return ResponseEntity.ok(invoiceService.updateInvoiceStatus(id, status));
+    }
+
+    @PutMapping("/{id}/payment")
+    public ResponseEntity<?> recordPayment(@PathVariable Long id, @RequestParam BigDecimal paidAmount) {
+        try {
+            return ResponseEntity.ok(invoiceService.recordPayment(id, paidAmount));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/{id}/send-email")
