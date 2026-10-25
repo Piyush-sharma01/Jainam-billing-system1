@@ -7,9 +7,9 @@ import { brandAPI, categoryAPI, productAPI } from '../services/api'
 
 const ADD_NEW = '__add_new__'
 
-export default function ProductModal({ product, onSave, onImported, onClose }) {
+export default function ProductModal({ product, onSave, onImported, onClose, initialMode = 'single' }) {
   // 'single' = normal form, 'catalogue' = import from PDF (only when adding)
-  const [mode, setMode] = useState('single')
+  const [mode, setMode] = useState(initialMode)
   const [pdfFile, setPdfFile] = useState(null)
   const [importRows, setImportRows] = useState([])
   const [importLoading, setImportLoading] = useState(false)
@@ -20,6 +20,7 @@ export default function ProductModal({ product, onSave, onImported, onClose }) {
     description: '',
     category: '',
     brand: '',
+    size: '',
     price: '',
     gst: '',
     stock: '',
@@ -69,6 +70,7 @@ export default function ProductModal({ product, onSave, onImported, onClose }) {
         description: product.description || '',
         category: product.category || '',
         brand: product.brand || '',
+        size: product.size || '',
         price: product.price ?? '',
         gst: product.gst ?? '',
         stock: product.stock ?? '',
@@ -188,6 +190,7 @@ export default function ProductModal({ product, onSave, onImported, onClose }) {
       description: textOrNull(formData.description),
       category: textOrNull(formData.category),
       brand: textOrNull(formData.brand),
+      size: textOrNull(formData.size),
       imageUrl: textOrNull(formData.imageUrl),
       price: numOrNull(formData.price, parseFloat),
       gst: numOrNull(formData.gst, parseFloat),
@@ -220,28 +223,64 @@ export default function ProductModal({ product, onSave, onImported, onClose }) {
 
   const updateRow = (id, field, value) =>
     setImportRows((rows) => rows.map((r) => (r._id === id ? { ...r, [field]: value } : r)))
+  const updateRowImage = (id, file) => {
+    if (!file) return
+    setImportRows((rows) => rows.map((r) => (r._id === id ? { ...r, _replacementFile: file, _replacementPreview: URL.createObjectURL(file) } : r)))
+  }
 
   const selectedRows = importRows.filter((r) => r._selected)
+
+  const uploadExtractedImage = async (dataUrlOrFile) => {
+    const blob = dataUrlOrFile instanceof Blob ? dataUrlOrFile : await (await fetch(dataUrlOrFile)).blob()
+    const formData = new FormData()
+    formData.append('file', blob, 'catalogue-product.jpg')
+    formData.append('upload_preset', 'jainam_products')
+    const uploaded = await fetch('https://api.cloudinary.com/v1_1/kygaxh5x/image/upload', { method: 'POST', body: formData })
+    if (!uploaded.ok) throw new Error('An extracted product image could not be uploaded to Cloudinary')
+    return (await uploaded.json()).secure_url
+  }
 
   const handleImportSave = async () => {
     if (selectedRows.length === 0) return
     setImportLoading(true)
+    setImportError('')
     try {
-      const payload = selectedRows.map((r) => ({
-        name: textOrNull(r.name),
-        category: textOrNull(r.category),
-        brand: textOrNull(r.brand),
-        description: textOrNull(r.description),
-        price: numOrNull(r.price, parseFloat),
-        gst: numOrNull(r.gst, parseFloat),
-        stock: numOrNull(r.stock, (v) => parseInt(v, 10)),
-      }))
-      const res = await productAPI.importBulk(payload)
-      alert(`${res.data?.saved ?? payload.length} products added`)
-      onImported && onImported()
-    } catch (err) {
-      const d = err.response?.data
-      setImportError(typeof d === 'string' ? d : d?.message || err.message)
+      const payload = []
+      let uploadFailures = 0
+      const failedNames = []
+      for (const r of selectedRows) {
+        try {
+          const imageUrl = r._replacementFile ? await uploadExtractedImage(r._replacementFile) : (r.imageUrl || (r.extractedImageData ? await uploadExtractedImage(r.extractedImageData) : null))
+          payload.push({
+            name: textOrNull(r.name),
+            size: textOrNull(r.size),
+            category: textOrNull(r.category),
+            brand: textOrNull(r.brand),
+            description: textOrNull(r.description),
+            imageUrl,
+            price: null,
+            gst: numOrNull(r.gst, parseFloat),
+            stock: numOrNull(r.stock, (v) => parseInt(v, 10)),
+          })
+        } catch (uploadError) {
+          uploadFailures += 1
+          failedNames.push(r.name || `row ${r._id + 1}`)
+        }
+      }
+      if (payload.length === 0) {
+        setImportError(`0 added, ${uploadFailures} failed image upload(s): ${failedNames.join(', ')}`)
+        return
+      }
+      try {
+        const res = await productAPI.importBulk(payload)
+        const counts = res.data || {}
+        const failed = (counts.failed ?? 0) + uploadFailures
+        alert(`Import complete: ${counts.saved ?? 0} added, ${counts.skipped ?? 0} duplicates skipped, ${failed} failed.${failedNames.length ? ` Image upload failures: ${failedNames.join(', ')}` : ''}`)
+        onImported && onImported()
+      } catch (err) {
+        const d = err.response?.data
+        setImportError(`Database import failed: 0 added, ${payload.length + uploadFailures} failed. ${typeof d === 'string' ? d : d?.message || err.message}`)
+      }
     } finally {
       setImportLoading(false)
     }
@@ -323,7 +362,9 @@ export default function ProductModal({ product, onSave, onImported, onClose }) {
                     <thead className="bg-gray-50 sticky top-0">
                       <tr className="text-left text-gray-500">
                         <th className="p-2 w-8"></th>
+                        <th className="p-2">Image</th>
                         <th className="p-2">Name</th>
+                        <th className="p-2">Size</th>
                         <th className="p-2">Category</th>
                         <th className="p-2 w-24">Price</th>
                         <th className="p-2 w-20">GST %</th>
@@ -341,13 +382,17 @@ export default function ProductModal({ product, onSave, onImported, onClose }) {
                             />
                           </td>
                           <td className="p-1">
-                            <input className="input-field !py-1" value={r.name ?? ''} onChange={(e) => updateRow(r._id, 'name', e.target.value)} />
+                            {r._replacementPreview || r.extractedImageData || r.imageUrl ? <img src={r._replacementPreview || r.extractedImageData || r.imageUrl} alt="Extracted product" className="h-12 w-12 object-contain rounded border" /> : <span className="text-xs text-gray-400">No image</span>}<label className="block text-[10px] text-blue-600 cursor-pointer mt-1">Replace<input type="file" accept="image/*" className="hidden" onChange={(e) => updateRowImage(r._id, e.target.files?.[0])} /></label>
                           </td>
+                          <td className="p-1">
+                            <input className="input-field !py-1 min-w-40" value={r.name ?? ''} onChange={(e) => updateRow(r._id, 'name', e.target.value)} />
+                          </td>
+                          <td className="p-1"><input className="input-field !py-1 w-24" value={r.size ?? ''} onChange={(e) => updateRow(r._id, 'size', e.target.value)} /></td>
                           <td className="p-1">
                             <input className="input-field !py-1" value={r.category ?? ''} onChange={(e) => updateRow(r._id, 'category', e.target.value)} />
                           </td>
                           <td className="p-1">
-                            <input type="number" step="0.01" className="input-field !py-1" value={r.price ?? ''} onChange={(e) => updateRow(r._id, 'price', e.target.value)} />
+                            <input type="number" step="0.01" className="input-field !py-1" value="" placeholder="Blank" disabled />
                           </td>
                           <td className="p-1">
                             <input type="number" step="0.01" className="input-field !py-1" value={r.gst ?? ''} onChange={(e) => updateRow(r._id, 'gst', e.target.value)} />
@@ -371,7 +416,7 @@ export default function ProductModal({ product, onSave, onImported, onClose }) {
                 disabled={selectedRows.length === 0 || importLoading}
                 className="btn-primary flex-1 disabled:opacity-50"
               >
-                {importLoading && importRows.length > 0 ? 'Adding...' : `Add ${selectedRows.length || ''} products`}
+                {importLoading && importRows.length > 0 ? 'Uploading images and adding...' : `Add All Products (${selectedRows.length})`}
               </button>
             </div>
           </div>
@@ -379,6 +424,7 @@ export default function ProductModal({ product, onSave, onImported, onClose }) {
 
         {(mode === 'single' || product) && (
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <label className="block"><span className="block text-gray-700 font-medium mb-1">Size</span><input type="text" name="size" value={formData.size} onChange={handleChange} className="input-field w-full" placeholder="e.g. 20 mm, Medium" /></label>
           <ImageUpload value={formData.imageUrl} onChange={handleImageChange} label="Product Image" />
 
           <div>
