@@ -814,6 +814,10 @@ const handleProceedClick = () => {
                               }
                             </p>
 
+                            {product.size && (
+                              <p className="text-xs text-gray-500 mt-0.5">Size: {product.size}</p>
+                            )}
+
                             <div className="flex items-center justify-between mt-0.5">
 
                               <p className="text-xs text-gray-400">
