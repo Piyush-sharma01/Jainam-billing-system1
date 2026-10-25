@@ -61,6 +61,15 @@ export const productAPI = {
   create: (data) => api.post('/products', data),
   update: (id, data) => api.put(`/products/${id}`, data),
   delete: (id) => api.delete(`/products/${id}`),
+  // Catalogue PDF import: preview (nothing saved) -> bulk save
+  importPreview: (file) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    return api.post('/products/import/preview', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  importBulk: (products) => api.post('/products/import/bulk', products),
 };
 
 // Clients API
