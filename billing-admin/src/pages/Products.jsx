@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { productAPI } from '../services/api'
-import { Plus, Edit2, Trash2, Search, Package } from 'lucide-react'
+import { Plus, Edit2, Trash2, Search, Package, FileUp } from 'lucide-react'
 import ProductModal from '../components/ProductModal'
 import BikeLoader from "../components/BikeLoader";
 
@@ -14,6 +14,7 @@ export default function Products() {
   const [brandFilter, setBrandFilter] = useState('All')
   const [showModal, setShowModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
+  const [initialImportMode, setInitialImportMode] = useState('single')
 
   useEffect(() => {
     loadProducts()
@@ -96,13 +97,20 @@ export default function Products() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Products</h1>
           <p className="text-gray-500 text-sm sm:text-base">Manage your product catalog</p>
         </div>
-        <button
-          onClick={() => { setEditingProduct(null); setShowModal(true) }}
-          className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
-        >
-          <Plus size={20} />
-          Add Product
-        </button>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <button
+            onClick={() => { setEditingProduct(null); setInitialImportMode('catalogue'); setShowModal(true) }}
+            className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
+          >
+            <FileUp size={18} /> Import PDF Catalogue
+          </button>
+          <button
+            onClick={() => { setEditingProduct(null); setInitialImportMode('single'); setShowModal(true) }}
+            className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
+          >
+            <Plus size={20} /> Add Product
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -198,6 +206,7 @@ export default function Products() {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-1 mb-2">
+                  {product.size && <span className="inline-block w-fit px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-xs">Size: {product.size}</span>}
                   {product.category && (
                     <span className="inline-block w-fit px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
                       {product.category}
@@ -248,6 +257,7 @@ export default function Products() {
       {showModal && (
         <ProductModal
           product={editingProduct}
+          initialMode={initialImportMode}
           existingBrands={existingBrands}
           onSave={handleSaveProduct}
           onImported={() => { setShowModal(false); setEditingProduct(null); loadProducts() }}
