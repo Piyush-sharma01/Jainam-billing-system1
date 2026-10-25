@@ -4,6 +4,18 @@ import autoTable from 'jspdf-autotable'
 // Builds a jsPDF document for an invoice returned by the backend
 // (InvoiceDTO shape: invoiceNumber, client, lineItems[], subtotal,
 // taxAmount, grandTotal, notes, status, invoiceDate, dueDate).
+// Payment summary used by the PDF, download and invoice screens.
+export function paymentSummary(invoice) {
+  const total = Number(invoice?.grandTotal ?? 0)
+  const paid = Math.min(total, Number(invoice?.paidAmount ?? 0))
+  const due = Math.max(0, total - paid)
+  let label = invoice?.status || 'PENDING'
+  if (label === 'CANCELLED') label = 'CANCELLED'
+  else if (due === 0 && total > 0) label = 'PAID'
+  else if (paid > 0) label = 'PARTIALLY PAID'
+  return { total, paid, due, label }
+}
+
 export function buildInvoicePdf(invoice) {
   const doc = new jsPDF()
 
@@ -32,7 +44,8 @@ export function buildInvoicePdf(invoice) {
     130,
     41
   )
-  doc.text(`Status: ${invoice.status || 'PENDING'}`, 130, 46)
+  const pay = paymentSummary(invoice)
+  doc.text(`Status: ${pay.label}`, 130, 46)
 
   autoTable(doc, {
     startY: 64,
@@ -58,11 +71,22 @@ export function buildInvoicePdf(invoice) {
   doc.text(`Total: Rs. ${Number(invoice.grandTotal ?? 0).toFixed(2)}`, 140, finalY + 14)
   doc.setFont(undefined, 'normal')
 
+  // Payment details (only when the invoice is not cancelled)
+  let notesY = finalY + 24
+  if (pay.label !== 'CANCELLED') {
+    doc.setFontSize(10)
+    doc.text(`Paid: Rs. ${pay.paid.toFixed(2)}`, 140, finalY + 22)
+    doc.setFont(undefined, 'bold')
+    doc.text(`Balance Due: Rs. ${pay.due.toFixed(2)}`, 140, finalY + 28)
+    doc.setFont(undefined, 'normal')
+    notesY = finalY + 38
+  }
+
   if (invoice.notes) {
     doc.setFontSize(9)
     doc.setTextColor(90)
     const noteLines = doc.splitTextToSize(`Notes: ${invoice.notes}`, 120)
-    doc.text(noteLines, 14, finalY + 24)
+    doc.text(noteLines, 14, notesY)
     doc.setTextColor(0)
   }
 
@@ -77,6 +101,7 @@ function invoiceWhatsAppMessage(invoice) {
   return (
     `Invoice ${invoice.invoiceNumber || ''} for ${invoice.client?.company || ''}\n` +
     `Total: Rs. ${Number(invoice.grandTotal ?? 0).toFixed(2)}\n` +
+    `Paid: Rs. ${paymentSummary(invoice).paid.toFixed(2)} | Balance: Rs. ${paymentSummary(invoice).due.toFixed(2)}\n` +
     `Due: ${invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}`
   )
 }
