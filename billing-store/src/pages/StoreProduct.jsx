@@ -1,662 +1,131 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  ArrowRight, ChevronRight, Search,
-  Package, Truck, Headphones, ShieldCheck,
-} from "lucide-react";
-import { brandAPI, categoryAPI, productAPI } from "../services/api";
-import HeroSlider from "../components/HeroSlider";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft, ArrowRight, BadgeCheck, Check, ChevronRight, MessageCircle, Package, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
+import { productAPI } from "../services/api";
+import { useCart } from "../services/cartContext";
 
-/* ─────────────────────────────────────────────
-   UTILITY: simple intersection-observer hook
-   for triggering entrance animations
-───────────────────────────────────────────── */
-function useReveal(threshold = 0.15) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return [ref, visible];
-}
+const WHATSAPP = "919422308740";
 
-/* ─────────────────────────────────────────────
-   MAIN PAGE
-───────────────────────────────────────────── */
-export default function StoreHome() {
-  const [brands,     setBrands]     = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [products,   setProducts]   = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [search, setSearch] = useState("");
+export default function StoreProduct() {
+  const { id } = useParams();
+  const { addItem } = useCart();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const [bRes, cRes, pRes] = await Promise.all([
-          brandAPI.getAll(),
-          categoryAPI.getAll(),
-          productAPI.getAll(),
-        ]);
-        setBrands(bRes.data || []);
-        setCategories(cRes.data || []);
-        setProducts((pRes.data || []).filter((p) => p.active !== false));
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+    let active = true;
+    setLoading(true);
+    setError(false);
+    setProduct(null);
+    productAPI.getById(id)
+      .then((response) => {
+        if (active && response.data && response.data.active !== false) setProduct(response.data);
+        else if (active) setError(true);
+      })
+      .catch(async () => {
+        try {
+          const response = await productAPI.getAll();
+          const match = (response.data || []).find((item) => String(item.id) === String(id) && item.active !== false);
+          if (active && match) setProduct(match);
+          else if (active) setError(true);
+        } catch {
+          if (active) setError(true);
+        }
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [id]);
 
-  const featured  = products.slice(0, 8);
-  const spotlight = products[Math.min(3, products.length - 1)] || products[0] || null;
+  const whatsappHref = useMemo(() => {
+    if (!product) return `https://wa.me/${WHATSAPP}`;
+    const lines = [
+      "Hello Jainam Auto Industries, I would like a quote for:",
+      `Product: ${product.name}`,
+      product.productCode ? `Code: ${product.productCode}` : "",
+      product.size ? `Size: ${product.size}` : "",
+      `Quantity: ${quantity}`,
+    ].filter(Boolean);
+    return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(lines.join("\n"))}`;
+  }, [product, quantity]);
 
-  const stats = {
-    productCount: products.length,
-    categoryCount: categories.length,
-    brandCount: brands.length,
+  const handleAddToEnquiry = () => {
+    addItem(product, Math.max(1, quantity));
+    setAdded(true);
   };
 
+  if (loading) return <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8"><div className="grid animate-pulse gap-8 lg:grid-cols-2"><div className="aspect-square rounded-3xl bg-paper" /><div className="space-y-5 py-8"><div className="h-4 w-28 rounded bg-paper" /><div className="h-12 w-3/4 rounded bg-paper" /><div className="h-5 w-full rounded bg-paper" /><div className="h-12 w-40 rounded bg-paper" /></div></div></div>;
+
+  if (error || !product) return <section className="mx-auto max-w-3xl px-5 py-24 text-center sm:px-8"><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-paper text-royal"><Package size={28} /></div><h1 className="mt-6 font-display text-3xl font-semibold text-royal">Product not found</h1><p className="mt-3 text-sm text-ink-soft">This item may no longer be available in the catalogue.</p><Link to="/store/catalogue" className="mt-7 inline-flex items-center gap-2 rounded-full bg-habanero px-6 py-3 text-sm font-semibold text-white">Back to catalogue <ArrowRight size={15} /></Link></section>;
+
+  const hasPrice = product.price !== null && product.price !== undefined && String(product.price).trim() !== "";
+  const inStock = product.stock !== null && product.stock !== undefined && Number(product.stock) > 0;
+
   return (
-    <div className="bg-white">
+    <div className="page-enter bg-white">
+      <div className="mx-auto max-w-7xl px-5 pt-7 sm:px-8 lg:px-10">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-ink-soft">
+          <Link to="/store" className="hover:text-habanero">Home</Link><ChevronRight size={13} />
+          <Link to="/store/catalogue" className="hover:text-habanero">Catalogue</Link><ChevronRight size={13} />
+          <span className="max-w-[220px] truncate text-royal">{product.name}</span>
+        </div>
+      </div>
 
-      {/* 01 — HERO SLIDER */}
-      {!loading && <HeroSlider stats={stats} />}
-      {loading && (
-        <div className="h-[560px] sm:h-[620px] bg-royal animate-pulse" />
-      )}
+      <section className="mx-auto grid max-w-7xl gap-9 px-5 py-9 sm:px-8 sm:py-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-10 lg:py-16">
+        <div className="relative overflow-hidden rounded-[2rem] border border-line bg-gradient-to-br from-paper via-white to-[#e9ecf6]">
+          <div className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-royal shadow-sm"><BadgeCheck size={13} className="text-habanero" /> Catalogue item</div>
+          <div className="flex aspect-square items-center justify-center p-8 sm:p-12">
+            {product.imageUrl ? <img src={product.imageUrl} alt={product.name} className="h-full w-full object-contain drop-shadow-[0_18px_22px_rgba(34,51,130,0.16)]" /> : <div className="flex h-full w-full flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-royal/20 bg-white/50 text-royal/30"><Package size={64} strokeWidth={1} /><span className="font-mono text-[10px] uppercase tracking-[0.2em]">Image not available</span></div>}
+          </div>
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-royal/5 to-transparent" />
+        </div>
 
-      {/* BRAND STRIP */}
-      {!loading && brands.length > 0 && <BrandStrip brands={brands} />}
+        <div className="flex flex-col justify-center">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-habanero">{product.brand || "Jainam Auto Industries"}</p>
+          <h1 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-tight text-royal sm:text-4xl lg:text-5xl">{product.name}</h1>
+          {product.description && <p className="mt-5 text-sm leading-7 text-ink-soft sm:text-base">{product.description}</p>}
 
-      {/* 02 — CATEGORY EXPLORER (bento) */}
-      <CategoryExplorer categories={categories} loading={loading} />
+          <div className="mt-6 flex flex-wrap gap-2">
+            {product.category && <span className="rounded-full bg-paper px-3.5 py-2 text-xs font-medium text-royal">{product.category}</span>}
+            {product.size && <span className="rounded-full bg-paper px-3.5 py-2 text-xs font-medium text-royal">Size: {product.size}</span>}
+            {product.productCode && <span className="rounded-full bg-paper px-3.5 py-2 font-mono text-xs text-royal">Code: {product.productCode}</span>}
+          </div>
 
-      {/* 03 — PRODUCT DISCOVERY + FEATURED */}
-      <ProductDiscovery
-        products={products}
-        featured={featured}
-        loading={loading}
-        search={search}
-        setSearch={setSearch}
-      />
+          <div className="mt-8 border-y border-line py-5">
+            <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-ink-soft/60">Price</p>
+            <p className="mt-1 font-display text-2xl font-semibold text-royal">{hasPrice ? `₹${Number(product.price).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Request a quote"}</p>
+            {!hasPrice && <p className="mt-1 text-xs text-ink-soft">Ask our team for current pricing and availability.</p>}
+          </div>
 
-      {/* 04 — PRODUCT SPOTLIGHT */}
-      {!loading && spotlight && <ProductSpotlight product={spotlight} />}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            {product.stock !== null && product.stock !== undefined && <span className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ${inStock ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}><span className={`h-1.5 w-1.5 rounded-full ${inStock ? "bg-emerald-500" : "bg-amber-500"}`} />{inStock ? `${product.stock} available` : "Check availability"}</span>}
+            {product.gst !== null && product.gst !== undefined && <span className="text-xs text-ink-soft">GST {product.gst}%</span>}
+          </div>
 
-      {/* 05 — PROCESS FLOW */}
-      <ProcessFlow />
+          <div className="mt-7 flex items-center gap-3">
+            <label htmlFor="quantity" className="sr-only">Quantity</label>
+            <input id="quantity" type="number" min="1" max="999" value={quantity} onChange={(event) => setQuantity(Math.max(1, Math.min(999, Number(event.target.value) || 1)))} className="h-12 w-20 rounded-xl border border-line px-3 text-center text-sm font-semibold text-royal outline-none focus:border-royal" />
+            <button onClick={handleAddToEnquiry} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-royal px-4 text-sm font-semibold text-royal transition-colors hover:bg-paper sm:flex-none sm:px-6"><ShoppingBag size={16} />Add to enquiry</button>
+            <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-habanero px-4 text-sm font-semibold text-white transition-colors hover:bg-royal sm:flex-none sm:px-6"><MessageCircle size={16} />Request quote</a>
+          </div>
 
-      {/* 06 — WHY JAINAM (bento) */}
-      <WhySection stats={stats} loading={loading} />
+          {added && <div role="status" className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"><span className="inline-flex items-center gap-2"><Check size={15} />Added to your enquiry list.</span><a href={whatsappHref} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-2">Send on WhatsApp</a></div>}
 
-      {/* 07 — FINAL CTA */}
-      <FinalCTA />
+          <div className="mt-9 grid grid-cols-1 gap-3 border-t border-line pt-6 sm:grid-cols-2">
+            <div className="flex items-start gap-3"><ShieldCheck size={17} className="mt-0.5 text-habanero" /><span><strong className="block text-xs text-royal">Quality-led range</strong><small className="mt-1 block text-[11px] leading-5 text-ink-soft">ISO 9001:2015 quality management system.</small></span></div>
+            <div className="flex items-start gap-3"><Truck size={17} className="mt-0.5 text-habanero" /><span><strong className="block text-xs text-royal">Pan-India network</strong><small className="mt-1 block text-[11px] leading-5 text-ink-soft">Contact Jainam for dealer and delivery information.</small></span></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-line bg-paper/60">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-10">
+          <Link to="/store/catalogue" className="inline-flex items-center gap-2 text-sm font-semibold text-royal hover:text-habanero"><ArrowLeft size={15} /> Back to all products</Link>
+          <span className="text-xs text-ink-soft">Need help matching a vehicle specification? Contact the Jainam team.</span>
+        </div>
+      </section>
     </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   BRAND STRIP
-───────────────────────────────────────────── */
-function BrandStrip({ brands }) {
-  const items = [...brands, ...brands, ...brands, ...brands];
-  return (
-    <section className="bg-paper border-y border-tan py-14 sm:py-20 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 mb-8 flex items-center gap-3">
-        <span className="w-10 h-px bg-habanero shrink-0" />
-        <span className="font-mono text-[20px] tracking-[0.2em] text-habanero uppercase">
-          Brands We Carry
-        </span>
-      </div>
-
-      <div className="relative">
-        {/* Edge fade masks so the loop reads as continuous, not clipped */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-40 bg-gradient-to-r from-paper to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-40 bg-gradient-to-l from-paper to-transparent z-10" />
-
-        <div className="flex w-max animate-ticker">
-          {items.map((brand, i) => (
-            <div
-              key={`${brand.id}-${i}`}
-              className="flex items-center justify-center h-28 sm:h-36 px-10 sm:px-16 shrink-0 border-r border-tan/70 group"
-            >
-              {brand.logoUrl ? (
-                <img
-                  src={brand.logoUrl}
-                  alt={brand.name}
-                  className="h-16 sm:h-24 w-auto object-contain grayscale opacity-55 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300"
-                />
-              ) : (
-                <span className="font-display font-600 text-xl sm:text-2xl text-royal/60 group-hover:text-royal tracking-wide uppercase whitespace-nowrap transition-colors duration-300">
-                  {brand.name}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   02 CATEGORY EXPLORER — bento composition
-───────────────────────────────────────────── */
-function CategoryExplorer({ categories, loading }) {
-  const [ref, visible] = useReveal();
-  const display = loading
-    ? Array.from({ length: 5 }, (_, i) => ({ id: i, name: "", _skeleton: true }))
-    : categories;
-
-  return (
-    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-tan">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12 sm:mb-16">
-          <div>
-            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
-              02 / Product Range
-            </span>
-            <h2 className="font-display font-600 text-display-lg text-royal mt-2">
-              Explore our<br />products
-            </h2>
-          </div>
-          <Link
-            to="/store/catalogue"
-            className="inline-flex items-center gap-2 text-sm font-display font-medium text-ink-soft hover:text-royal transition-colors group"
-          >
-            View full catalogue
-            <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
-
-        {/* Bento grid: large navy "PRODUCTS" panel + category tiles */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-tan border border-tan">
-          {/* Large lead panel */}
-          <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 bg-royal relative overflow-hidden p-8 sm:p-10 flex flex-col justify-between min-h-[220px] sm:min-h-[320px]">
-            <div
-              className="absolute inset-0 opacity-[0.06] pointer-events-none"
-              style={{
-                backgroundImage: "linear-gradient(#FFFFFF 1px,transparent 1px),linear-gradient(90deg,#FFFFFF 1px,transparent 1px)",
-                backgroundSize: "48px 48px",
-              }}
-            />
-            <div className="relative z-10 w-10 h-10 bg-habanero flex items-center justify-center">
-              <Package size={18} className="text-white" />
-            </div>
-            <div className="relative z-10">
-              <h3 className="font-display font-600 text-display-md text-white leading-none mb-3">
-                Products
-              </h3>
-              <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-sm">
-                {loading
-                  ? "Loading the current catalogue…"
-                  : `${categories.length} categories of pipes, valves, fittings and hardware — all in stock and ready to order.`}
-              </p>
-            </div>
-          </div>
-
-          {/* Category tiles */}
-          {display.map((cat, idx) => (
-            <CategoryTile key={cat.id} cat={cat} idx={idx} visible={visible} skeleton={cat._skeleton} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function CategoryTile({ cat, idx, visible, skeleton }) {
-  if (skeleton) {
-    return <div className="bg-white p-6 min-h-[130px] animate-pulse" />;
-  }
-  const isCoral = idx % 3 === 1;
-  return (
-    <Link
-      to={`/store/catalogue?category=${encodeURIComponent(cat.name)}`}
-      className={`group relative flex flex-col justify-between p-6 min-h-[130px] transition-colors duration-300 ${
-        isCoral ? "bg-habanero hover:bg-deadly" : "bg-white hover:bg-deadly"
-      }`}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "none" : "translateY(10px)",
-        transition: `opacity 0.5s ${idx * 70}ms, transform 0.5s ${idx * 70}ms`,
-      }}
-    >
-      <span className={`font-mono text-[10px] tracking-widest ${isCoral ? "text-white/70" : "text-ink-soft"} group-hover:text-white/60`}>
-        {String(idx + 1).padStart(2, "0")}
-      </span>
-      <div className="flex items-center justify-between gap-2">
-        <span className={`font-display font-600 text-base sm:text-lg leading-tight ${isCoral ? "text-white" : "text-royal"} group-hover:text-white transition-colors`}>
-          {cat.name}
-        </span>
-        <ChevronRight
-          size={16}
-          className={`shrink-0 ${isCoral ? "text-white" : "text-royal"} group-hover:text-habanero group-hover:translate-x-1 transition-all`}
-        />
-      </div>
-    </Link>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   03 PRODUCT DISCOVERY + FEATURED SLIDER
-───────────────────────────────────────────── */
-function ProductDiscovery({ products, featured, loading, search, setSearch }) {
-  const results = search.trim()
-    ? products.filter((p) => p.name?.toLowerCase().includes(search.toLowerCase())).slice(0, 6)
-    : [];
-
-  return (
-    <section className="bg-royal py-20 sm:py-28 relative overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage: "linear-gradient(#FFFFFF 1px,transparent 1px),linear-gradient(90deg,#FFFFFF 1px,transparent 1px)",
-          backgroundSize: "64px 64px",
-        }}
-      />
-      <div className="relative max-w-7xl mx-auto px-6 sm:px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] gap-10 lg:gap-6 mb-16">
-
-          {/* Search panel */}
-          <div className="bg-habanero p-8 sm:p-10 flex flex-col justify-between">
-            <div>
-              <span className="font-mono text-[11px] tracking-[0.2em] text-white/70 uppercase">
-                03 / Product Discovery
-              </span>
-              <h2 className="font-display font-600 text-2xl sm:text-3xl text-white mt-3 mb-6 leading-tight">
-                Find your product
-              </h2>
-            </div>
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="relative"
-            >
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-royal/50" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search products…"
-                className="w-full bg-white pl-11 pr-4 py-3.5 text-sm text-royal placeholder:text-royal/40 focus:outline-none"
-              />
-            </form>
-            <Link
-              to="/store/catalogue"
-              className="inline-flex items-center gap-2 mt-5 font-mono text-[11px] tracking-widest uppercase text-white hover:text-royal transition-colors group"
-            >
-              Full search &amp; filters
-              <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-
-            {/* Live search results */}
-            {results.length > 0 && (
-              <div className="mt-6 bg-white divide-y divide-line">
-                {results.map((p) => (
-                  <Link
-                    key={p.id}
-                    to={`/store/product/${p.id}`}
-                    className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-tan/50 transition-colors"
-                  >
-                    <span className="text-sm text-royal truncate">{p.name}</span>
-                    <span className="font-mono text-xs text-habanero shrink-0">₹{Number(p.price).toFixed(0)}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Featured heading */}
-          <div className="flex flex-col justify-center">
-            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase mb-3">
-              Featured Products
-            </span>
-            <h3 className="font-display font-600 text-display-md text-white leading-tight mb-4">
-              A current sample of<br />what's in stock
-            </h3>
-            <p className="text-white/60 text-sm sm:text-base max-w-md leading-relaxed">
-              Scroll to browse — every item shown is live from the catalogue, with real pricing
-              and availability.
-            </p>
-          </div>
-        </div>
-
-        {/* Horizontal product slider */}
-        {loading ? (
-          <div className="flex gap-4 overflow-hidden">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="w-[45%] sm:w-[220px] shrink-0 aspect-square bg-white/10 animate-pulse" />
-            ))}
-          </div>
-        ) : featured.length === 0 ? (
-          <p className="text-white/50 text-sm">No products available yet.</p>
-        ) : (
-          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-1 px-1">
-            {featured.map((product) => (
-              <FeaturedCard
-                key={product.id}
-                product={product}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-function FeaturedCard({ product }) {
-  const outOfStock = product.stock === 0;
-  return (
-    <div className="w-[70%] xs:w-[55%] sm:w-[240px] shrink-0 snap-start bg-white group flex flex-col">
-      <Link
-        to={`/store/product/${product.id}`}
-        className="relative block aspect-square bg-tan/40 overflow-hidden"
-      >
-        {product.imageUrl ? (
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Package size={32} strokeWidth={1} className="text-royal/20" />
-          </div>
-        )}
-      </Link>
-      <div className="p-4 border-t border-tan">
-        {(product.brand || product.category) && (
-          <p className="font-mono text-[9px] tracking-widest text-ink-soft uppercase mb-1 truncate">
-            {product.brand || product.category}
-          </p>
-        )}
-        <Link
-          to={`/store/product/${product.id}`}
-          className="font-display font-medium text-sm text-royal leading-snug line-clamp-2 hover:text-habanero transition-colors block min-h-[2.5em]"
-        >
-          {product.name}
-        </Link>
-        <p className="font-mono font-600 text-base text-habanero mt-2">
-          ₹{Number(product.price).toFixed(2)}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   04 PRODUCT SPOTLIGHT — editorial, dramatic
-───────────────────────────────────────────── */
-function ProductSpotlight({ product }) {
-  const [ref, visible] = useReveal(0.15);
-  return (
-    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-tan overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-0 items-stretch">
-
-          {/* LEFT — huge image on navy, overlapping coral shape */}
-          <div
-            className="relative bg-royal min-h-[340px] sm:min-h-[440px] flex items-center justify-center clip-spotlight-block"
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "none" : "translateX(-20px)",
-              transition: "opacity 0.7s ease, transform 0.7s ease",
-            }}
-          >
-            <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-habanero rotate-12" />
-            {product.imageUrl ? (
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="relative z-10 w-full h-full object-contain p-12 sm:p-16"
-              />
-            ) : (
-              <Package size={80} strokeWidth={1} className="relative z-10 text-white/20" />
-            )}
-          </div>
-
-          {/* RIGHT — copy */}
-          <div
-            className="bg-white flex flex-col justify-center px-8 sm:px-12 py-12 lg:py-0"
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "none" : "translateX(20px)",
-              transition: "opacity 0.7s 0.1s ease, transform 0.7s 0.1s ease",
-            }}
-          >
-            <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase mb-4">
-              04 / Product Spotlight
-            </span>
-            <h2 className="font-display font-600 text-display-lg text-royal leading-none mb-5">
-              {product.name}
-            </h2>
-            {product.description && (
-              <p className="text-ink-soft text-base leading-relaxed mb-6 max-w-md line-clamp-4">
-                {product.description}
-              </p>
-            )}
-            <div className="flex flex-wrap items-center gap-6 mb-8">
-              {product.brand && (
-                <div>
-                  <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Brand</p>
-                  <p className="font-display font-600 text-sm text-royal mt-1">{product.brand}</p>
-                </div>
-              )}
-              {product.category && (
-                <div>
-                  <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Category</p>
-                  <p className="font-display font-600 text-sm text-royal mt-1">{product.category}</p>
-                </div>
-              )}
-              <div>
-                <p className="font-mono text-[10px] tracking-widest text-ink-soft uppercase">Price</p>
-                <p className="font-mono font-600 text-lg text-habanero mt-1">₹{Number(product.price).toFixed(2)}</p>
-              </div>
-            </div>
-            <Link
-              to={`/store/product/${product.id}`}
-              className="inline-flex items-center gap-2 bg-royal text-white font-display font-medium text-sm px-6 py-3.5 hover:bg-habanero transition-colors w-fit"
-            >
-              View Product
-              <ArrowRight size={15} />
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   05 PROCESS FLOW
-───────────────────────────────────────────── */
-function ProcessFlow() {
-  const [ref, visible] = useReveal(0.1);
-  const steps = [
-    { n: "01", label: "Requirement", body: "Tell us what you need — by phone, message, or the enquiry form." },
-    { n: "02", label: "Product Selection", body: "Browse the catalogue or get help finding the right spec." },
-    { n: "03", label: "Enquiry", body: "Send your enquiry through the contact form or call us directly." },
-    { n: "04", label: "Confirmation", body: "Your account manager confirms pricing and generates the invoice." },
-    { n: "05", label: "Delivery", body: "Order is fulfilled and shipped to your site." },
-  ];
-  return (
-    <section ref={ref} className="bg-white py-20 sm:py-28 border-b border-tan">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
-          05 / How It Works
-        </span>
-        <h2 className="font-display font-600 text-display-lg text-royal mt-2 mb-14">
-          From enquiry to delivery
-        </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-5 gap-8 sm:gap-4">
-          {steps.map((step, i) => (
-            <div
-              key={step.n}
-              className="relative"
-              style={{
-                opacity: visible ? 1 : 0,
-                transform: visible ? "none" : "translateY(14px)",
-                transition: `opacity 0.5s ${i * 90}ms, transform 0.5s ${i * 90}ms`,
-              }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <span className="font-display font-600 text-3xl text-royal/15">{step.n}</span>
-                <span className="flex-1 h-px bg-tan hidden sm:block" />
-                {i < steps.length - 1 && (
-                  <ArrowRight size={14} className="text-habanero hidden sm:block" />
-                )}
-              </div>
-              <h3 className="font-display font-600 text-sm text-royal uppercase tracking-wide mb-2">
-                {step.label}
-              </h3>
-              <p className="text-ink-soft text-sm leading-relaxed">{step.body}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   06 WHY JAINAM — bento
-───────────────────────────────────────────── */
-function WhySection({ stats, loading }) {
-  const [ref, visible] = useReveal(0.1);
-
-  const pillars = [
-    {
-      icon: ShieldCheck,
-      title: "Consistent quality",
-      body: "Products sourced from established manufacturers. What's in the catalogue is what you receive — no substitutions.",
-    },
-    {
-      icon: Truck,
-      title: "Stock you can rely on",
-      body: "Maintained inventory levels so your procurement doesn't stall. Regular restocking across active SKUs.",
-    },
-    {
-      icon: Headphones,
-      title: "Dedicated account management",
-      body: "A named account manager for every client. Direct contact for orders, pricing queries and invoice questions.",
-    },
-    {
-      icon: Package,
-      title: "OEM-compatible range",
-      body: "Pipes, valves and fittings compatible with leading OEM brands — catalogued and cross-referenced for your workflow.",
-    },
-  ];
-
-  return (
-    <section ref={ref} className="bg-royal py-20 sm:py-28">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10">
-        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
-          06 / Why Jainam
-        </span>
-        <h2 className="font-display font-600 text-display-lg text-white mt-2 mb-14">
-          What sets us apart
-        </h2>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-white/10 border border-white/10">
-          {/* Large stat tile */}
-          <div className="lg:row-span-2 bg-habanero p-8 sm:p-10 flex flex-col justify-between min-h-[220px]">
-            <span className="font-mono text-[10px] tracking-widest text-white/70 uppercase">Live catalogue</span>
-            <div>
-              <p className="font-display font-600 text-5xl sm:text-6xl text-white leading-none">
-                {loading ? "—" : stats.productCount}
-              </p>
-              <p className="font-mono text-[11px] tracking-widest text-white/80 uppercase mt-3">
-                Active products across {loading ? "—" : stats.categoryCount} categories
-                {stats.brandCount ? ` · ${stats.brandCount} brands` : ""}
-              </p>
-            </div>
-          </div>
-
-          {pillars.map(({ icon: Icon, title, body }, i) => (
-            <div
-              key={title}
-              className="bg-royal p-6 sm:p-8 flex flex-col gap-4"
-              style={{
-                opacity: visible ? 1 : 0,
-                transform: visible ? "none" : "translateY(14px)",
-                transition: `opacity 0.5s ${i * 80}ms, transform 0.5s ${i * 80}ms`,
-              }}
-            >
-              <div className="w-9 h-9 border border-white/20 flex items-center justify-center shrink-0">
-                <Icon size={16} className="text-habanero" strokeWidth={1.5} />
-              </div>
-              <h3 className="font-display font-600 text-sm text-white">{title}</h3>
-              <p className="font-sans text-sm text-white/55 leading-relaxed">{body}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   07 FINAL CTA
-───────────────────────────────────────────── */
-function FinalCTA() {
-  const [ref, visible] = useReveal(0.2);
-
-  return (
-    <section ref={ref} className="bg-white py-24 sm:py-36 relative overflow-hidden">
-      <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
-        aria-hidden="true"
-      >
-        <span className="font-display font-600 text-[20vw] leading-none text-tan whitespace-nowrap">
-          JAINAM
-        </span>
-      </div>
-
-      <div
-        className="relative z-10 max-w-4xl mx-auto px-6 sm:px-10 text-center"
-        style={{
-          opacity: visible ? 1 : 0,
-          transform: visible ? "none" : "translateY(20px)",
-          transition: "opacity 0.7s ease, transform 0.7s ease",
-        }}
-      >
-        <span className="font-mono text-[11px] tracking-[0.2em] text-habanero uppercase">
-          07 / Get Started
-        </span>
-        <h2 className="font-display font-600 text-display-xl text-royal mt-4 mb-6 leading-none">
-          Have a requirement?<br />Let's find the right product.
-        </h2>
-        <p className="text-ink-soft text-base sm:text-lg max-w-lg mx-auto mb-10 leading-relaxed">
-          Browse the catalogue by brand, category or specification — or send your requirement
-          straight through to your account manager.
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <Link
-            to="/store/contact"
-            className="inline-flex items-center gap-2 bg-habanero text-white font-display font-medium text-sm px-8 py-4 hover:bg-deadly transition-colors"
-          >
-            Send Enquiry
-            <ArrowRight size={15} />
-          </Link>
-          <Link
-            to="/store/catalogue"
-            className="inline-flex items-center gap-2 border border-tan text-royal font-display font-medium text-sm px-8 py-4 hover:border-royal transition-colors"
-          >
-            Explore Catalogue
-          </Link>
-        </div>
-      </div>
-    </section>
   );
 }
