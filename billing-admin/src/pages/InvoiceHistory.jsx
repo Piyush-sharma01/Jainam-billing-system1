@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { invoiceAPI } from '../services/api'
 import { Eye, Download, Mail, Trash2 } from 'lucide-react'
 import BikeLoader from "../components/BikeLoader";
+import { paymentSummary } from '../services/invoiceDocument'
 
 
 export default function InvoiceHistory() {
@@ -123,6 +124,8 @@ export default function InvoiceHistory() {
   }
 
   const handleDownloadInvoice = (invoice) => {
+    const pay = paymentSummary(invoice)
+    const stampColor = pay.label === 'PAID' ? '#16a34a' : pay.label === 'PARTIALLY PAID' ? '#ea580c' : pay.label === 'CANCELLED' ? '#6b7280' : '#ca8a04'
     const lineItemsHtml = (invoice.lineItems || [])
       .map(
         (item) => `
@@ -165,7 +168,7 @@ export default function InvoiceHistory() {
           <p>
             <strong>Invoice Date:</strong> ${invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString() : 'N/A'}<br/>
             <strong>Due Date:</strong> ${invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}<br/>
-            <strong>Status:</strong> ${invoice.status}
+            <strong>Status:</strong> <span style="color:${stampColor};font-weight:bold;">${pay.label}</span>
           </p>
 
           <table>
@@ -185,6 +188,9 @@ export default function InvoiceHistory() {
             <div><span>Subtotal</span><span>₹${Number(invoice.subtotal ?? 0).toFixed(2)}</span></div>
             <div><span>Tax</span><span>₹${Number(invoice.taxAmount ?? 0).toFixed(2)}</span></div>
             <div class="grand"><span>Total</span><span>₹${Number(invoice.grandTotal ?? 0).toFixed(2)}</span></div>
+            ${pay.label === 'CANCELLED' ? '' : `
+            <div><span>Paid</span><span>₹${pay.paid.toFixed(2)}</span></div>
+            <div style="font-weight:bold;color:${pay.due > 0 ? '#dc2626' : '#16a34a'};"><span>Balance Due</span><span>₹${pay.due.toFixed(2)}</span></div>`}
           </div>
 
           ${invoice.notes ? `<p class="muted" style="margin-top:24px;"><strong>Notes:</strong> ${invoice.notes}</p>` : ''}
@@ -300,7 +306,7 @@ export default function InvoiceHistory() {
                         className={`px-3 py-1 rounded-full text-xs font-medium border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-secondary ${statusClass(invoice.status)}`}
                       >
                         {STATUS_OPTIONS.map((st) => (
-                          <option key={st} value={st}>{st}</option>
+                          <option key={st} value={st}>{st === 'PENDING' && paidOf(invoice) > 0 && dueOf(invoice) > 0 ? 'PENDING (PARTIAL)' : st}</option>
                         ))}
                       </select>
                     </td>
@@ -430,6 +436,18 @@ export default function InvoiceHistory() {
               <span>Total</span>
               <span>₹{selectedInvoice.grandTotal?.toFixed(2) || '0.00'}</span>
             </div>
+            {selectedInvoice.status !== 'CANCELLED' && (
+              <>
+                <div className="flex justify-between text-sm text-gray-600 pt-2">
+                  <span>Paid</span>
+                  <span>₹{paymentSummary(selectedInvoice).paid.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm font-semibold text-gray-800">
+                  <span>Balance due</span>
+                  <span>₹{paymentSummary(selectedInvoice).due.toFixed(2)}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
