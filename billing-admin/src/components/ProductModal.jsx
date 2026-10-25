@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react'
-import { X } from 'lucide-react'
+import { X, FileUp, Loader2 } from 'lucide-react'
 import ImageUpload from './ImageUpload'
 import BrandModal from './BrandModal'
 import CategoryModal from './CategoryModal'
-import { brandAPI, categoryAPI } from '../services/api'
+import { brandAPI, categoryAPI, productAPI } from '../services/api'
 
 const ADD_NEW = '__add_new__'
 
-export default function ProductModal({ product, onSave, onClose }) {
+export default function ProductModal({ product, onSave, onImported, onClose }) {
+  // 'single' = normal form, 'catalogue' = import from PDF (only when adding)
+  const [mode, setMode] = useState('single')
+  const [pdfFile, setPdfFile] = useState(null)
+  const [importRows, setImportRows] = useState([])
+  const [importLoading, setImportLoading] = useState(false)
+  const [importError, setImportError] = useState('')
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -165,23 +172,84 @@ export default function ProductModal({ product, onSave, onClose }) {
     }
   }
 
+  // Every field is optional: blank text/number -> null
+  const textOrNull = (v) => (v === '' || v == null ? null : String(v).trim() || null)
+  const numOrNull = (v, parse) => {
+    if (v === '' || v == null) return null
+    const n = parse(v)
+    return Number.isNaN(n) ? null : n
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!formData.name || !formData.price || !formData.stock) {
-      alert('Please fill all required fields')
-      return
-    }
     onSave({
       ...formData,
-      price: parseFloat(formData.price),
-      gst: parseFloat(formData.gst),
-      stock: parseInt(formData.stock),
+      name: textOrNull(formData.name),
+      description: textOrNull(formData.description),
+      category: textOrNull(formData.category),
+      brand: textOrNull(formData.brand),
+      imageUrl: textOrNull(formData.imageUrl),
+      price: numOrNull(formData.price, parseFloat),
+      gst: numOrNull(formData.gst, parseFloat),
+      stock: numOrNull(formData.stock, (v) => parseInt(v, 10)),
     })
+  }
+
+  // ---------- Catalogue PDF import ----------
+  const handlePdfPick = (e) => {
+    setPdfFile(e.target.files?.[0] || null)
+    setImportRows([])
+    setImportError('')
+  }
+
+  const handleReadPdf = async () => {
+    if (!pdfFile) return
+    setImportLoading(true)
+    setImportError('')
+    try {
+      const res = await productAPI.importPreview(pdfFile)
+      setImportRows((res.data || []).map((p, i) => ({ ...p, _id: i, _selected: true })))
+    } catch (err) {
+      const d = err.response?.data
+      setImportRows([])
+      setImportError(typeof d === 'string' ? d : d?.message || err.message)
+    } finally {
+      setImportLoading(false)
+    }
+  }
+
+  const updateRow = (id, field, value) =>
+    setImportRows((rows) => rows.map((r) => (r._id === id ? { ...r, [field]: value } : r)))
+
+  const selectedRows = importRows.filter((r) => r._selected)
+
+  const handleImportSave = async () => {
+    if (selectedRows.length === 0) return
+    setImportLoading(true)
+    try {
+      const payload = selectedRows.map((r) => ({
+        name: textOrNull(r.name),
+        category: textOrNull(r.category),
+        brand: textOrNull(r.brand),
+        description: textOrNull(r.description),
+        price: numOrNull(r.price, parseFloat),
+        gst: numOrNull(r.gst, parseFloat),
+        stock: numOrNull(r.stock, (v) => parseInt(v, 10)),
+      }))
+      const res = await productAPI.importBulk(payload)
+      alert(`${res.data?.saved ?? payload.length} products added`)
+      onImported && onImported()
+    } catch (err) {
+      const d = err.response?.data
+      setImportError(typeof d === 'string' ? d : d?.message || err.message)
+    } finally {
+      setImportLoading(false)
+    }
   }
 
   return (
     <div className="modal-backdrop fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="modal-panel bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div className={`modal-panel bg-white rounded-xl shadow-xl ${mode === 'catalogue' ? 'max-w-4xl' : 'max-w-md'} w-full max-h-[90vh] overflow-y-auto`}>
         <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white rounded-t-xl">
           <h2 className="text-xl font-bold text-gray-800">
             {product ? 'Edit Product' : 'Add Product'}
@@ -191,11 +259,130 @@ export default function ProductModal({ product, onSave, onClose }) {
           </button>
         </div>
 
+        {!product && (
+          <div className="flex gap-2 px-6 pt-4">
+            <button
+              type="button"
+              onClick={() => setMode('single')}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium ${mode === 'single' ? 'bg-secondary text-white' : 'bg-gray-100 text-gray-600'}`}
+            >
+              Single product
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('catalogue')}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 ${mode === 'catalogue' ? 'bg-secondary text-white' : 'bg-gray-100 text-gray-600'}`}
+            >
+              <FileUp size={14} /> Import catalogue PDF
+            </button>
+          </div>
+        )}
+
+        {mode === 'catalogue' && !product && (
+          <div className="p-6 space-y-4">
+            <p className="text-sm text-gray-500">
+              Upload a catalogue PDF. Products are detected from lines like
+              <span className="font-mono"> "Product name  price  18%"</span> and you can edit or untick any row before saving.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+              <input type="file" accept="application/pdf,.pdf" onChange={handlePdfPick} className="text-sm" />
+              <button
+                type="button"
+                onClick={handleReadPdf}
+                disabled={!pdfFile || importLoading}
+                className="btn-primary disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {importLoading && importRows.length === 0 && <Loader2 size={16} className="animate-spin" />}
+                Read PDF
+              </button>
+            </div>
+
+            {importError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">{importError}</div>
+            )}
+
+            {importRows.length > 0 && (
+              <>
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>{selectedRows.length} of {importRows.length} selected</span>
+                  <button
+                    type="button"
+                    className="text-secondary font-medium"
+                    onClick={() => {
+                      const all = selectedRows.length !== importRows.length
+                      setImportRows((rows) => rows.map((r) => ({ ...r, _selected: all })))
+                    }}
+                  >
+                    {selectedRows.length === importRows.length ? 'Unselect all' : 'Select all'}
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto border border-gray-200 rounded-lg max-h-[45vh] overflow-y-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 sticky top-0">
+                      <tr className="text-left text-gray-500">
+                        <th className="p-2 w-8"></th>
+                        <th className="p-2">Name</th>
+                        <th className="p-2">Category</th>
+                        <th className="p-2 w-24">Price</th>
+                        <th className="p-2 w-20">GST %</th>
+                        <th className="p-2 w-20">Stock</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {importRows.map((r) => (
+                        <tr key={r._id} className={`border-t border-gray-100 ${r._selected ? '' : 'opacity-40'}`}>
+                          <td className="p-2">
+                            <input
+                              type="checkbox"
+                              checked={r._selected}
+                              onChange={(e) => updateRow(r._id, '_selected', e.target.checked)}
+                            />
+                          </td>
+                          <td className="p-1">
+                            <input className="input-field !py-1" value={r.name ?? ''} onChange={(e) => updateRow(r._id, 'name', e.target.value)} />
+                          </td>
+                          <td className="p-1">
+                            <input className="input-field !py-1" value={r.category ?? ''} onChange={(e) => updateRow(r._id, 'category', e.target.value)} />
+                          </td>
+                          <td className="p-1">
+                            <input type="number" step="0.01" className="input-field !py-1" value={r.price ?? ''} onChange={(e) => updateRow(r._id, 'price', e.target.value)} />
+                          </td>
+                          <td className="p-1">
+                            <input type="number" step="0.01" className="input-field !py-1" value={r.gst ?? ''} onChange={(e) => updateRow(r._id, 'gst', e.target.value)} />
+                          </td>
+                          <td className="p-1">
+                            <input type="number" className="input-field !py-1" value={r.stock ?? ''} onChange={(e) => updateRow(r._id, 'stock', e.target.value)} />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button>
+              <button
+                type="button"
+                onClick={handleImportSave}
+                disabled={selectedRows.length === 0 || importLoading}
+                className="btn-primary flex-1 disabled:opacity-50"
+              >
+                {importLoading && importRows.length > 0 ? 'Adding...' : `Add ${selectedRows.length || ''} products`}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {(mode === 'single' || product) && (
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <ImageUpload value={formData.imageUrl} onChange={handleImageChange} label="Product Image" />
 
           <div>
-            <label className="block text-gray-700 font-medium mb-1">Product Name *</label>
+            <label className="block text-gray-700 font-medium mb-1">Product Name</label>
             <input
               type="text"
               name="name"
@@ -278,7 +465,7 @@ export default function ProductModal({ product, onSave, onClose }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-700 font-medium mb-1">Price *</label>
+              <label className="block text-gray-700 font-medium mb-1">Price</label>
               <input
                 type="number"
                 step="0.01"
@@ -305,7 +492,7 @@ export default function ProductModal({ product, onSave, onClose }) {
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium mb-1">Stock *</label>
+            <label className="block text-gray-700 font-medium mb-1">Stock</label>
             <input
               type="number"
               name="stock"
@@ -325,6 +512,7 @@ export default function ProductModal({ product, onSave, onClose }) {
             </button>
           </div>
         </form>
+        )}
       </div>
 
       {showBrandModal && (
