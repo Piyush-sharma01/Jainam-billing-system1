@@ -148,8 +148,34 @@ public class InvoiceService {
         Invoice invoice = invoiceRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Invoice not found"));
         invoice.setStatus(status);
+        // keep the received amount in step with a manual status change
+        if (status == InvoiceStatus.PAID) {
+            invoice.setPaidAmount(invoice.getGrandTotal());
+        } else if (status == InvoiceStatus.PENDING && invoice.getPaidAmount() != null
+                && invoice.getPaidAmount().compareTo(invoice.getGrandTotal()) >= 0) {
+            invoice.setPaidAmount(BigDecimal.ZERO);
+        }
         Invoice updatedInvoice = invoiceRepository.save(invoice);
         return convertToDTO(updatedInvoice);
+    }
+
+    /** Record how much money has been received so far (part payment). Status follows automatically. */
+    public InvoiceDTO recordPayment(Long id, BigDecimal paidAmount) {
+        Invoice invoice = invoiceRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Invoice not found"));
+        if (paidAmount == null || paidAmount.signum() < 0) {
+            throw new RuntimeException("Paid amount cannot be negative");
+        }
+        if (paidAmount.compareTo(invoice.getGrandTotal()) > 0) {
+            throw new RuntimeException("Paid amount cannot be more than the invoice total");
+        }
+        invoice.setPaidAmount(paidAmount);
+        if (paidAmount.compareTo(invoice.getGrandTotal()) >= 0) {
+            invoice.setStatus(InvoiceStatus.PAID);
+        } else if (invoice.getStatus() == InvoiceStatus.PAID) {
+            invoice.setStatus(InvoiceStatus.PENDING); // balance still due
+        }
+        return convertToDTO(invoiceRepository.save(invoice));
     }
 
     public void deleteInvoice(Long id) {
@@ -219,6 +245,7 @@ public class InvoiceService {
         dto.setTaxAmount(invoice.getTaxAmount());
         dto.setGrandTotal(invoice.getGrandTotal());
         dto.setStatus(invoice.getStatus());
+        dto.setPaidAmount(invoice.getPaidAmount() != null ? invoice.getPaidAmount() : BigDecimal.ZERO);
         dto.setNotes(invoice.getNotes());
         dto.setCreatedBy(invoice.getCreatedBy());
 
