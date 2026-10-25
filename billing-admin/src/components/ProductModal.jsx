@@ -211,7 +211,7 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
     setImportError('')
     try {
       const res = await productAPI.importPreview(pdfFile)
-      setImportRows((res.data || []).map((p, i) => ({ ...p, _id: i, _selected: true })))
+      setImportRows((res.data || []).map((p, i) => ({ ...p, _id: i, _selected: false, _imageSourceId: p.extractedImageData ? i : '' })))
     } catch (err) {
       const d = err.response?.data
       setImportRows([])
@@ -229,6 +229,11 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
   }
 
   const selectedRows = importRows.filter((r) => r._selected)
+
+  const imageForRow = (row) => {
+    const sourceId = row._imageSourceId === '' || row._imageSourceId == null ? row._id : Number(row._imageSourceId)
+    return importRows.find((candidate) => candidate._id === sourceId)?.extractedImageData || null
+  }
 
   const uploadExtractedImage = async (dataUrlOrFile) => {
     const blob = dataUrlOrFile instanceof Blob ? dataUrlOrFile : await (await fetch(dataUrlOrFile)).blob()
@@ -250,17 +255,21 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
       const failedNames = []
       for (const r of selectedRows) {
         try {
-          const imageUrl = r._replacementFile ? await uploadExtractedImage(r._replacementFile) : (r.imageUrl || (r.extractedImageData ? await uploadExtractedImage(r.extractedImageData) : null))
+          const imageSource = r._replacementFile || imageForRow(r)
+          if (!imageSource) throw new Error('Assign or upload an image before approving this product')
+          const imageUrl = r._replacementFile ? await uploadExtractedImage(r._replacementFile) : await uploadExtractedImage(imageSource)
           payload.push({
             name: textOrNull(r.name),
+            productCode: textOrNull(r.productCode),
             size: textOrNull(r.size),
             category: textOrNull(r.category),
             brand: textOrNull(r.brand),
-            description: textOrNull(r.description),
+            description: textOrNull(r.sourceLabel || r.description),
             imageUrl,
             price: null,
-            gst: numOrNull(r.gst, parseFloat),
-            stock: numOrNull(r.stock, (v) => parseInt(v, 10)),
+            gst: null,
+            stock: null,
+            reviewConfirmed: true,
           })
         } catch (uploadError) {
           uploadFailures += 1
@@ -320,8 +329,7 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
         {mode === 'catalogue' && !product && (
           <div className="p-6 space-y-4">
             <p className="text-sm text-gray-500">
-              Upload a catalogue PDF. Products are detected from lines like
-              <span className="font-mono"> "Product name  price  18%"</span> and you can edit or untick any row before saving.
+              Each detected JNM caption is matched within its PDF page using text and image coordinates. Every row starts unapproved: inspect the page crop, correct fields/image, then explicitly approve only verified rows. Price is never extracted.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
@@ -344,61 +352,61 @@ export default function ProductModal({ product, onSave, onImported, onClose, ini
             {importRows.length > 0 && (
               <>
                 <div className="flex items-center justify-between text-sm text-gray-600">
-                  <span>{selectedRows.length} of {importRows.length} selected</span>
-                  <button
-                    type="button"
-                    className="text-secondary font-medium"
-                    onClick={() => {
-                      const all = selectedRows.length !== importRows.length
-                      setImportRows((rows) => rows.map((r) => ({ ...r, _selected: all })))
-                    }}
-                  >
-                    {selectedRows.length === importRows.length ? 'Unselect all' : 'Select all'}
-                  </button>
+                  <span>{selectedRows.length} of {importRows.length} products explicitly approved</span>
                 </div>
 
                 <div className="overflow-x-auto border border-gray-200 rounded-lg max-h-[45vh] overflow-y-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 sticky top-0">
                       <tr className="text-left text-gray-500">
-                        <th className="p-2 w-8"></th>
-                        <th className="p-2">Image</th>
+                        <th className="p-2">Approve</th>
+                        <th className="p-2">Source page and image evidence</th>
                         <th className="p-2">Name</th>
+                        <th className="p-2">Code</th>
                         <th className="p-2">Size</th>
                         <th className="p-2">Category</th>
                         <th className="p-2 w-24">Price</th>
-                        <th className="p-2 w-20">GST %</th>
-                        <th className="p-2 w-20">Stock</th>
                       </tr>
                     </thead>
                     <tbody>
                       {importRows.map((r) => (
-                        <tr key={r._id} className={`border-t border-gray-100 ${r._selected ? '' : 'opacity-40'}`}>
-                          <td className="p-2">
+                        <tr key={r._id} className={`border-t border-gray-100 ${r._selected ? 'bg-green-50' : ''}`}>
+                          <td className="p-2 align-top min-w-28">
                             <input
                               type="checkbox"
                               checked={r._selected}
                               onChange={(e) => updateRow(r._id, '_selected', e.target.checked)}
                             />
+                            <div className="mt-1 text-[10px] font-semibold text-amber-700">{r._selected ? 'Approved' : 'Needs Review'}</div>
+                            <div className="mt-1 max-w-36 text-[10px] text-gray-500">{r.reviewReason}</div>
                           </td>
-                          <td className="p-1">
-                            {r._replacementPreview || r.extractedImageData || r.imageUrl ? <img src={r._replacementPreview || r.extractedImageData || r.imageUrl} alt="Extracted product" className="h-12 w-12 object-contain rounded border" /> : <span className="text-xs text-gray-400">No image</span>}<label className="block text-[10px] text-blue-600 cursor-pointer mt-1">Replace<input type="file" accept="image/*" className="hidden" onChange={(e) => updateRowImage(r._id, e.target.files?.[0])} /></label>
+                          <td className="p-2 align-top min-w-64">
+                            <div className="text-xs font-semibold mb-1">PDF page {r.sourcePage || '—'}</div>
+                            {r.sourceCropData ? <img src={r.sourceCropData} alt={`Original catalogue page ${r.sourcePage} crop`} className="w-56 h-36 object-contain rounded border bg-white" /> : <span className="text-xs text-red-600">Source crop unavailable</span>}
+                            <div className="grid grid-cols-2 gap-2 mt-2 items-start">
+                              <div>
+                                {r._replacementPreview || imageForRow(r) ? <img src={r._replacementPreview || imageForRow(r)} alt="Assigned product image" className="h-20 w-24 object-contain rounded border bg-white" /> : <span className="text-xs text-red-600">No image assigned</span>}
+                                <label className="block text-[10px] text-blue-600 cursor-pointer mt-1">Upload replacement<input type="file" accept="image/*" className="hidden" onChange={(e) => updateRowImage(r._id, e.target.files?.[0])} /></label>
+                              </div>
+                              <div>
+                                <label className="block text-[10px] text-gray-600">Use image from row</label>
+                                <select className="input-field !py-1 text-xs w-32" value={r._imageSourceId ?? ''} onChange={(e) => updateRow(r._id, '_imageSourceId', e.target.value === '' ? '' : Number(e.target.value))}>
+                                  <option value="">Choose image</option>
+                                  {importRows.filter((candidate) => candidate.extractedImageData).map((candidate) => <option key={candidate._id} value={candidate._id}>Page {candidate.sourcePage}: {candidate.productCode || candidate.sourceLabel || candidate.name || 'unreadable caption'}</option>)}
+                                </select>
+                              </div>
+                            </div>
                           </td>
                           <td className="p-1">
                             <input className="input-field !py-1 min-w-40" value={r.name ?? ''} onChange={(e) => updateRow(r._id, 'name', e.target.value)} />
                           </td>
+                          <td className="p-1"><input className="input-field !py-1 min-w-32" value={r.productCode ?? ''} onChange={(e) => updateRow(r._id, 'productCode', e.target.value)} /></td>
                           <td className="p-1"><input className="input-field !py-1 w-24" value={r.size ?? ''} onChange={(e) => updateRow(r._id, 'size', e.target.value)} /></td>
                           <td className="p-1">
                             <input className="input-field !py-1" value={r.category ?? ''} onChange={(e) => updateRow(r._id, 'category', e.target.value)} />
                           </td>
                           <td className="p-1">
                             <input type="number" step="0.01" className="input-field !py-1" value="" placeholder="Blank" disabled />
-                          </td>
-                          <td className="p-1">
-                            <input type="number" step="0.01" className="input-field !py-1" value={r.gst ?? ''} onChange={(e) => updateRow(r._id, 'gst', e.target.value)} />
-                          </td>
-                          <td className="p-1">
-                            <input type="number" className="input-field !py-1" value={r.stock ?? ''} onChange={(e) => updateRow(r._id, 'stock', e.target.value)} />
                           </td>
                         </tr>
                       ))}
