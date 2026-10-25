@@ -22,6 +22,9 @@ public class Product {
     @Column
     private String name;
 
+    @Column(name = "product_code", length = 120)
+    private String productCode;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -60,9 +63,7 @@ public class Product {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        if (active == null) {
-            active = true;
-        }
+        if (active == null) active = true;
     }
 
     @PreUpdate
