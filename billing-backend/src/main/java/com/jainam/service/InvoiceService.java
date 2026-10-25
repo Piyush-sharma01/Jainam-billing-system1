@@ -105,11 +105,13 @@ public class InvoiceService {
                 ? lineItemDTO.getDiscountPercentage()
                 : BigDecimal.ZERO;
 
-            BigDecimal itemSubtotal = product.getPrice().multiply(quantity);
+            BigDecimal unitPrice = product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
+            BigDecimal gstPct = product.getGst() != null ? product.getGst() : BigDecimal.ZERO;
+            BigDecimal itemSubtotal = unitPrice.multiply(quantity);
             BigDecimal discountAmount = itemSubtotal.multiply(discountPct)
                 .divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
             BigDecimal taxableAmount = itemSubtotal.subtract(discountAmount);
-            BigDecimal itemTax = taxableAmount.multiply(product.getGst())
+            BigDecimal itemTax = taxableAmount.multiply(gstPct)
                 .divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
             BigDecimal itemTotal = taxableAmount.add(itemTax);
 
@@ -117,8 +119,8 @@ public class InvoiceService {
                 .invoice(invoice)
                 .product(product)
                 .quantity(lineItemDTO.getQuantity())
-                .unitPrice(product.getPrice())
-                .gstPercentage(product.getGst())
+                .unitPrice(unitPrice)
+                .gstPercentage(gstPct)
                 .discountPercentage(discountPct)
                 .subtotal(itemSubtotal)
                 .discountAmount(discountAmount)
