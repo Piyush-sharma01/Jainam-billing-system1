@@ -1,296 +1,97 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import {
-  ShieldCheck, Truck, Headphones, Award, PackageSearch, Navigation,
-  Package, LayoutGrid, Phone, Boxes, UserCheck, ArrowRight,
-} from "lucide-react";
-import { productAPI, categoryAPI, brandAPI } from "../services/api";
+import { ArrowRight, ArrowUpRight, BadgeCheck, Check, Factory, Gauge, MapPin, MoveRight, ShieldCheck, Truck, Wrench } from "lucide-react";
 
-const pillars = [
-  {
-    icon: ShieldCheck,
-    title: "Trusted Quality",
-    body: "Every product sourced directly from established manufacturers, verified for spec compliance before reaching our catalogue.",
-    highlight: true,
-  },
-  {
-    icon: Truck,
-    title: "Reliable Supply",
-    body: "Consistent stock levels maintained so your projects aren't held up waiting for materials.",
-  },
-  {
-    icon: Headphones,
-    title: "Dedicated Support",
-    body: "Each client has a named account manager — a real person who knows your business and handles your orders personally.",
-  },
-  {
-    icon: Award,
-    title: "Trusted Brands",
-    body: "We work only with brands whose quality standards meet ours — so you know what you're getting, every time.",
-  },
-  {
-    icon: PackageSearch,
-    title: "Custom Sourcing",
-    body: "Can't find an exact spec in the catalogue? Send your requirement and we'll help source it.",
-  },
-  {
-    icon: Navigation,
-    title: "Reliable Dispatch",
-    body: "Orders are confirmed and dispatched on a predictable timeline, with your account manager keeping you updated.",
-  },
+const productLines = [
+  { icon: Gauge, title: "Automobile pipes", detail: "Precision fluid and fuel-transmission lines for commercial vehicle applications." },
+  { icon: Wrench, title: "Nozzle pipes", detail: "Engineered diesel injection and fuel-delivery pipe assemblies." },
+  { icon: Truck, title: "Hydraulic hoses", detail: "High-pressure hose lines for heavy commercial vehicles and equipment." },
+  { icon: ShieldCheck, title: "Brake pipe systems", detail: "Hydraulic and nylon pneumatic brake lines for commercial vehicles." },
+  { icon: MoveRight, title: "Power steering hoses", detail: "Heavy-duty power-steering fluid lines for trucks and buses." },
+  { icon: Factory, title: "Teflon pipes", detail: "PTFE fluid-transmission lines for demanding applications." },
 ];
 
 export default function StoreAbout() {
-  const [stats, setStats] = useState(null);
-
-  useEffect(() => {
-    Promise.all([productAPI.getAll(), categoryAPI.getAll(), brandAPI.getAll()])
-      .then(([pRes, cRes, bRes]) => {
-        const products = (pRes.data || []).filter((p) => p.active !== false);
-        setStats({
-          products: products.length,
-          categories: (cRes.data || []).length,
-          brands: (bRes.data || []).length,
-        });
-      })
-      .catch((err) => console.error(err));
-  }, []);
-
   return (
     <div className="page-enter">
-
-      {/* ══════════════════════════════════════
-          PAGE BANNER
-      ══════════════════════════════════════ */}
-      <section className="relative h-[280px] sm:h-[340px] flex items-center justify-center overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1636887584784-954392022b75?fm=jpg&q=70&w=1600&auto=format&fit=crop"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-royal/85" />
-        <div className="relative text-center px-4">
-          <h1 className="font-display font-600 text-3xl sm:text-5xl text-white leading-none mb-4">
-            About Us
-          </h1>
-          <p className="font-mono text-[11px] tracking-widest text-white/70 uppercase">
-            Home <span className="mx-2 text-habanero">/</span> About Us
-          </p>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════
-          INTRO
-      ══════════════════════════════════════ */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-8 py-16 sm:py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
-          <div>
-            <p className="font-mono text-[11px] tracking-widest text-habanero uppercase mb-3">
-              Who We Are
-            </p>
-            <h2 className="font-display font-600 text-2xl sm:text-4xl text-royal leading-tight">
-              Built for Reliable Industrial Supply.
-            </h2>
+      <section className="relative overflow-hidden bg-royal text-white">
+        <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "54px 54px" }} />
+        <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full border border-white/10" />
+        <div className="absolute -right-6 -top-6 h-44 w-44 rounded-full border border-white/10" />
+        <div className="relative mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
+          <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/70"><MapPin size={12} className="text-habanero" /> Pune, Maharashtra · Since 2002</p>
+          <h1 className="max-w-4xl font-display text-[clamp(2.5rem,6vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.045em]">Engineering the flow<br /><span className="text-habanero">of every journey.</span></h1>
+          <p className="mt-6 max-w-2xl text-base leading-7 text-white/65 sm:text-lg sm:leading-8">Jainam Auto Industries makes automotive pipes and hoses for commercial vehicles, OEMs and replacement markets across India.</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/store/catalogue" className="inline-flex items-center gap-2 rounded-full bg-habanero px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-royal">Explore products <ArrowRight size={15} /></Link>
+            <Link to="/store/contact" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3.5 text-sm font-medium text-white transition-colors hover:bg-white/10">Talk to Jainam <ArrowUpRight size={15} /></Link>
           </div>
-          <div className="space-y-4">
-            <p className="text-ink-soft leading-relaxed">
-              Jainam is a dependable supplier of pipes, valves, fittings and related hardware,
-              working directly with leading brands to keep our catalogue current, competitively
-              priced, and consistently in stock.
-            </p>
-            <p className="text-ink-soft leading-relaxed">
-              Every client works with a dedicated account manager who personally handles their
-              orders, pricing, and invoicing — so there's always a familiar face behind every
-              order, not just a form.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════
-          PILLARS GRID — first tile highlighted
-      ══════════════════════════════════════ */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-8 pb-16 sm:pb-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {pillars.map(({ icon: Icon, title, body, highlight }) => (
-            <div
-              key={title}
-              className={`p-7 flex flex-col ${
-                highlight
-                  ? "bg-habanero"
-                  : "bg-white border border-tan"
-              }`}
-            >
-              <div
-                className={`w-11 h-11 flex items-center justify-center mb-6 ${
-                  highlight ? "bg-white/20" : "bg-tan"
-                }`}
-              >
-                <Icon size={20} className={highlight ? "text-white" : "text-royal"} />
-              </div>
-              <h3
-                className={`font-display font-600 text-base mb-2 ${
-                  highlight ? "text-white" : "text-royal"
-                }`}
-              >
-                {title}
-              </h3>
-              <p
-                className={`text-sm leading-relaxed mb-6 flex-1 ${
-                  highlight ? "text-white/80" : "text-ink-soft"
-                }`}
-              >
-                {body}
-              </p>
-              <Link
-                to="/store/contact"
-                className={`inline-flex items-center gap-2 text-xs font-display font-medium uppercase tracking-wide transition-colors ${
-                  highlight
-                    ? "text-white hover:text-royal"
-                    : "text-royal hover:text-habanero"
-                }`}
-              >
-                Read More <ArrowRight size={13} />
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════
-          STATS BAND — real counts from the catalogue
-      ══════════════════════════════════════ */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-8 pb-16 sm:pb-20">
-        <div className="relative bg-royal overflow-hidden">
-          <div
-            className="absolute inset-y-0 right-0 w-1/2 bg-habanero/90"
-            style={{ clipPath: "polygon(30% 0, 100% 0, 100% 100%, 0% 100%)" }}
-          />
-          <div className="relative grid grid-cols-3 gap-4 px-6 sm:px-12 py-10 sm:py-14 text-center">
+          <div className="mt-12 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
             {[
-              { icon: Package, num: stats ? stats.products : "—", label: "Active Products" },
-              { icon: LayoutGrid, num: stats ? stats.categories : "—", label: "Categories" },
-              { icon: Award, num: stats ? stats.brands : "—", label: "Brands Carried" },
-            ].map(({ icon: Icon, num, label }) => (
-              <div key={label} className="flex flex-col items-center">
-                <Icon size={24} className="text-white/70 mb-3" strokeWidth={1.5} />
-                <p className="font-display font-600 text-2xl sm:text-4xl text-white leading-none">
-                  {num}
-                </p>
-                <p className="font-mono text-[9px] sm:text-[10px] tracking-widest text-white/70 uppercase mt-2">
-                  {label}
-                </p>
-              </div>
-            ))}
+              ["01", "Pune, Maharashtra"],
+              ["02", "Since 2002"],
+              ["03", "ISO 9001:2015"],
+            ].map(([num, label]) => <div key={num} className="flex items-center gap-3 border-t border-white/20 py-4"><span className="font-mono text-[10px] text-habanero">{num}</span><span className="text-sm font-medium text-white/80">{label}</span></div>)}
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          WHY CHOOSE US — split layout
-      ══════════════════════════════════════ */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-8 pb-16 sm:pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr_1fr] gap-8 lg:gap-6 items-start">
-
-          {/* Left — image + call-us overlay card */}
-          <div className="relative">
-            <div className="aspect-[4/5] overflow-hidden bg-tan">
-              <img
-                src="https://images.unsplash.com/photo-1780034766246-68bab7c0ce00?fm=jpg&q=70&w=1200&auto=format&fit=crop"
-                alt="Industrial valve and equipment"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="absolute top-6 left-6 right-6 sm:right-auto sm:w-52 bg-habanero p-5">
-              <Phone size={20} className="text-white mb-3" />
-              <p className="font-display font-600 text-sm text-white leading-snug mb-2">
-                Have a question? Call us now.
-              </p>
-              <p className="font-mono text-xs text-white/80 tracking-wide">
-                +91 00000 00000
-              </p>
-            </div>
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20 lg:px-10 lg:py-24">
+        <div>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-habanero">Who we are</p>
+          <h2 className="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-royal sm:text-4xl">A Pune-based specialist in fluid transmission.</h2>
+        </div>
+        <div className="space-y-5 text-[15px] leading-7 text-ink-soft">
+          <p>Based in Sanaswadi, Pune, Jainam Auto Industries manufactures and distributes fluid-transmission components for traditional commercial vehicles and next-generation New Energy Vehicles.</p>
+          <p>The range serves TATA, Mahindra, Eicher, Ashok Leyland and other commercial vehicle applications. Jainam supplies OEM and replacement-market parts across India through an authorized distributor and dealer network.</p>
+          <div className="mt-7 grid gap-3 sm:grid-cols-2">
+            {["Automotive pipes and fuel lines", "Braided and hydraulic hoses", "Nylon air-brake tubing", "OEM and replacement-market supply"].map((item) => <div key={item} className="flex items-start gap-3 rounded-2xl border border-line bg-paper/60 p-4 text-sm font-medium text-royal"><Check size={16} className="mt-0.5 shrink-0 text-habanero" />{item}</div>)}
           </div>
+        </div>
+      </section>
 
-          {/* Middle — copy + feature bullets */}
-          <div className="lg:pt-2">
-            <p className="font-mono text-[11px] tracking-widest text-habanero uppercase mb-3">
-              Why Choose Us
-            </p>
-            <h2 className="font-display font-600 text-2xl sm:text-3xl text-royal leading-tight mb-5">
-              Built to Support Your Projects, Start to Finish.
-            </h2>
-            <p className="text-ink-soft leading-relaxed mb-8">
-              Whether you're sourcing for a single project or maintaining an ongoing supply
-              relationship, our team is set up to make ordering simple and predictable.
-            </p>
+      <section className="bg-paper py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="mb-9 flex flex-col justify-between gap-4 sm:mb-12 sm:flex-row sm:items-end">
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-habanero">Main manufacturing lines</p>
+              <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-royal sm:text-4xl">Automotive products, built around the flow.</h2>
+            </div>
+            <Link to="/store/catalogue" className="inline-flex items-center gap-2 text-sm font-semibold text-royal hover:text-habanero">Browse the catalogue <ArrowRight size={15} /></Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {productLines.map(({ icon: Icon, title, detail }, index) => <article key={title} className="group rounded-2xl border border-royal/5 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-royal/10 sm:p-7">
+              <div className="flex items-center justify-between"><span className="font-mono text-[10px] tracking-[0.18em] text-ink-soft/50">0{index + 1}</span><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-paper text-royal transition-colors group-hover:bg-habanero group-hover:text-white"><Icon size={18} /></span></div>
+              <h3 className="mt-7 font-display text-lg font-semibold text-royal">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-ink-soft">{detail}</p>
+              <div className="mt-6 h-px w-full bg-line"><div className="h-px w-0 bg-habanero transition-all duration-500 group-hover:w-full" /></div>
+            </article>)}
+          </div>
+        </div>
+      </section>
 
-            <div className="space-y-6">
-              <div className="flex items-start gap-4 pb-6 border-b border-tan">
-                <Boxes size={22} className="text-habanero shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-display font-600 text-sm text-royal mb-1">
-                    Consistent Stock Levels
-                  </h4>
-                  <p className="text-ink-soft text-sm leading-relaxed">
-                    Maintained inventory so your projects aren't held up waiting for materials.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <UserCheck size={22} className="text-habanero shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-display font-600 text-sm text-royal mb-1">
-                    Dedicated Account Manager
-                  </h4>
-                  <p className="text-ink-soft text-sm leading-relaxed">
-                    One point of contact who knows your orders, pricing, and history.
-                  </p>
-                </div>
+      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
+        <div className="relative overflow-hidden rounded-[2rem] bg-deadly p-7 text-white sm:p-10 lg:p-14">
+          <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
+          <div className="relative grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="max-w-3xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-habanero/30 bg-habanero/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-habanero"><BadgeCheck size={13} /> Quality assurance</span>
+              <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">ISO 9001:2015 certified</h2>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/65 sm:text-base">The official company site identifies its quality management system as audited and certified by ICV Assessments Pvt. Ltd.</p>
+              <div className="mt-6 space-y-2 text-sm text-white/75">
+                <p><span className="text-white/45">Certificate:</span> IN/89327141/5147</p>
+                <p><span className="text-white/45">Scope:</span> Manufacturing of automotive pipes and hoses</p>
               </div>
             </div>
+            <div className="flex h-28 w-28 items-center justify-center rounded-full border border-habanero/40 bg-habanero/10 text-habanero sm:h-36 sm:w-36"><ShieldCheck size={54} strokeWidth={1.2} /></div>
           </div>
+        </div>
+      </section>
 
-          {/* Right — mission, vision, testimonial */}
-          <div className="space-y-4">
-            <div className="bg-tan/40 p-6">
-              <p className="font-display font-600 text-sm text-habanero uppercase tracking-wide mb-2">
-                Our Mission
-              </p>
-              <p className="text-ink-soft text-sm leading-relaxed">
-                To make sourcing industrial hardware simple, predictable, and backed by a
-                team that treats every order personally.
-              </p>
-            </div>
-            <div className="bg-tan/40 p-6">
-              <p className="font-display font-600 text-sm text-habanero uppercase tracking-wide mb-2">
-                Our Vision
-              </p>
-              <p className="text-ink-soft text-sm leading-relaxed">
-                To be the supplier businesses default to — reliable, well-stocked, and easy
-                to work with.
-              </p>
-            </div>
-
-            {/* Placeholder testimonial — swap in a real client quote before launch */}
-            <div className="bg-royal p-6">
-              <p className="text-white/80 text-sm leading-relaxed italic mb-5">
-                "Consistent stock and a single point of contact made ordering so much
-                easier for our team."
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-habanero flex items-center justify-center font-display font-600 text-xs text-white shrink-0">
-                  RM
-                </div>
-                <div>
-                  <p className="font-display font-600 text-sm text-white">Rahul Mehta</p>
-                  <p className="font-mono text-[10px] tracking-widest text-white/50 uppercase">
-                    Procurement Manager
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+      <section className="border-t border-line bg-white">
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-10 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-10">
+          <div><p className="font-display text-xl font-semibold text-royal">Have a vehicle or pipe specification to match?</p><p className="mt-1 text-sm text-ink-soft">Share the requirement with Jainam's team.</p></div>
+          <Link to="/store/contact" className="inline-flex items-center gap-2 self-start rounded-full bg-habanero px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-royal md:self-auto">Contact Jainam <ArrowRight size={15} /></Link>
         </div>
       </section>
     </div>
