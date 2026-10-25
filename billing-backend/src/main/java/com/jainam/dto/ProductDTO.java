@@ -19,4 +19,7 @@ public class ProductDTO {
     private Integer stock;
     private String imageUrl;
     private Boolean active;
+    private String size;
+    // Import-preview only; uploaded to existing image storage by the admin client.
+    private String extractedImageData;
 }
