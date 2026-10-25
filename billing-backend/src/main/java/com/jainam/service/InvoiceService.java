@@ -309,10 +309,11 @@ public class InvoiceService {
     }
 
     private InvoiceLineItemDTO convertLineItemToDTO(InvoiceLineItem lineItem) {
+        Product product = lineItem.getProduct();
         return new InvoiceLineItemDTO(
             lineItem.getId(),
-            lineItem.getProduct().getId(),
-            lineItem.getProduct().getName(),
+            product == null ? null : product.getId(),
+            product == null ? "Deleted product" : product.getName(),
             lineItem.getQuantity(),
             lineItem.getUnitPrice(),
             lineItem.getGstPercentage(),
