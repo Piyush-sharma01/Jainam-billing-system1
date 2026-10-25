@@ -20,6 +20,14 @@ public class ProductDTO {
     private String imageUrl;
     private Boolean active;
     private String size;
-    // Import-preview only; uploaded to existing image storage by the admin client.
+    private String productCode;
+
+    // PDF-preview evidence only; these payloads are never persisted to the products table.
     private String extractedImageData;
+    private String sourceCropData;
+    private String sourceLabel;
+    private Integer sourcePage;
+    private Boolean needsReview;
+    private Boolean reviewConfirmed;
+    private String reviewReason;
 }
