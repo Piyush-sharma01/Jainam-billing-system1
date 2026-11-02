@@ -1,19 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, BadgeCheck, Check, ChevronRight, MessageCircle, Package, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
+import { ArrowLeft, ArrowRight, BadgeCheck, ChevronRight, Minus, MessageCircle, Package, Plus, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import { productAPI } from "../services/api";
-import { useCart } from "../services/cartContext";
-
-const WHATSAPP = "919422308740";
+import { orderMessage, whatsappLink } from "../config";
 
 export default function StoreProduct() {
   const { id } = useParams();
-  const { addItem } = useCart();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [added, setAdded] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -39,22 +35,9 @@ export default function StoreProduct() {
     return () => { active = false; };
   }, [id]);
 
-  const whatsappHref = useMemo(() => {
-    if (!product) return `https://wa.me/${WHATSAPP}`;
-    const lines = [
-      "Hello Jainam Auto Industries, I would like a quote for:",
-      `Product: ${product.name}`,
-      product.productCode ? `Code: ${product.productCode}` : "",
-      product.size ? `Size: ${product.size}` : "",
-      `Quantity: ${quantity}`,
-    ].filter(Boolean);
-    return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(lines.join("\n"))}`;
-  }, [product, quantity]);
-
-  const handleAddToEnquiry = () => {
-    addItem(product, Math.max(1, quantity));
-    setAdded(true);
-  };
+  const clampQty = (value) => Math.max(1, Math.min(999, Number(value) || 1));
+  const quoteHref = useMemo(() => (product ? whatsappLink(orderMessage(product, quantity, "quote")) : whatsappLink()), [product, quantity]);
+  const orderHref = useMemo(() => (product ? whatsappLink(orderMessage(product, quantity, "order")) : whatsappLink()), [product, quantity]);
 
   if (loading) return <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8"><div className="grid animate-pulse gap-8 lg:grid-cols-2"><div className="aspect-square rounded-3xl bg-paper" /><div className="space-y-5 py-8"><div className="h-4 w-28 rounded bg-paper" /><div className="h-12 w-3/4 rounded bg-paper" /><div className="h-5 w-full rounded bg-paper" /><div className="h-12 w-40 rounded bg-paper" /></div></div></div>;
 
@@ -104,14 +87,16 @@ export default function StoreProduct() {
             {product.gst !== null && product.gst !== undefined && <span className="text-xs text-ink-soft">GST {product.gst}%</span>}
           </div>
 
-          <div className="mt-7 flex items-center gap-3">
-            <label htmlFor="quantity" className="sr-only">Quantity</label>
-            <input id="quantity" type="number" min="1" max="999" value={quantity} onChange={(event) => setQuantity(Math.max(1, Math.min(999, Number(event.target.value) || 1)))} className="h-12 w-20 rounded-xl border border-line px-3 text-center text-sm font-semibold text-royal outline-none focus:border-royal" />
-            <button onClick={handleAddToEnquiry} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-royal px-4 text-sm font-semibold text-royal transition-colors hover:bg-paper sm:flex-none sm:px-6"><ShoppingBag size={16} />Add to enquiry</button>
-            <a href={whatsappHref} target="_blank" rel="noreferrer" className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-habanero px-4 text-sm font-semibold text-white transition-colors hover:bg-royal sm:flex-none sm:px-6"><MessageCircle size={16} />Request quote</a>
+          <div className="mt-7 flex flex-wrap items-center gap-3">
+            <div className="inline-flex h-12 items-center overflow-hidden rounded-xl border border-royal" role="group" aria-label="Quantity">
+              <button type="button" onClick={() => setQuantity((q) => clampQty(q - 1))} disabled={quantity <= 1} aria-label="Decrease quantity" className="flex h-full w-11 items-center justify-center text-royal transition-colors hover:bg-paper disabled:opacity-30"><Minus size={16} /></button>
+              <input id="quantity" type="number" min="1" max="999" value={quantity} onChange={(event) => setQuantity(clampQty(event.target.value))} aria-label="Quantity" className="h-full w-14 border-x border-line text-center text-sm font-semibold text-royal outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+              <button type="button" onClick={() => setQuantity((q) => clampQty(q + 1))} disabled={quantity >= 999} aria-label="Increase quantity" className="flex h-full w-11 items-center justify-center text-royal transition-colors hover:bg-paper disabled:opacity-30"><Plus size={16} /></button>
+            </div>
+            <a href={orderHref} target="_blank" rel="noreferrer" className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-royal px-4 text-sm font-semibold text-royal transition-colors hover:bg-paper sm:flex-none sm:px-6"><ShoppingBag size={16} />Order now</a>
+            <a href={quoteHref} target="_blank" rel="noreferrer" className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-habanero px-4 text-sm font-semibold text-white transition-colors hover:bg-royal sm:flex-none sm:px-6"><MessageCircle size={16} />Request quote</a>
           </div>
-
-          {added && <div role="status" className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"><span className="inline-flex items-center gap-2"><Check size={15} />Added to your enquiry list.</span><a href={whatsappHref} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-2">Send on WhatsApp</a></div>}
+          <p className="mt-3 text-xs text-ink-soft">Orders are sent on WhatsApp with the product name, code, size and quantity.</p>
 
           <div className="mt-9 grid grid-cols-1 gap-3 border-t border-line pt-6 sm:grid-cols-2">
             <div className="flex items-start gap-3"><ShieldCheck size={17} className="mt-0.5 text-habanero" /><span><strong className="block text-xs text-royal">Quality-led range</strong><small className="mt-1 block text-[11px] leading-5 text-ink-soft">ISO 9001:2015 quality management system.</small></span></div>
