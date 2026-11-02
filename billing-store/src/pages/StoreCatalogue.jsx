@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search, Package, X, SlidersHorizontal, Check, ChevronDown, ArrowRight } from "lucide-react";
 import { productAPI, brandAPI, categoryAPI } from "../services/api";
+import SafeImage from "../components/SafeImage";
+import { fallbackArt } from "../services/artwork";
 
 /* ─────────────────────────────────────────────
    MAIN PAGE
@@ -95,7 +97,7 @@ export default function StoreCatalogue() {
           <div className="relative mx-auto w-full max-w-xl">
             <div className="absolute -right-3 -top-3 h-24 w-24 rounded-full border border-habanero/40 sm:-right-5 sm:-top-5 sm:h-32 sm:w-32" />
             <div className="relative overflow-hidden rounded-[1.6rem] border border-white/15 bg-white/5 shadow-2xl sm:rounded-[2rem]">
-              <img src="/jainam-slider-formed-pipes.jpg" alt="Illustrative formed automotive pipe assemblies" className="aspect-[4/3] w-full object-cover" />
+              <SafeImage sources={["/jainam-slider-formed-pipes.jpg", fallbackArt("pipes")]} alt="Illustrative formed automotive pipe assemblies" className="aspect-[4/3] w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#07142f]/75 via-transparent to-transparent" />
               <p className="absolute bottom-4 left-4 rounded-full border border-white/20 bg-[#07142f]/55 px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.15em] text-white/80 backdrop-blur sm:bottom-5 sm:left-5">Illustrative product-family image</p>
             </div>
