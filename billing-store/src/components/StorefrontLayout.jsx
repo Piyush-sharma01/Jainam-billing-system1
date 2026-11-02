@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { ArrowUpRight, Clock3, Mail, MapPin, Menu, X } from "lucide-react";
+import { whatsappLink } from "../config";
 
 const navLinks = [
   { to: "/store", label: "Home", end: true },
   { to: "/store/catalogue", label: "Catalogue" },
+  { to: "/store/new", label: "New Arrivals", badge: true },
   { to: "/store/about", label: "About Jainam" },
   { to: "/store/contact", label: "Contact" },
 ];
 
 const email = "jainamautoindustries@gmail.com";
-const whatsappHref = "https://wa.me/919422308740?text=Hello%20Jainam%20Auto%20Industries%2C%20I%20need%20a%20product%20quote.";
+const whatsappHref = whatsappLink("Hello Jainam Auto Industries, I need a product quote.");
 const factoryAddress = "Plot No. 29, B. U. Bhandari Ind. Estate, Gat No. 156/1544, Behind Mazak Company, Next to Sericol Company, Pune Nagar Road, Sanaswadi, Taluka - Shirur, Dist. - Pune - 412208, Maharashtra, India";
 const officialLogoUrl = "https://www.jainamautoindustries.com/images/logo-light.png";
 
@@ -76,7 +78,7 @@ export default function StorefrontLayout({ children }) {
           <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
             {navLinks.map((link) => (
               <NavLink key={link.to} to={link.to} end={link.end} className={({ isActive }) => `relative rounded-full px-4 py-2.5 text-[13px] font-medium transition-colors ${isActive ? "bg-paper text-royal" : "text-ink-soft hover:bg-paper hover:text-royal"}`}>
-                {link.label}
+                {link.label}{link.badge && <span className="ml-1.5 rounded-full bg-habanero px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white">New</span>}
               </NavLink>
             ))}
           </nav>
