@@ -13,6 +13,7 @@ import StoreCatalogue from "./pages/StoreCatalogue";
 import StoreAbout from "./pages/StoreAbout";
 import StoreContact from "./pages/StoreContact";
 import StoreProduct from "./pages/StoreProduct";
+import StoreNewArrivals from "./pages/StoreNewArrivals";
 
 // Public client storefront only — no login anywhere in this app. Admin /
 // marketing login lives in the separate billing-admin app at its own URL.
@@ -35,6 +36,14 @@ export default function App() {
             element={
               <StorefrontLayout>
                 <StoreCatalogue />
+              </StorefrontLayout>
+            }
+          />
+          <Route
+            path="/store/new"
+            element={
+              <StorefrontLayout>
+                <StoreNewArrivals />
               </StorefrontLayout>
             }
           />
