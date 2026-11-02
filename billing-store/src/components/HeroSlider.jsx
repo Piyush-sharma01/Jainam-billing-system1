@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { ArrowRight, ArrowUpRight, BadgeCheck, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
+import SafeImage from "./SafeImage";
+import { fallbackArt } from "../services/artwork";
+import { whatsappLink } from "../config";
 
 const slides = [
   {
@@ -37,12 +40,16 @@ const slides = [
   },
 ];
 
-const whatsappHref = "https://wa.me/919422308740?text=Hello%20Jainam%20Auto%20Industries%2C%20I%20need%20a%20product%20quote.";
+const whatsappHref = whatsappLink("Hello Jainam Auto Industries, I need a product quote.");
 
-export default function HeroSlider({ stats = {} }) {
+export default function HeroSlider({ stats = {}, products = [] }) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const slide = slides[active];
+  // real catalogue photos are used when the illustration file is missing
+  const photos = products.filter((p) => p.imageUrl).map((p) => p.imageUrl);
+  const photo = photos.length ? photos[active % photos.length] : null;
+  const sources = [slide.image, photo, fallbackArt(slide.family)];
 
   useEffect(() => {
     if (paused || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return undefined;
@@ -98,7 +105,7 @@ export default function HeroSlider({ stats = {} }) {
           <div className="pointer-events-none absolute -bottom-5 -left-5 z-0 h-24 w-24 rounded-3xl bg-habanero sm:-bottom-7 sm:-left-7 sm:h-32 sm:w-32" aria-hidden="true" />
           <div className="relative z-10 overflow-hidden rounded-[1.7rem] border border-white/15 bg-[#121f3c] shadow-[0_30px_90px_-28px_rgba(0,0,0,0.8)] sm:rounded-[2rem]">
             <div className="relative aspect-[4/3] overflow-hidden">
-              <img key={slide.image} src={slide.image} alt={slide.alt} className="jainam-carousel-photo absolute inset-0 h-full w-full object-cover" fetchPriority="high" />
+              <SafeImage key={slide.image} sources={sources} alt={slide.alt} className="jainam-carousel-photo absolute inset-0 h-full w-full object-cover" classNameFor={(src, c) => src === photo ? c.replace("object-cover", "object-contain bg-white p-8") : c} fetchPriority="high" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#07142f]/90 via-[#07142f]/8 to-[#07142f]/5" />
               <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-[#07142f]/65 px-3 py-2 text-[9px] font-bold uppercase tracking-[0.14em] text-white/80 backdrop-blur sm:left-6 sm:top-6">
                 <span className="h-1.5 w-1.5 rounded-full bg-habanero" /> Illustrative product-family image
