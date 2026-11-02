@@ -1,9 +1,9 @@
 import React, { useState } from "react";
+import { WHATSAPP_NUMBER as WHATSAPP, WHATSAPP_DISPLAY } from "../config";
 import { Clock3, Mail, MapPin, Send, ArrowUpRight, MessageCircle, Navigation } from "lucide-react";
 
 const EMAIL = "jainamautoindustries@gmail.com";
 const ADDRESS = "Plot No. 29, B. U. Bhandari Ind. Estate, Gat No. 156/1544, Behind Mazak Company, Next to Sericol Company, Pune Nagar Road, Sanaswadi, Taluka - Shirur, Dist. - Pune - 412208, Maharashtra, India";
-const WHATSAPP = "919422308740";
 const MAP_LINK = "https://www.google.com/maps/search/?api=1&query=Plot+No.+29+BU+Bhandari+Ind+Estate+Sanaswadi+Pune+412208";
 
 export default function StoreContact() {
@@ -33,7 +33,7 @@ export default function StoreContact() {
 
   const cards = [
     { icon: Mail, label: "Email", value: EMAIL, href: `mailto:${EMAIL}`, action: "Write an email" },
-    { icon: MessageCircle, label: "WhatsApp", value: "+91 94223 08740", href: `https://wa.me/${WHATSAPP}?text=Hello%20Jainam%20Auto%20Industries%2C%20I%20have%20a%20product%20enquiry.`, action: "Start a conversation" },
+    { icon: MessageCircle, label: "WhatsApp", value: WHATSAPP_DISPLAY, href: `https://wa.me/${WHATSAPP}?text=Hello%20Jainam%20Auto%20Industries%2C%20I%20have%20a%20product%20enquiry.`, action: "Start a conversation" },
     { icon: MapPin, label: "Factory", value: "Sanaswadi, Pune, Maharashtra", href: MAP_LINK, action: "Get directions" },
   ];
 
