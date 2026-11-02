@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { brandAPI, categoryAPI, productAPI } from "../services/api";
 import HeroSlider from "../components/HeroSlider";
+import SafeImage from "../components/SafeImage";
+import { fallbackArt } from "../services/artwork";
 
 const familyArtwork = {
   hoses: "/jainam-slider-hydraulic-hoses.jpg",
@@ -81,7 +83,7 @@ export default function StoreHome() {
 
   return (
     <div className="store-home bg-white text-royal">
-      <HeroSlider stats={stats} />
+      <HeroSlider stats={stats} products={products} />
       <ApplicationBand brands={brands} />
       <CategorySection categories={categories} products={products} loading={loading} />
       <ProductCollection products={featured} search={search} setSearch={setSearch} results={searchResults} loading={loading} />
@@ -143,7 +145,7 @@ function CategorySection({ categories, products, loading }) {
               const destination = category.live ? `/store/catalogue?category=${encodeURIComponent(category.name)}` : "/store/catalogue";
               return (
                 <Link key={category.id || category.name} to={destination} className={`store-category-card group relative isolate min-h-[180px] overflow-hidden rounded-2xl bg-royal shadow-sm sm:min-h-[235px] ${index === 0 ? "col-span-2 lg:col-span-1" : ""}`}>
-                  {image ? <img src={image} alt={exactProduct ? exactProduct.name : `Illustrative range image for ${category.name}`} loading="lazy" className="absolute inset-0 z-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" /> : <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#11234f] via-[#1b3472] to-[#07142f]" />}
+                  {true ? <SafeImage sources={[image, fallbackArt(category.name)]} alt={exactProduct ? exactProduct.name : `Illustrative range image for ${category.name}`} loading="lazy" className="absolute inset-0 z-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" /> : <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#11234f] via-[#1b3472] to-[#07142f]" />}
                   <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#07142f]/95 via-[#07142f]/30 to-[#07142f]/5" />
                   <div className="relative z-20 flex h-full min-h-[180px] flex-col justify-between p-4 sm:min-h-[235px] sm:p-6">
                     <div className="flex items-start justify-between gap-2">
