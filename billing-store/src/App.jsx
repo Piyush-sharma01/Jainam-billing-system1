@@ -108,20 +108,13 @@ export default function App() {
           />
 
           <Route
-            path="/store/product/:id"
-            element={
-              <StorefrontLayout>
-                <>
-                  <SEO
-                    title="Automotive Product | Jainam Automotive"
-                    description="Explore automotive product details at Jainam Automotive."
-                    path={window.location.pathname}
-                  />
-                  <StoreProduct />
-                </>
-              </StorefrontLayout>
-            }
-          />
+  path="/store/product/:id"
+  element={
+    <StorefrontLayout>
+      <StoreProduct />
+    </StorefrontLayout>
+  }
+/>
 
           <Route
             path="/"
