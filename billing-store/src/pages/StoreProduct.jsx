@@ -5,24 +5,30 @@ import { productAPI } from "../services/api";
 import { orderMessage, whatsappLink } from "../config";
 import SEO from "../components/SEO";
 
+
 function ProductSchema({ product, id }) {
   useEffect(() => {
     if (!product) return;
 
-    const hasPrice =
+    const numericPrice = Number(product.price);
+
+    const hasValidPrice =
       product.price !== null &&
       product.price !== undefined &&
       String(product.price).trim() !== "" &&
-      Number.isFinite(Number(product.price));
+      Number.isFinite(numericPrice) &&
+      numericPrice >= 0;
+
+    // Without an actual price or genuine reviews,
+    // do not generate Product rich-result structured data.
+    if (!hasValidPrice) return;
 
     const schema = {
       "@context": "https://schema.org",
       "@type": "Product",
       name: product.name,
       description: product.description || undefined,
-      image: product.imageUrl
-        ? [new URL(product.imageUrl, window.location.origin).href]
-        : undefined,
+      image: product.imageUrl ? [product.imageUrl] : undefined,
       brand: {
         "@type": "Brand",
         name: product.brand || "Jainam Automotive",
@@ -30,34 +36,26 @@ function ProductSchema({ product, id }) {
       sku: product.productCode || undefined,
       category: product.category || undefined,
       url: `https://jainamautomotive.vercel.app/store/product/${id}`,
+      offers: {
+        "@type": "Offer",
+        url: `https://jainamautomotive.vercel.app/store/product/${id}`,
+        priceCurrency: "INR",
+        price: numericPrice.toFixed(2),
+      },
     };
 
-    if (hasPrice) {
-      schema.offers = {
-        "@type": "Offer",
-        url: schema.url,
-        priceCurrency: "INR",
-        price: Number(product.price).toFixed(2),
-        availability:
-          product.stock === null || product.stock === undefined
-            ? undefined
-            : Number(product.stock) > 0
-              ? "https://schema.org/InStock"
-              : "https://schema.org/OutOfStock",
-      };
+    if (product.stock !== null && product.stock !== undefined) {
+      schema.offers.availability =
+        Number(product.stock) > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock";
     }
 
     Object.keys(schema).forEach((key) => {
-      if (schema[key] === undefined) delete schema[key];
+      if (schema[key] === undefined) {
+        delete schema[key];
+      }
     });
-
-    if (schema.offers) {
-      Object.keys(schema.offers).forEach((key) => {
-        if (schema.offers[key] === undefined) {
-          delete schema.offers[key];
-        }
-      });
-    }
 
     const script = document.createElement("script");
     script.type = "application/ld+json";
@@ -71,6 +69,7 @@ function ProductSchema({ product, id }) {
 
   return null;
 }
+
 
 
 export default function StoreProduct() {
