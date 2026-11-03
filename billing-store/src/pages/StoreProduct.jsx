@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, BadgeCheck, ChevronRight, Minus, MessageCircle, Package, Plus, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import { productAPI } from "../services/api";
 import { orderMessage, whatsappLink } from "../config";
-
+import SEO from "../components/SEO";
 export default function StoreProduct() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -47,6 +47,17 @@ export default function StoreProduct() {
   const inStock = product.stock !== null && product.stock !== undefined && Number(product.stock) > 0;
 
   return (
+  <>
+    <SEO
+      title={`${product.name} | ${product.brand || "Jainam Automotive"}`}
+      description={
+        product.description
+          ? product.description.slice(0, 155)
+          : `Explore ${product.name} at Jainam Automotive. Contact us for product details, pricing and availability.`
+      }
+      path={`/store/product/${id}`}
+    />
+
     <div className="page-enter bg-white">
       <div className="mx-auto max-w-7xl px-5 pt-7 sm:px-8 lg:px-10">
         <div className="flex flex-wrap items-center gap-2 text-xs text-ink-soft">
@@ -111,6 +122,7 @@ export default function StoreProduct() {
           <span className="text-xs text-ink-soft">Need help matching a vehicle specification? Contact the Jainam team.</span>
         </div>
       </section>
-    </div>
+       </div>
+  </>
   );
 }
