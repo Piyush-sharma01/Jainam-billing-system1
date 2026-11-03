@@ -14,6 +14,7 @@ import StoreAbout from "./pages/StoreAbout";
 import StoreContact from "./pages/StoreContact";
 import StoreProduct from "./pages/StoreProduct";
 import StoreNewArrivals from "./pages/StoreNewArrivals";
+import SEO from "./components/SEO";
 
 // Public client storefront only — no login anywhere in this app. Admin /
 // marketing login lives in the separate billing-admin app at its own URL.
