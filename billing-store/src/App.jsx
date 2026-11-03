@@ -25,13 +25,20 @@ export default function App() {
       <CartProvider>
         <Routes>
           <Route
-            path="/store"
-            element={
-              <StorefrontLayout>
-                <StoreHome />
-              </StorefrontLayout>
-            }
-          />
+          path="/store"
+           element={
+         <StorefrontLayout>
+          <>
+           <SEO
+             title="Jainam Automotive | Automotive Products"
+             description="Explore automotive products and business solutions at Jainam Automotive. Browse our latest product catalogue."
+              path="/store"
+           />
+        <StoreHome />
+      </>
+    </StorefrontLayout>
+  }
+/>
           <Route
             path="/store/catalogue"
             element={
