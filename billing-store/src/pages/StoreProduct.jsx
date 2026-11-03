@@ -4,6 +4,75 @@ import { ArrowLeft, ArrowRight, BadgeCheck, ChevronRight, Minus, MessageCircle, 
 import { productAPI } from "../services/api";
 import { orderMessage, whatsappLink } from "../config";
 import SEO from "../components/SEO";
+
+function ProductSchema({ product, id }) {
+  useEffect(() => {
+    if (!product) return;
+
+    const hasPrice =
+      product.price !== null &&
+      product.price !== undefined &&
+      String(product.price).trim() !== "" &&
+      Number.isFinite(Number(product.price));
+
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      description: product.description || undefined,
+      image: product.imageUrl
+        ? [new URL(product.imageUrl, window.location.origin).href]
+        : undefined,
+      brand: {
+        "@type": "Brand",
+        name: product.brand || "Jainam Automotive",
+      },
+      sku: product.productCode || undefined,
+      category: product.category || undefined,
+      url: `https://jainamautomotive.vercel.app/store/product/${id}`,
+    };
+
+    if (hasPrice) {
+      schema.offers = {
+        "@type": "Offer",
+        url: schema.url,
+        priceCurrency: "INR",
+        price: Number(product.price).toFixed(2),
+        availability:
+          product.stock === null || product.stock === undefined
+            ? undefined
+            : Number(product.stock) > 0
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+      };
+    }
+
+    Object.keys(schema).forEach((key) => {
+      if (schema[key] === undefined) delete schema[key];
+    });
+
+    if (schema.offers) {
+      Object.keys(schema.offers).forEach((key) => {
+        if (schema.offers[key] === undefined) {
+          delete schema.offers[key];
+        }
+      });
+    }
+
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify(schema);
+    script.dataset.productSchema = "true";
+
+    document.head.appendChild(script);
+
+    return () => script.remove();
+  }, [product, id]);
+
+  return null;
+}
+
+
 export default function StoreProduct() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -57,7 +126,7 @@ export default function StoreProduct() {
       }
       path={`/store/product/${id}`}
     />
-
+<ProductSchema product={product} id={id} />
     <div className="page-enter bg-white">
       <div className="mx-auto max-w-7xl px-5 pt-7 sm:px-8 lg:px-10">
         <div className="flex flex-wrap items-center gap-2 text-xs text-ink-soft">
